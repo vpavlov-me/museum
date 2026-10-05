@@ -1,12 +1,14 @@
 import { WALL_THICKNESS } from '../museum/roomRegistry'
-import { Doorway, type DoorOpening } from './Doorway'
+import { floorGeometry, type Palette } from '../scene/materials'
+import { Wall, type DoorOpening } from './Wall'
 
-type WallSpec = { color?: string; door?: DoorOpening }
+type WallSpec = { door?: DoorOpening; palette?: Palette }
 
 /**
  * Floor, ceiling and walls of a rectangular space, in room-local coordinates.
  * Bounds are the inner faces; walls are built outside them. A side set to `null`
- * is left open because the neighbouring space already builds that shared wall.
+ * is left open because the neighbouring space already builds that shared wall
+ * (the taller neighbour owns it, so it covers both ceilings).
  */
 export function RoomShell({
   minX,
@@ -14,9 +16,7 @@ export function RoomShell({
   minZ,
   maxZ,
   height,
-  floorColor = '#232221',
-  wallColor = '#3a3936',
-  ceilingColor = '#0d0d0d',
+  palette,
   north,
   south,
   east = {},
@@ -27,9 +27,7 @@ export function RoomShell({
   minZ: number
   maxZ: number
   height: number
-  floorColor?: string
-  wallColor?: string
-  ceilingColor?: string
+  palette: Palette
   north: WallSpec | null
   south: WallSpec | null
   east?: WallSpec | null
@@ -50,33 +48,19 @@ export function RoomShell({
 
   return (
     <group>
-      <mesh position={[cx, 0, cz]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[width, length]} />
-        <meshStandardMaterial color={floorColor} roughness={0.9} />
-      </mesh>
+      <mesh position={[cx, 0, cz]} geometry={floorGeometry(width, length)} material={palette.floor} />
 
-      <mesh position={[(outerMinX + outerMaxX) / 2, height + 0.09, (outerMinZ + outerMaxZ) / 2]}>
+      <mesh position={[(outerMinX + outerMaxX) / 2, height + 0.09, (outerMinZ + outerMaxZ) / 2]} material={palette.ceiling}>
         <boxGeometry args={[outerMaxX - outerMinX, 0.18, outerMaxZ - outerMinZ]} />
-        <meshStandardMaterial color={ceilingColor} roughness={1} />
       </mesh>
 
-      {north && (
-        <Doorway from={minX} to={maxX} z={minZ - t / 2} height={height} color={north.color ?? wallColor} door={north.door} />
-      )}
-      {south && (
-        <Doorway from={minX} to={maxX} z={maxZ + t / 2} height={height} color={south.color ?? wallColor} door={south.door} />
-      )}
+      {north && <Wall axis="x" at={minZ - t / 2} from={minX} to={maxX} height={height} palette={north.palette ?? palette} door={north.door} />}
+      {south && <Wall axis="x" at={maxZ + t / 2} from={minX} to={maxX} height={height} palette={south.palette ?? palette} door={south.door} />}
       {west && (
-        <mesh position={[minX - t / 2, height / 2, (outerMinZ + outerMaxZ) / 2]}>
-          <boxGeometry args={[t, height, outerMaxZ - outerMinZ]} />
-          <meshStandardMaterial color={west.color ?? wallColor} roughness={0.92} />
-        </mesh>
+        <Wall axis="z" at={minX - t / 2} from={outerMinZ} to={outerMaxZ} height={height} palette={west.palette ?? palette} door={west.door} />
       )}
       {east && (
-        <mesh position={[maxX + t / 2, height / 2, (outerMinZ + outerMaxZ) / 2]}>
-          <boxGeometry args={[t, height, outerMaxZ - outerMinZ]} />
-          <meshStandardMaterial color={east.color ?? wallColor} roughness={0.92} />
-        </mesh>
+        <Wall axis="z" at={maxX + t / 2} from={outerMinZ} to={outerMaxZ} height={height} palette={east.palette ?? palette} door={east.door} />
       )}
     </group>
   )

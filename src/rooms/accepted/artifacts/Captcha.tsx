@@ -2,11 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Text } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { Doorway } from '../../../components/Doorway'
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { ExhibitLabel } from '../../../components/ExhibitLabel'
+import { Wall } from '../../../components/Wall'
 import { rect } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
+import { CIRCLE } from '../../../scene/geometry'
 import { useFocusTarget } from '../../../scene/Interaction'
-import { CAPTCHA_Z, CARDS, HALL } from '../content'
+import { PALETTES } from '../../../scene/materials'
+import { CAPTCHA_Z, CARDS, CELLS } from '../content'
 import { smoothstep, useVisitorAway } from '../shared'
 
 const WALL_DEPTH = 0.3
@@ -29,48 +33,39 @@ const BACKGROUNDS = ['#5d5a52', '#4a4f53', '#6b6556', '#3f4441', '#575049', '#4d
 type Pattern = 'crossing' | 'disc' | 'blocks' | 'horizon'
 const PATTERNS: Pattern[] = ['crossing', 'disc', 'blocks', 'horizon']
 
-/** Abstract "photographs": enough to read as an image grid, with no recognisable source. */
-function TileImage({ pattern, color }: { pattern: Pattern; color: string }) {
+const PLANE = new THREE.PlaneGeometry(1, 1)
+const TILE_MATERIAL = new THREE.MeshBasicMaterial({ vertexColors: true })
+
+/** One coloured piece of a tile image: a unit shape, scaled, placed and painted with vertex colours. */
+function piece(shape: THREE.BufferGeometry, color: string, [x, y]: [number, number], [sx, sy]: [number, number], rotation = 0, layer = 0) {
+  const geometry = shape.clone().scale(sx, sy, 1).rotateZ(rotation).translate(x, y, layer * 0.002)
+  const c = new THREE.Color(color)
+  const colors = new Float32Array(geometry.attributes.position.count * 3)
+  for (let i = 0; i < colors.length; i += 3) colors.set([c.r, c.g, c.b], i)
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+  return geometry
+}
+
+const tileImages = new Map<string, THREE.BufferGeometry>()
+
+/** Abstract "photographs": enough to read as an image grid, with no recognisable source. One draw call each. */
+function tileImage(pattern: Pattern, color: string) {
+  const key = `${pattern}:${color}`
+  const cached = tileImages.get(key)
+  if (cached) return cached
   const { width: w, height: h } = TILE
-  return (
-    <group>
-      <mesh>
-        <planeGeometry args={[w, h]} />
-        <meshBasicMaterial color={color} />
-      </mesh>
-      {pattern === 'crossing' &&
-        [-0.3, -0.15, 0, 0.15, 0.3].map((x) => (
-          <mesh key={x} position={[x, -0.12, 0.002]} rotation={[0, 0, 0.18]}>
-            <planeGeometry args={[0.07, 0.5]} />
-            <meshBasicMaterial color="#d9d6cc" />
-          </mesh>
-        ))}
-      {pattern === 'disc' && (
-        <mesh position={[0.12, 0.14, 0.002]}>
-          <circleGeometry args={[0.16, 32]} />
-          <meshBasicMaterial color="#c9b98f" />
-        </mesh>
-      )}
-      {pattern === 'blocks' && (
-        <>
-          <mesh position={[-0.2, -0.12, 0.002]}>
-            <planeGeometry args={[0.24, 0.62]} />
-            <meshBasicMaterial color="#2c2e2f" />
-          </mesh>
-          <mesh position={[0.14, -0.2, 0.002]}>
-            <planeGeometry args={[0.3, 0.46]} />
-            <meshBasicMaterial color="#363634" />
-          </mesh>
-        </>
-      )}
-      {pattern === 'horizon' && (
-        <mesh position={[0, -0.22, 0.002]}>
-          <planeGeometry args={[w, 0.42]} />
-          <meshBasicMaterial color="#2f302d" />
-        </mesh>
-      )}
-    </group>
-  )
+  const parts = [piece(PLANE, color, [0, 0], [w, h])]
+  if (pattern === 'crossing') [-0.3, -0.15, 0, 0.15, 0.3].forEach((x) => parts.push(piece(PLANE, '#d9d6cc', [x, -0.12], [0.07, 0.5], 0.18, 1)))
+  if (pattern === 'disc') parts.push(piece(CIRCLE, '#c9b98f', [0.12, 0.14], [0.16, 0.16], 0, 1))
+  if (pattern === 'blocks') {
+    parts.push(piece(PLANE, '#2c2e2f', [-0.2, -0.12], [0.24, 0.62], 0, 1))
+    parts.push(piece(PLANE, '#363634', [0.14, -0.2], [0.3, 0.46], 0, 1))
+  }
+  if (pattern === 'horizon') parts.push(piece(PLANE, '#2f302d', [0, -0.22], [w, 0.42], 0, 1))
+  const geometry = mergeGeometries(parts, false)
+  parts.forEach((part) => part.dispose())
+  tileImages.set(key, geometry)
+  return geometry
 }
 
 const TILES = Array.from({ length: 9 }, (_, i) => {
@@ -147,8 +142,6 @@ export function Captcha() {
   })
 
   const half = WALL_DEPTH / 2
-  useObstacle('captcha-wall-west', rect(HALL.minX, -GATE.width / 2, CAPTCHA_Z - half, CAPTCHA_Z + half))
-  useObstacle('captcha-wall-east', rect(GATE.width / 2, HALL.maxX, CAPTCHA_Z - half, CAPTCHA_Z + half))
   useObstacle('captcha-gate', passable ? null : rect(-GATE.width / 2, GATE.width / 2, CAPTCHA_Z - half, CAPTCHA_Z + half))
 
   const interactive = stage === 'idle' || stage === 'retry'
@@ -157,6 +150,7 @@ export function Captcha() {
     position: [0, 1.5, CAPTCHA_Z + half],
     distance: 3.4,
     card: stage === 'open' ? null : CARDS.captcha,
+    labelled: true,
     prompt: interactive ? 'VERIFY' : null,
     onInteract: verify,
   })
@@ -165,15 +159,18 @@ export function Captcha() {
 
   return (
     <>
-      <Doorway
-        from={HALL.minX}
-        to={HALL.maxX}
-        z={CAPTCHA_Z}
-        height={HALL.height}
+      {/* A partition across the room: the end of chapter II. */}
+      <Wall
+        axis="x"
+        at={CAPTCHA_Z}
+        from={CELLS.attend.minX}
+        to={CELLS.attend.maxX}
+        height={CELLS.attend.height}
         thickness={WALL_DEPTH}
-        color="#353432"
+        palette={PALETTES.accepted}
         door={{ center: 0, width: GATE.width, height: GATE.height }}
       />
+      <ExhibitLabel position={[CELLS.attend.minX + 0.2, 1.6, face]} exhibit={CARDS.captcha} width={1.15} />
 
       <Text position={[0, 3.62, face]} fontSize={0.075} letterSpacing={0.16} color="#8f8c85" anchorX="center" anchorY="middle">
         VERIFY THAT YOU ARE HUMAN
@@ -190,12 +187,8 @@ export function Captcha() {
           }}
           position={[tile.x, tile.y, CAPTCHA_Z]}
         >
-          <group position={[0, 0, 0.012]}>
-            <TileImage pattern={tile.front.pattern} color={tile.front.color} />
-          </group>
-          <group position={[0, 0, -0.012]} rotation={[0, Math.PI, 0]}>
-            <TileImage pattern={tile.back.pattern} color={tile.back.color} />
-          </group>
+          <mesh position={[0, 0, 0.012]} geometry={tileImage(tile.front.pattern, tile.front.color)} material={TILE_MATERIAL} />
+          <mesh position={[0, 0, -0.012]} rotation={[0, Math.PI, 0]} geometry={tileImage(tile.back.pattern, tile.back.color)} material={TILE_MATERIAL} />
         </group>
       ))}
     </>

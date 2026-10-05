@@ -1,10 +1,11 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { ExhibitLabel } from '../../../components/ExhibitLabel'
+import { useRoom } from '../../../museum/RoomContext'
 import { box } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
 import { useFocusTarget } from '../../../scene/Interaction'
+import { basicMaterial, PALETTES } from '../../../scene/materials'
 import { CARDS } from '../content'
 import { CIRCLE, roundedRect } from '../shared'
 
@@ -12,17 +13,21 @@ const BASE = new THREE.Color('#2a2927')
 const SHINE = new THREE.Color('#4d4b47')
 const SLAB = new THREE.Color('#1b1b1a')
 const DEPTH = 0.12
+// Walking up to a panel starts a fresh load; walking away re-arms it.
+const ARRIVE = 4.2
+const LEAVE = 6
 
 type Shape = { kind: 'bar'; x0: number; x1: number; y: number; h: number } | { kind: 'circle'; x: number; y: number; r: number }
 
 type Panel = { id: string; x: number; z: number; width: number; height: number; shapes: Shape[] }
 
-// Two placeholder "pages", staggered like posts in a feed. Panel-local metres, y from the floor.
+// Two placeholder "pages", staggered like posts in a feed and standing in the way like
+// partitions: the visitor has to walk around each one. Panel-local metres, y from the floor.
 const PANELS: Panel[] = [
   {
     id: 'post',
-    x: -2.6,
-    z: -10.6,
+    x: -1,
+    z: -39.5,
     width: 3,
     height: 2.85,
     shapes: [
@@ -37,8 +42,8 @@ const PANELS: Panel[] = [
   },
   {
     id: 'grid',
-    x: 2.4,
-    z: -12.9,
+    x: 3.15,
+    z: -43,
     width: 2.6,
     height: 2.6,
     shapes: [
@@ -56,27 +61,29 @@ const shapeX = (shape: Shape) => (shape.kind === 'circle' ? shape.x : (shape.x0 
 
 function SkeletonPanel({ panel }: { panel: Panel }) {
   const clock = useThree((state) => state.clock)
+  const { origin } = useRoom()
   // The first load "started" when the museum opened; by the time anyone arrives it has stalled.
   const refreshedAt = useRef(0)
+  const armed = useRef(true)
   const progress = useRef<THREE.Mesh>(null)
   const materials = useMemo(() => panel.shapes.map(() => new THREE.MeshBasicMaterial({ color: BASE })), [panel])
 
+  useEffect(() => () => materials.forEach((material) => material.dispose()), [materials])
+
   useObstacle(`skeleton-${panel.id}`, box(panel.x, panel.z, panel.width, DEPTH + 0.1))
-  useFocusTarget({
-    id: `skeleton-${panel.id}`,
-    position: [panel.x, 1.5, panel.z],
-    distance: 3.6,
-    card: CARDS.skeleton,
-    prompt: 'REFRESH',
-    onInteract: () => {
-      refreshedAt.current = clock.elapsedTime
-    },
-  })
+  useFocusTarget({ id: `skeleton-${panel.id}`, position: [panel.x, 1.5, panel.z], distance: 3.6, card: CARDS.skeleton, labelled: true })
 
   const barWidth = panel.width - 0.3
 
-  useFrame(() => {
+  useFrame(({ camera }) => {
     const now = clock.elapsedTime
+    // Arriving is the refresh: nobody presses anything, the page simply starts loading again.
+    const distance = Math.hypot(camera.position.x - origin[0] - panel.x, camera.position.z - origin[1] - panel.z)
+    if (armed.current && distance < ARRIVE) {
+      armed.current = false
+      refreshedAt.current = now
+    } else if (distance > LEAVE) armed.current = true
+
     const since = now - refreshedAt.current
     // After a refresh the shapes blink out, then the same shimmer starts again.
     const presence = THREE.MathUtils.clamp((since - 0.25) / 0.35, 0, 1)
@@ -96,9 +103,8 @@ function SkeletonPanel({ panel }: { panel: Panel }) {
 
   return (
     <group position={[panel.x, 0, panel.z]}>
-      <mesh position={[0, panel.height / 2, 0]}>
+      <mesh position={[0, panel.height / 2, 0]} material={PALETTES.accepted.reveal}>
         <boxGeometry args={[panel.width, panel.height, DEPTH]} />
-        <meshStandardMaterial color={SLAB} roughness={0.85} />
       </mesh>
 
       {panel.shapes.map((shape, i) =>
@@ -115,18 +121,15 @@ function SkeletonPanel({ panel }: { panel: Panel }) {
       )}
 
       <group position={[-barWidth / 2, panel.height - 0.1, face]}>
-        <mesh ref={progress} position={[0, 0, 0.001]} scale={[0.001, 1, 1]}>
+        <mesh ref={progress} position={[0, 0, 0.001]} scale={[0.001, 1, 1]} material={basicMaterial('#8f8c85')}>
           <planeGeometry args={[barWidth, 0.012]} />
-          <meshBasicMaterial color="#8f8c85" />
         </mesh>
       </group>
-
-      <ExhibitLabel position={[-panel.width / 2 + 0.15, 0.32, face]}>05 / 2013</ExhibitLabel>
     </group>
   )
 }
 
-/** Exhibit 05. Placeholders that shimmer forever and never resolve into content. */
+/** Exhibit 05. Placeholders that start loading as you arrive, shimmer forever and never resolve into content. */
 export function SkeletonLoader() {
   return (
     <>

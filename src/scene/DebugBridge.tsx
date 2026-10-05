@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useThree } from '@react-three/fiber'
+import { advance, useThree } from '@react-three/fiber'
 import { spaceAt } from '../museum/roomRegistry'
 import { museumStore } from '../museum/store'
 import { moveWithCollision } from './Collision'
@@ -19,6 +19,7 @@ declare global {
 export function DebugBridge({ setLocked }: { setLocked: (locked: boolean) => void }) {
   const camera = useThree((state) => state.camera)
   const scene = useThree((state) => state.scene)
+  const gl = useThree((state) => state.gl)
 
   useEffect(() => {
     const walkTo = (x: number, z: number) => {
@@ -38,11 +39,41 @@ export function DebugBridge({ setLocked }: { setLocked: (locked: boolean) => voi
       return { x: +p.x.toFixed(2), z: +p.z.toFixed(2), space: museumStore.get().spaceId }
     }
 
-    window.__museum = { camera, scene, store: museumStore, setLocked, walkTo }
+    /** Places the visitor without walking (no collision), facing yaw / pitch. */
+    const teleport = (x: number, z: number, yaw = 0, pitch = 0) => {
+      camera.position.set(x, camera.position.y, z)
+      camera.rotation.set(pitch, yaw, 0, 'YXZ')
+      const space = spaceAt(x, z)
+      if (space && space.id !== museumStore.get().spaceId) museumStore.set({ spaceId: space.id })
+      return space?.id ?? null
+    }
+
+    /** Turn the view: yaw 0 looks north (-z), positive yaw turns left; pitch in radians. */
+    const look = (yaw: number, pitch = 0) => {
+      camera.rotation.set(pitch, yaw, 0, 'YXZ')
+    }
+
+    /** Renders a frame now and returns the sRGB colour at a point of the canvas, in CSS pixels. */
+    const sample = (x: number, y: number) => {
+      gl.render(scene, camera)
+      const ratio = gl.getPixelRatio()
+      const pixel = new Uint8Array(4)
+      const context = gl.getContext()
+      context.readPixels(Math.round(x * ratio), Math.round(context.drawingBufferHeight - y * ratio), 1, 1, context.RGBA, context.UNSIGNED_BYTE, pixel)
+      return Array.from(pixel.slice(0, 3))
+    }
+
+    /** Runs `frames` frames by hand: frame callbacks and a render, even while the page is hidden. */
+    let clock = performance.now()
+    const step = (frames = 1) => {
+      for (let i = 0; i < frames; i++) advance((clock += 1000 / 60), true)
+    }
+
+    window.__museum = { camera, scene, gl, store: museumStore, setLocked, walkTo, teleport, look, sample, step }
     return () => {
       delete window.__museum
     }
-  }, [camera, scene, setLocked])
+  }, [camera, scene, gl, setLocked])
 
   return null
 }

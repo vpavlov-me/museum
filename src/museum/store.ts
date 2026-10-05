@@ -5,6 +5,8 @@ import type { ExhibitCardData } from './types'
 export type FocusInfo = {
   id: string
   card: ExhibitCardData | null
+  /** True when the card's text is already written in the space next to the object. */
+  labelled: boolean
   /** Verb shown next to the E key, or null when the object is not interactive right now. */
   prompt: string | null
 }

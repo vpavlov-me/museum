@@ -15,17 +15,34 @@ The first vertical slice is intentionally small. It tests:
 
 ## Prototype 02 — From room to museum
 
-The museum is now one continuous walk:
+The museum became one continuous walk with a shared room registry, collision and
+proximity + gaze + `E` interaction. Room 01's four buttons answer a press in the language of their era;
+Room 02 turns interface behavior into architecture.
+
+## Prototype 03 — Spatial direction & atmosphere
+
+Art direction through space, not more content:
 
 ```
-ENTRANCE → 01 THE BUTTON → PASSAGE → 02 THINGS WE SOMEHOW ACCEPTED → feed → closed passage (Room 03)
+ENTRANCE → 01 THE BUTTON → threshold (low, narrow, two 90° turns) →
+02 THINGS WE SOMEHOW ACCEPTED
+     I   INTERRUPT        cookie banner, modals that appear as you approach
+     ·   pause            low, quiet, the chapter II title
+     II  PROVE / ATTEND   one badge on a plinth, then many; the CAPTCHA gate
+     III WAIT / CONTINUE  skeleton panels as partitions → the feed → closed passage (Room 03)
 ```
 
-- The HUD room label follows the visitor's physical position; there is no routing or room selector.
-- Objects respond to proximity + gaze + `E`. No precision clicking under pointer lock.
-- Room 01's four buttons each answer a press in the language of their era.
-- Room 02 turns interface behavior into architecture: a cookie banner across the room, escalating
-  notification badges, layered modals, a CAPTCHA checkpoint, skeleton screens and an endless feed.
+- No straight view runs through the museum: Room 01's exit meets a wall and turns, and every
+  opening in Room 02 is offset from the last, so the visitor keeps reorienting.
+- Each kind of space has its own palette (`scene/materials.ts`): a lighter entrance, a neutral
+  gallery, a dark threshold and a cooler, harsher Room 02. Realtime light is reserved for exhibits
+  (`Downlight`); visible luminaires and painted light pools do the rest.
+- Exhibits carry physical labels. The floating card is kept only for the feed, whose subject appears
+  while walking; every focused object is still announced to screen readers.
+- `E` is kept for deliberate acts (press, accept, close, verify, mark as read). Modals, skeleton
+  screens, badges and the feed respond to approach.
+- Static architecture is merged per material (`StaticMerge`); badges and feed cards are instanced.
+  In development, `` ` `` toggles a small frame-time / draw-call readout.
 
 ### Controls
 
@@ -74,9 +91,10 @@ Potential rooms:
 
 ```
 src/
-  museum/      plan and shared state: room registry (bounds, doors, spawn), types, store, room context
-  scene/       MuseumWorld, Player, Controls, Collision, Interaction (focus + E), Lighting
-  components/  RoomShell, Doorway, WallText, Plinth, ExhibitLabel
+  museum/      plan and shared state: room registry (bounds, cells, doors, spawn), types, store, room context
+  scene/       MuseumWorld, Player, Controls, Collision, Interaction (focus + E), Lighting,
+               materials (palettes), Light (Downlight, LightPool, Luminaire), StaticMerge, geometry
+  components/  RoomShell, Wall, WallText, ChapterMark, Plinth, ExhibitLabel
   rooms/       entrance/, the-button/, passage/, accepted/ — each owns its composition and content
   ui/          HUD, ExhibitCard, Intro, Pause
 ```
@@ -84,6 +102,8 @@ src/
 Rooms are authored in local coordinates and placed at their registry `origin`. They register
 obstacles with `useObstacle` and focus targets with `useFocusTarget`; walkable floor is derived
 from the registry, so adding a room means adding a registry entry, its doors and its component.
+A room may be several rectangular cells with their own ceiling heights (Room 02 is five); the
+taller neighbour builds a shared wall. Architecture uses palette materials so it can be merged.
 
 ## Content model
 

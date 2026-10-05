@@ -3,6 +3,11 @@ import { RoomShell } from '../../components/RoomShell'
 import { WallText, type WallTextLayout } from '../../components/WallText'
 import { DOORS, localDoor } from '../../museum/roomRegistry'
 import { useRoom } from '../../museum/RoomContext'
+import { Luminaire } from '../../scene/Light'
+import { basicMaterial, PALETTES } from '../../scene/materials'
+import { StaticMerge } from '../../scene/StaticMerge'
+
+const palette = PALETTES.entrance
 
 // Entrance shell, room-local. Lower than the galleries so Room 01 opens up after it.
 const HALL = { minX: -4.5, maxX: 4.5, minZ: -6, maxZ: 6, height: 4.4 }
@@ -24,8 +29,20 @@ export function Entrance() {
 
   return (
     <>
-      {/* The north wall is Room 01's south wall, built by that room. */}
-      <RoomShell {...HALL} wallColor="#353432" north={null} south={{}} />
+      <StaticMerge>
+        {/* The north wall is Room 01's south wall, built by that room. */}
+        <RoomShell {...HALL} palette={palette} north={null} south={{}} />
+
+        {/* A soft laylight: even, slightly brighter than the galleries ahead. */}
+        {[-1.6, 1.6].map((x) =>
+          [-2.6, 0.4, 3.4].map((z) => <Luminaire key={`${x}:${z}`} position={[x, HALL.height - 0.004, z]} size={[2, 2.6]} palette={palette} />),
+        )}
+
+        {/* A single line on the floor leads towards the first room. */}
+        <mesh position={[0, 0.003, (HALL.minZ + 3.4) / 2]} rotation={[-Math.PI / 2, 0, 0]} material={basicMaterial('#57544e')}>
+          <planeGeometry args={[0.025, 3.4 - HALL.minZ]} />
+        </mesh>
+      </StaticMerge>
 
       <Text position={[0, 3.72, wall]} fontSize={0.56} letterSpacing={-0.03} color="#efede6" anchorX="center" anchorY="middle">
         INTERFACE MUSEUM
@@ -48,7 +65,7 @@ export function Entrance() {
         position={[HALL.minX + 0.02, 4.4]}
         facing="east"
         layout={STATEMENT_LAYOUT}
-        kicker="INTERFACE MUSEUM / PROTOTYPE 02"
+        kicker="INTERFACE MUSEUM / PROTOTYPE 03"
         title="Interfaces, given physical form."
         body="An exhibition about the controls, conventions and habits we use every day without noticing them. Each room holds one idea. Walk slowly and read the walls. Some objects respond when you approach them and press E."
       />
@@ -70,13 +87,6 @@ export function Entrance() {
         ))}
       </group>
 
-      {/* A single line on the floor leads towards the first room. */}
-      <mesh position={[0, 0.003, (HALL.minZ + 3.4) / 2]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.025, 3.4 - HALL.minZ]} />
-        <meshBasicMaterial color="#4a4844" />
-      </mesh>
-
-      <pointLight position={[0, 3.6, -2.5]} intensity={10} distance={9} color="#efe6d6" />
     </>
   )
 }

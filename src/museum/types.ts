@@ -12,7 +12,9 @@ export const box = (x: number, z: number, width: number, depth: number): Rect =>
 
 export const contains = (r: Rect, x: number, z: number) => x >= r.minX && x <= r.maxX && z >= r.minZ && z <= r.maxZ
 
-/** Gallery-label metadata shown in the exhibit card when an object is in focus. */
+export const offsetRect = (r: Rect, [x, z]: Vec2): Rect => rect(r.minX + x, r.maxX + x, r.minZ + z, r.maxZ + z)
+
+/** Gallery-label metadata for an exhibit: shown on physical labels, the overlay card and to screen readers. */
 export type ExhibitCardData = {
   index: string
   year: string
@@ -43,4 +45,6 @@ export type DoorDefinition = {
   z: number
   width: number
   height: number
+  /** Wall thickness at the opening, if it differs from the standard wall. */
+  thickness?: number
 }
