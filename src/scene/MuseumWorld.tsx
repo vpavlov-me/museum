@@ -9,6 +9,7 @@ import { Controls } from './Controls'
 import { DebugBridge } from './DebugBridge'
 import { FocusSystem } from './Interaction'
 import { Lighting } from './Lighting'
+import { PerfReadout } from './PerfReadout'
 import { Player } from './Player'
 
 const ROOMS: Record<string, ComponentType> = {
@@ -36,6 +37,7 @@ export function MuseumWorld({ active, onLockChange }: { active: boolean; onLockC
       <FocusSystem active={active} />
       <Controls onLockChange={onLockChange} />
       {import.meta.env.DEV && <DebugBridge setLocked={onLockChange} />}
+      {import.meta.env.DEV && <PerfReadout />}
     </>
   )
 }

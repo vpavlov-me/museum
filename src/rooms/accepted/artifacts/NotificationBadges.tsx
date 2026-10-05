@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Text } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -9,14 +9,19 @@ import { museumStore } from '../../../museum/store'
 import { box } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
 import { useFocusTarget } from '../../../scene/Interaction'
-import { CARDS, HALL } from '../content'
+import { Downlight } from '../../../scene/Light'
+import { basicMaterial, PALETTES } from '../../../scene/materials'
+import { CARDS, CELLS } from '../content'
 import { CIRCLE, hash, roundedRect } from '../shared'
 
 const RED = '#e5483b'
-const PLINTH = { x: 0, z: 4.6, width: 1.1, height: 1, depth: 0.7 }
+const ROOM = CELLS.attend
+const PLINTH = { x: 2.4, z: -24.6, width: 1.1, height: 1, depth: 0.7 }
 const COUNT = 42
 // After "mark all as read", the room stays quiet for a moment before it starts again.
 const QUIET_FOR = 2.5
+// Badges spread over this stretch of the chapter as the visitor walks deeper into it.
+const SPREAD = { start: ROOM.maxZ - 1.3, length: 9.6 }
 
 type Badge = {
   position: [number, number, number]
@@ -32,14 +37,15 @@ const countLabel = (i: number) => {
   return value > 99 ? '99+' : String(value)
 }
 
-// Wall text occupies roughly y 1.0–2.9 on the west wall between these z values.
-const TEXT_BAND = { minZ: 0.6, maxZ: 7.6, minY: 0.95, maxY: 3 }
+// The observation text occupies roughly y 1.0–2.9 on the west wall between these z values.
+const TEXT_BAND = { minZ: -28.5, maxZ: -22, minY: 0.95, maxY: 3 }
 
 function layoutBadges(): Badge[] {
   const badges: Badge[] = []
+  const cx = (ROOM.minX + ROOM.maxX) / 2
   for (let i = 0; i < COUNT; i++) {
     const progress = i / (COUNT - 1)
-    const z = THREE.MathUtils.clamp(7.4 - progress * 8.8 + (hash(i) - 0.5) * 2, -1.8, 7.6)
+    const z = THREE.MathUtils.clamp(SPREAD.start - progress * SPREAD.length + (hash(i) - 0.5) * 2, ROOM.minZ + 0.6, ROOM.maxZ - 0.4)
     const radius = 0.05 + 0.04 * hash(i + 50) + 0.32 * Math.pow(progress, 1.6)
     const surface = i % 5
     let position: [number, number, number]
@@ -48,22 +54,22 @@ function layoutBadges(): Badge[] {
     if (surface === 0) {
       // West wall: competes with the wall text without covering it.
       const inBand = z > TEXT_BAND.minZ && z < TEXT_BAND.maxZ
-      const y = inBand ? (hash(i + 7) > 0.5 ? 3.25 + hash(i + 9) * 0.6 : 0.3 + hash(i + 9) * 0.45) : 0.5 + hash(i + 9) * 3.2
-      position = [HALL.minX + 0.012, y, z]
+      const y = inBand ? (hash(i + 7) > 0.5 ? 3.25 + hash(i + 9) * 0.5 : 0.3 + hash(i + 9) * 0.45) : 0.5 + hash(i + 9) * 3
+      position = [ROOM.minX + 0.012, y, z]
       rotation = [0, Math.PI / 2, 0]
     } else if (surface === 1 || surface === 4) {
-      position = [HALL.maxX - 0.012, 0.5 + hash(i + 9) * 3.2, z]
+      position = [ROOM.maxX - 0.012, 0.5 + hash(i + 9) * 3, z]
       rotation = [0, -Math.PI / 2, 0]
     } else if (surface === 2) {
-      position = [(hash(i + 3) - 0.5) * 10, HALL.height - 0.012, z]
+      position = [cx + (hash(i + 3) - 0.5) * 9, ROOM.height - 0.012, z]
       // Facing down, numbers upright for a visitor walking north.
       rotation = [Math.PI / 2, 0, Math.PI]
     } else {
-      position = [(hash(i + 3) - 0.5) * 9, 0.006, z]
+      position = [cx + (hash(i + 3) - 0.5) * 8.4, 0.006, z]
       rotation = [-Math.PI / 2, 0, 0]
     }
 
-    badges.push({ position, rotation, radius, label: countLabel(i), threshold: 7.4 - progress * 8.4 })
+    badges.push({ position, rotation, radius, label: countLabel(i), threshold: SPREAD.start - progress * (SPREAD.length - 1) })
   }
   return badges
 }
@@ -76,36 +82,101 @@ const easeOutBack = (x: number) => {
 
 const popScale = (t: number) => (t >= 0.28 ? 1 : easeOutBack(Math.max(0, t) / 0.28))
 
-function BadgeMark({ radius, label, material }: { radius: number; label: string; material: THREE.Material }) {
-  const fontSize = radius * (label.length > 2 ? 0.72 : label.length > 1 ? 0.95 : 1.15)
-  return (
-    <>
-      <mesh geometry={CIRCLE} material={material} scale={radius} />
-      <Text position={[0, 0, 0.003]} fontSize={fontSize} color="#ffffff" anchorX="center" anchorY="middle">
-        {label}
-      </Text>
-    </>
-  )
+/*
+ * Every badge in the room is one instance of a single quad, drawn in one call.
+ * Its disc and number come from a small canvas atlas, one cell per label.
+ */
+const ATLAS = { cells: 8, cell: 128 }
+
+function badgeAtlas(labels: string[]) {
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = ATLAS.cells * ATLAS.cell
+  const ctx = canvas.getContext('2d')!
+  const c = ATLAS.cell
+  labels.forEach((label, i) => {
+    const x = (i % ATLAS.cells) * c
+    const y = Math.floor(i / ATLAS.cells) * c
+    ctx.fillStyle = RED
+    ctx.beginPath()
+    ctx.arc(x + c / 2, y + c / 2, c / 2 - 2, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.fillStyle = '#ffffff'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    const size = label.length > 2 ? 0.36 : label.length > 1 ? 0.47 : 0.58
+    ctx.font = `500 ${Math.round(c * size)}px "Helvetica Neue", Arial, sans-serif`
+    ctx.fillText(label, x + c / 2, y + c / 2 + c * 0.03)
+  })
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace
+  texture.anisotropy = 4
+  return texture
 }
+
+function badgeMaterial(texture: THREE.Texture) {
+  const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, alphaTest: 0.02 })
+  // Each instance looks up its own cell of the atlas.
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute vec2 cell;')
+      .replace('#include <uv_vertex>', `#include <uv_vertex>\nvMapUv = (vMapUv + cell) / ${ATLAS.cells.toFixed(1)};`)
+  }
+  return material
+}
+
+const QUAD = new THREE.PlaneGeometry(2, 2)
 
 /**
  * Exhibit 02. One small badge on a plinth, treated with museum seriousness. As the
- * visitor walks on, the count climbs and badges spread across walls, ceiling and floor.
- * "Mark all as read" clears them; a moment later they start coming back.
+ * visitor walks on, the count climbs and badges spread across walls, ceiling and floor:
+ * nothing to press, only to approach. "Mark all as read" clears them; a moment later
+ * they start coming back.
  */
 export function NotificationBadges() {
   const { id: roomId, origin } = useRoom()
   const clock = useThree((state) => state.clock)
   const badges = useMemo(layoutBadges, [])
-  const material = useMemo(() => new THREE.MeshBasicMaterial({ color: RED }), [])
 
-  const groups = useRef<(THREE.Group | null)[]>([])
+  const { geometry, material, texture } = useMemo(() => {
+    const labels = [...new Set(badges.map((badge) => badge.label))]
+    const texture = badgeAtlas(labels)
+    const geometry = QUAD.clone()
+    const cells = new Float32Array(COUNT * 2)
+    badges.forEach((badge, i) => {
+      const index = labels.indexOf(badge.label)
+      // Canvas rows run top-down, texture rows bottom-up.
+      cells.set([index % ATLAS.cells, ATLAS.cells - 1 - Math.floor(index / ATLAS.cells)], i * 2)
+    })
+    geometry.setAttribute('cell', new THREE.InstancedBufferAttribute(cells, 2))
+    return { geometry, material: badgeMaterial(texture), texture }
+  }, [badges])
+
+  useEffect(
+    () => () => {
+      geometry.dispose()
+      material.dispose()
+      texture.dispose()
+    },
+    [geometry, material, texture],
+  )
+
+  const instances = useRef<THREE.InstancedMesh>(null)
   const first = useRef<THREE.Group>(null)
   const shownAt = useRef(new Float32Array(COUNT).fill(-1))
   const scales = useRef(new Float32Array(COUNT))
   const deepest = useRef(Infinity)
   const clearedAt = useRef(-Infinity)
   const [count, setCount] = useState(1)
+  const placements = useMemo(
+    () =>
+      badges.map((badge) => {
+        const object = new THREE.Object3D()
+        object.position.set(...badge.position)
+        object.rotation.set(...badge.rotation)
+        return object
+      }),
+    [badges],
+  )
 
   useObstacle('badge-plinth', box(PLINTH.x, PLINTH.z, PLINTH.width, PLINTH.depth))
   useFocusTarget({
@@ -113,6 +184,7 @@ export function NotificationBadges() {
     position: [PLINTH.x, 1.2, PLINTH.z],
     distance: 3.4,
     card: CARDS.badge,
+    labelled: true,
     prompt: 'MARK ALL AS READ',
     onInteract: () => {
       clearedAt.current = clock.elapsedTime
@@ -124,17 +196,21 @@ export function NotificationBadges() {
     if (museumStore.get().spaceId === roomId) deepest.current = Math.min(deepest.current, camera.position.z - origin[1])
     else deepest.current = Infinity
 
+    const mesh = instances.current
     let visible = 0
     for (let i = 0; i < COUNT; i++) {
       const show = deepest.current < badges[i].threshold && now > clearedAt.current + QUIET_FOR + i * 0.12
       if (show && shownAt.current[i] < 0) shownAt.current[i] = now
       if (!show) shownAt.current[i] = -1
 
-      scales.current[i] = show ? popScale(now - shownAt.current[i]) : THREE.MathUtils.damp(scales.current[i], 0, 16, delta)
-      const group = groups.current[i]
-      if (group) {
-        group.scale.setScalar(scales.current[i])
-        group.visible = scales.current[i] > 0.002
+      const before = scales.current[i]
+      scales.current[i] = show ? popScale(now - shownAt.current[i]) : THREE.MathUtils.damp(before, 0, 16, delta)
+      if (mesh && scales.current[i] !== before) {
+        const placement = placements[i]
+        placement.scale.setScalar(Math.max(1e-4, scales.current[i] * badges[i].radius))
+        placement.updateMatrix()
+        mesh.setMatrixAt(i, placement.matrix)
+        mesh.instanceMatrix.needsUpdate = true
       }
       if (show) visible++
     }
@@ -145,35 +221,40 @@ export function NotificationBadges() {
     if (next !== count) setCount(next)
   })
 
+  useLayoutEffect(() => {
+    // Start with every badge collapsed.
+    const mesh = instances.current
+    if (!mesh) return
+    placements.forEach((placement, i) => {
+      placement.scale.setScalar(1e-4)
+      placement.updateMatrix()
+      mesh.setMatrixAt(i, placement.matrix)
+    })
+    mesh.instanceMatrix.needsUpdate = true
+  }, [placements])
+
+  const label = count > 99 ? '99+' : String(Math.max(count, 1))
+
   return (
     <>
       <group position={[PLINTH.x, 0, PLINTH.z]}>
         <Plinth width={PLINTH.width} height={PLINTH.height} depth={PLINTH.depth} />
         {/* An app icon, and the first, polite badge. */}
         <group position={[0, PLINTH.height + 0.3, 0]}>
-          <mesh geometry={roundedRect(0.44, 0.44, 0.1)}>
-            <meshStandardMaterial color="#3a3936" roughness={0.6} side={THREE.DoubleSide} />
-          </mesh>
+          <mesh geometry={roundedRect(0.44, 0.44, 0.1)} material={PALETTES.accepted.wall} />
           <group ref={first} position={[0.2, 0.2, 0.01]}>
-            <BadgeMark radius={0.075} label={count > 99 ? '99+' : String(Math.max(count, 1))} material={material} />
+            <mesh geometry={CIRCLE} material={basicMaterial(RED)} scale={0.075} />
+            <Text position={[0, 0, 0.003]} fontSize={0.075 * (label.length > 2 ? 0.72 : label.length > 1 ? 0.95 : 1.15)} color="#ffffff" anchorX="center" anchorY="middle">
+              {label}
+            </Text>
           </group>
         </group>
-        <ExhibitLabel position={[-PLINTH.width / 2 + 0.1, PLINTH.height - 0.12, PLINTH.depth / 2 + 0.005]}>02 / 2007</ExhibitLabel>
-        <pointLight position={[0, 3.2, 1]} intensity={5} distance={5} color="#efe6d6" />
+        <ExhibitLabel position={[-PLINTH.width / 2 + 0.08, PLINTH.height - 0.07, PLINTH.depth / 2 + 0.004]} exhibit={CARDS.badge} width={0.94} />
       </group>
+      {/* Hard and narrow: one object, one pool, before the room fills up. */}
+      <Downlight at={[PLINTH.x, PLINTH.z + 1.4]} aim={[PLINTH.x, 1.1, PLINTH.z]} ceiling={ROOM.height} palette={PALETTES.accepted} angle={0.3} penumbra={0.2} intensity={45} />
 
-      {badges.map((badge, i) => (
-        <group key={i} position={badge.position} rotation={badge.rotation}>
-          <group
-            ref={(node) => {
-              groups.current[i] = node
-            }}
-            visible={false}
-          >
-            <BadgeMark radius={badge.radius} label={badge.label} material={material} />
-          </group>
-        </group>
-      ))}
+      <instancedMesh ref={instances} args={[geometry, material, COUNT]} frustumCulled={false} />
     </>
   )
 }

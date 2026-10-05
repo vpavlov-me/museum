@@ -8,8 +8,11 @@ import type { ExhibitCardData } from '../museum/types'
 /*
  * Proximity + gaze focus. Rooms register targets in local coordinates; every frame
  * the focus system picks the best target in the visitor's current room that is
- * close enough and roughly in front of them. Its card is shown, and if it has a
- * prompt, pressing E calls `onInteract`. No precision clicking is ever required.
+ * close enough and roughly in front of them. If it has a prompt, pressing E calls
+ * `onInteract`. No precision clicking is ever required.
+ *
+ * Its card is always announced to assistive technology, but only shown on screen
+ * when the object has no physical label of its own (`labelled`).
  */
 
 export type FocusTargetSpec = {
@@ -21,6 +24,8 @@ export type FocusTargetSpec = {
   /** Minimum cosine between the horizontal view direction and the target. */
   facing?: number
   card?: ExhibitCardData | null
+  /** The object carries its own label in the space, so the card stays off screen. */
+  labelled?: boolean
   /** Verb next to the E key. `null` disables interaction while keeping the card. */
   prompt?: string | null
   onInteract?: () => void
@@ -90,8 +95,9 @@ export function FocusSystem({ active }: { active: boolean }) {
     const spec = best?.spec.current
     const prompt = spec?.onInteract ? (spec.prompt ?? null) : null
     const card = spec?.card ?? null
-    if (focus?.id !== spec?.id || focus?.prompt !== prompt || focus?.card !== card) {
-      museumStore.set({ focus: spec ? { id: spec.id, card, prompt } : null })
+    const labelled = spec?.labelled ?? false
+    if (focus?.id !== spec?.id || focus?.prompt !== prompt || focus?.card !== card || focus?.labelled !== labelled) {
+      museumStore.set({ focus: spec ? { id: spec.id, card, labelled, prompt } : null })
     }
   })
 

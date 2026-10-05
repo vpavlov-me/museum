@@ -1,29 +1,37 @@
+import type { Chapter } from '../../components/ChapterMark'
 import type { WallTextLayout } from '../../components/WallText'
+import { ACCEPTED_CELLS } from '../../museum/roomRegistry'
 import type { ExhibitCardData } from '../../museum/types'
 
 /*
- * Room 02 plan, room-local metres. The visitor enters at z = +15 and walks towards -z
- * through a sequence of interruptions:
+ * Room 02 plan, room-local metres. The visitor enters at z = 0 through the
+ * south-west corner and walks towards -z through three chapters, separated by
+ * pauses and offset openings:
  *
- *   z  15 … 8    vestibule (thesis, title)      → cookie banner across the room at z = 8
- *   z   8 … 0    notification badges
- *   z   0 … -7   three layered modals
- *   z  -8        CAPTCHA checkpoint in a partition wall
- *   z  -8 … -15  skeleton screens
- *   z -15 … -35  the feed, ending at a closed passage
+ *   INTERRUPT     z    0 … -17   thesis, cookie banner at z = -6.6, three modals
+ *   (pause)       z  -17 … -21   low and quiet, the chapter II title
+ *   PROVE/ATTEND  z  -21 … -35   one badge on a plinth, then many; CAPTCHA gate at z = -35.15
+ *   WAIT/CONTINUE z  -35 … -46   skeleton panels as partitions
+ *                 z  -46 … -66   the feed, ending at a closed passage
  */
-export const HALL = { minX: -6, maxX: 6, minZ: -15, maxZ: 15, height: 4.2 }
-export const FEED = { minX: -1.5, maxX: 1.5, minZ: -35.2, maxZ: -15.2, height: 3.2 }
+export const CELLS = ACCEPTED_CELLS
+export const FEED = ACCEPTED_CELLS.feed
 
-export const BANNER_Z = 8
-export const CAPTCHA_Z = -8
+export const BANNER_Z = -6.6
+export const CAPTCHA_Z = -35.15
+
+export const CHAPTERS = {
+  interrupt: { numeral: 'I', name: 'INTERRUPT', line: 'Interfaces that block what you came to do.' },
+  attend: { numeral: 'II', name: 'PROVE /\nATTEND', line: 'Interfaces that demand proof, or attention.' },
+  wait: { numeral: 'III', name: 'WAIT /\nCONTINUE', line: 'Interfaces that stretch time and keep you inside.' },
+} satisfies Record<string, Chapter>
 
 // Narrower than Room 01's wall texts: this room is denser and the walls are shorter.
-export const COMPACT_LAYOUT: WallTextLayout = { top: 2.55, titleWidth: 2.6, gap: 0.4, bodyWidth: 3.5 }
+export const COMPACT_LAYOUT: WallTextLayout = { top: 2.55, titleWidth: 2.4, gap: 0.35, bodyWidth: 3.3 }
 
 export const THESIS = {
   kicker: 'ROOM 02 / THESIS',
-  title: 'Things we somehow accepted.',
+  title: 'The way things are.',
   body: 'Many interface conventions did not begin as good ideas. They began as compromises: a legal requirement, a slow network, a growth target, a bot problem. Repeated often enough, each one stopped looking like a decision and started looking like the way things are.',
 }
 
@@ -106,8 +114,8 @@ export type ModalLayer = {
 
 export const MODALS: ModalLayer[] = [
   {
-    z: -1.5,
-    x: -0.35,
+    z: -9.4,
+    x: 1.9,
     y: 1.8,
     width: 2.6,
     height: 1.5,
@@ -117,8 +125,8 @@ export const MODALS: ModalLayer[] = [
     secondary: 'No thanks, I prefer to stay uninformed',
   },
   {
-    z: -3.6,
-    x: 0.45,
+    z: -12,
+    x: 5.8,
     y: 1.7,
     width: 2.4,
     height: 1.4,
@@ -128,8 +136,8 @@ export const MODALS: ModalLayer[] = [
     secondary: 'Not now',
   },
   {
-    z: -5.7,
-    x: 0,
+    z: -14.6,
+    x: 2.8,
     y: 1.62,
     width: 2.2,
     height: 1.3,

@@ -1,9 +1,10 @@
-/** A dark museum plinth standing on the floor, centred at the group origin. */
-export function Plinth({ width, height, depth, color = '#141414' }: { width: number; height: number; depth: number; color?: string }) {
+import { PLINTH_MATERIAL } from '../scene/materials'
+
+/** A museum plinth standing on the floor, centred at the group origin. */
+export function Plinth({ width, height, depth }: { width: number; height: number; depth: number }) {
   return (
-    <mesh position={[0, height / 2, 0]}>
+    <mesh position={[0, height / 2, 0]} material={PLINTH_MATERIAL}>
       <boxGeometry args={[width, height, depth]} />
-      <meshStandardMaterial color={color} roughness={0.8} />
     </mesh>
   )
 }

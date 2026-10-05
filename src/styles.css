@@ -306,3 +306,27 @@ button {
     width: auto;
   }
 }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.perf-readout {
+  position: fixed;
+  left: 24px;
+  bottom: 52px;
+  z-index: 20;
+  font: 10px/1.5 ui-monospace, Menlo, monospace;
+  letter-spacing: 0.04em;
+  color: rgba(240, 238, 232, 0.55);
+  white-space: pre;
+  pointer-events: none;
+}
