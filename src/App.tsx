@@ -1,65 +1,32 @@
 import { Suspense, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Loader } from '@react-three/drei'
-import { Museum, type Exhibit } from './Museum'
+import { SPAWN } from './museum/roomRegistry'
+import { MuseumWorld } from './scene/MuseumWorld'
+import { ExhibitCard } from './ui/ExhibitCard'
+import { HUD } from './ui/HUD'
+import { Intro } from './ui/Intro'
+import { Pause } from './ui/Pause'
 
 function App() {
   const [entered, setEntered] = useState(false)
   const [locked, setLocked] = useState(false)
-  const [focusedExhibit, setFocusedExhibit] = useState<Exhibit | null>(null)
+  const active = entered && locked
 
   return (
     <main className="app-shell">
-      <Canvas
-        camera={{ position: [0, 1.7, 12.2], fov: 60, near: 0.1, far: 100 }}
-        dpr={[1, 1.75]}
-        gl={{ antialias: true }}
-      >
-        <color attach="background" args={["#0a0a0a"]} />
-        <fog attach="fog" args={["#0a0a0a", 18, 40]} />
+      <Canvas camera={{ position: SPAWN.position, fov: 60, near: 0.1, far: 100 }} dpr={[1, 1.75]} gl={{ antialias: true }}>
+        <color attach="background" args={['#0a0a0a']} />
+        <fog attach="fog" args={['#0a0a0a', 18, 40]} />
         <Suspense fallback={null}>
-          <Museum active={entered && locked} onFocus={setFocusedExhibit} onLockChange={setLocked} />
+          <MuseumWorld active={active} onLockChange={setLocked} />
         </Suspense>
       </Canvas>
 
-      <section className={`intro ${entered ? 'intro--hidden' : ''}`}>
-        <div className="intro__eyebrow">INTERFACE MUSEUM / PROTOTYPE 01</div>
-        <h1>Interfaces,<br />given physical form.</h1>
-        <p>
-          An experimental exhibition about the objects, conventions and habits
-          we use every day without thinking about them.
-        </p>
-        <button id="enter-museum" type="button" onClick={() => setEntered(true)}>
-          Enter exhibition
-        </button>
-        <div className="intro__hint">Desktop prototype · WASD to move · Mouse to look · Esc to release</div>
-      </section>
-
-      <div className={`hud ${entered && locked ? 'hud--visible' : ''}`} aria-hidden={!entered || !locked}>
-        <div className="hud__brand">INTERFACE MUSEUM</div>
-        <div className="hud__room">01 / THE BUTTON</div>
-        <div className="crosshair" />
-        <div className="hud__hint">Esc to release cursor</div>
-      </div>
-
-      <section className={`pause ${entered && !locked ? 'pause--visible' : ''}`} aria-hidden={!entered || locked}>
-        <div className="intro__eyebrow">PAUSED / 01 THE BUTTON</div>
-        <button id="resume-museum" type="button">
-          Continue exploring
-        </button>
-        <div className="pause__hint">WASD to move · Mouse to look · Esc to release</div>
-      </section>
-
-      <aside className={`exhibit-card ${focusedExhibit && entered && locked ? 'exhibit-card--visible' : ''}`}>
-        {focusedExhibit && (
-          <>
-            <div className="exhibit-card__meta">{focusedExhibit.year} / {focusedExhibit.category}</div>
-            <h2>{focusedExhibit.title}</h2>
-            <p>{focusedExhibit.description}</p>
-            <div className="exhibit-card__index">OBJECT {focusedExhibit.index}</div>
-          </>
-        )}
-      </aside>
+      <Intro hidden={entered} onEnter={() => setEntered(true)} />
+      <HUD visible={active} />
+      <Pause visible={entered && !locked} />
+      <ExhibitCard visible={active} />
 
       <Loader
         containerStyles={{ background: '#0a0a0a' }}
