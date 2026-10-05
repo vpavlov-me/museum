@@ -1,0 +1,229 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #0a0a0a;
+  color: #efede6;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+.app-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #0a0a0a;
+}
+
+.app-shell canvas {
+  display: block;
+}
+
+.intro {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(28px, 4vw, 64px);
+  background:
+    linear-gradient(180deg, rgba(10, 10, 10, 0.12) 0%, rgba(10, 10, 10, 0.35) 48%, rgba(10, 10, 10, 0.92) 100%);
+  transition: opacity 700ms ease, visibility 700ms ease;
+}
+
+.intro--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.intro__eyebrow,
+.hud__brand,
+.hud__room,
+.exhibit-card__meta,
+.exhibit-card__index,
+.intro__hint {
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.intro__eyebrow {
+  margin-bottom: 22px;
+  color: #8f8d87;
+}
+
+.intro h1 {
+  max-width: 860px;
+  margin: 0;
+  font-size: clamp(54px, 9vw, 138px);
+  font-weight: 400;
+  line-height: 0.84;
+  letter-spacing: -0.07em;
+}
+
+.intro p {
+  max-width: 530px;
+  margin: 28px 0 0;
+  color: #b7b4ad;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.intro button {
+  align-self: flex-start;
+  margin-top: 32px;
+  padding: 14px 18px;
+  border: 1px solid #efede6;
+  border-radius: 999px;
+  background: #efede6;
+  color: #111;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.intro button:hover {
+  transform: translateY(-1px);
+  background: #fff;
+}
+
+.intro__hint {
+  position: absolute;
+  right: clamp(28px, 4vw, 64px);
+  bottom: clamp(28px, 4vw, 64px);
+  color: #6e6c67;
+}
+
+.hud {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 500ms ease 350ms;
+}
+
+.hud--visible {
+  opacity: 1;
+}
+
+.hud__brand,
+.hud__room {
+  position: absolute;
+  top: 20px;
+  color: #c5c1b8;
+}
+
+.hud__brand {
+  left: 22px;
+}
+
+.hud__room {
+  right: 22px;
+  color: #72706a;
+}
+
+.crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: rgba(239, 237, 230, 0.72);
+}
+
+.exhibit-card {
+  position: absolute;
+  z-index: 6;
+  right: 22px;
+  bottom: 22px;
+  width: min(360px, calc(100vw - 44px));
+  padding: 18px;
+  border: 1px solid rgba(239, 237, 230, 0.16);
+  background: rgba(12, 12, 12, 0.84);
+  backdrop-filter: blur(18px);
+  transform: translateY(14px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms ease, transform 240ms ease;
+}
+
+.exhibit-card--visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.exhibit-card__meta {
+  margin-bottom: 28px;
+  color: #7f7c75;
+}
+
+.exhibit-card h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.exhibit-card p {
+  margin: 14px 0 34px;
+  color: #aaa79f;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.exhibit-card__index {
+  color: #66645f;
+}
+
+@media (max-width: 720px) {
+  .intro {
+    justify-content: center;
+  }
+
+  .intro h1 {
+    font-size: clamp(52px, 15vw, 82px);
+  }
+
+  .intro__hint {
+    display: none;
+  }
+
+  .intro::after {
+    content: 'Desktop prototype — keyboard and mouse required';
+    margin-top: 22px;
+    color: #6e6c67;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .exhibit-card {
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    width: auto;
+  }
+}
