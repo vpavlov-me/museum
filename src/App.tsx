@@ -5,19 +5,20 @@ import { Museum, type Exhibit } from './Museum'
 
 function App() {
   const [entered, setEntered] = useState(false)
+  const [locked, setLocked] = useState(false)
   const [focusedExhibit, setFocusedExhibit] = useState<Exhibit | null>(null)
 
   return (
     <main className="app-shell">
       <Canvas
-        camera={{ position: [0, 1.7, 12], fov: 68, near: 0.1, far: 100 }}
+        camera={{ position: [0, 1.7, 12.2], fov: 60, near: 0.1, far: 100 }}
         dpr={[1, 1.75]}
         gl={{ antialias: true }}
       >
         <color attach="background" args={["#0a0a0a"]} />
-        <fog attach="fog" args={["#0a0a0a", 14, 34]} />
+        <fog attach="fog" args={["#0a0a0a", 18, 40]} />
         <Suspense fallback={null}>
-          <Museum active={entered} onFocus={setFocusedExhibit} />
+          <Museum active={entered && locked} onFocus={setFocusedExhibit} onLockChange={setLocked} />
         </Suspense>
       </Canvas>
 
@@ -34,13 +35,22 @@ function App() {
         <div className="intro__hint">Desktop prototype · WASD to move · Mouse to look · Esc to release</div>
       </section>
 
-      <div className={`hud ${entered ? 'hud--visible' : ''}`} aria-hidden={!entered}>
+      <div className={`hud ${entered && locked ? 'hud--visible' : ''}`} aria-hidden={!entered || !locked}>
         <div className="hud__brand">INTERFACE MUSEUM</div>
         <div className="hud__room">01 / THE BUTTON</div>
         <div className="crosshair" />
+        <div className="hud__hint">Esc to release cursor</div>
       </div>
 
-      <aside className={`exhibit-card ${focusedExhibit && entered ? 'exhibit-card--visible' : ''}`}>
+      <section className={`pause ${entered && !locked ? 'pause--visible' : ''}`} aria-hidden={!entered || locked}>
+        <div className="intro__eyebrow">PAUSED / 01 THE BUTTON</div>
+        <button id="resume-museum" type="button">
+          Continue exploring
+        </button>
+        <div className="pause__hint">WASD to move · Mouse to look · Esc to release</div>
+      </section>
+
+      <aside className={`exhibit-card ${focusedExhibit && entered && locked ? 'exhibit-card--visible' : ''}`}>
         {focusedExhibit && (
           <>
             <div className="exhibit-card__meta">{focusedExhibit.year} / {focusedExhibit.category}</div>
