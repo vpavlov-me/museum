@@ -209,8 +209,14 @@ function worldMapped<T extends THREE.MeshStandardMaterial>(material: T, repeat: 
       `#include <uv_vertex>
       #ifdef USE_MAP
       {
-        vec4 worldAt = modelMatrix * vec4( position, 1.0 );
-        vec3 worldNormal = normalize( mat3( modelMatrix ) * normal );
+        vec4 localAt = vec4( position, 1.0 );
+        vec3 localNormal = normal;
+        #ifdef USE_INSTANCING
+        localAt = instanceMatrix * localAt;
+        localNormal = mat3( instanceMatrix ) * localNormal;
+        #endif
+        vec4 worldAt = modelMatrix * localAt;
+        vec3 worldNormal = normalize( mat3( modelMatrix ) * localNormal );
         vec2 worldUv = abs( worldNormal.y ) > 0.5 ? worldAt.xz : ( abs( worldNormal.x ) > abs( worldNormal.z ) ? worldAt.zy : worldAt.xy );
         vMapUv = worldUv / worldRepeat;
         #ifdef USE_ROUGHNESSMAP
