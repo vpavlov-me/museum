@@ -211,11 +211,22 @@ export const WALKABLE: Rect[] = [...SPACES.flatMap((space) => space.bounds), ...
 
 export const getSpace = (id: string) => SPACES.find((space) => space.id === id) ?? null
 
-export const spaceAt = (x: number, z: number) =>
-  SPACES.find((space) => space.bounds.some((bounds) => contains(bounds, x, z))) ?? null
+const inside = (bounds: Rect[], x: number, z: number) => {
+  for (let i = 0; i < bounds.length; i++) if (contains(bounds[i], x, z)) return true
+  return false
+}
 
-export const zoneAt = (space: SpaceDefinition, x: number, z: number) =>
-  space.zones?.find((zone) => zone.bounds.some((bounds) => contains(bounds, x, z))) ?? null
+// Both run every frame for the visitor: loops rather than find/some, so they allocate nothing.
+export function spaceAt(x: number, z: number) {
+  for (let i = 0; i < SPACES.length; i++) if (inside(SPACES[i].bounds, x, z)) return SPACES[i]
+  return null
+}
+
+export function zoneAt(space: SpaceDefinition, x: number, z: number) {
+  const zones = space.zones ?? []
+  for (let i = 0; i < zones.length; i++) if (inside(zones[i].bounds, x, z)) return zones[i]
+  return null
+}
 
 /**
  * Which spaces open into which, derived from the doors: a door joins every space whose
@@ -238,3 +249,87 @@ export const localDoor = (door: DoorDefinition, origin: Vec2) => ({
   width: door.width,
   height: door.height,
 })
+
+/*
+ * Sight lines, cell by cell. Every cell of every space is a node; doors (and open
+ * floor between cells of one space, like the passages' turns) are edges. Contents are
+ * drawn only within VIEW_DEPTH steps of the visitor's cell: a cell can be seen through
+ * a door, and through the next one beyond it (Room 02's short pause lets the visitor
+ * see from INTERRUPT straight into PROVE / ATTEND), never further.
+ */
+export const VIEW_DEPTH = 2
+
+const nodeId = (spaceId: string, cell: number) => `${spaceId}:${cell}`
+const touching = (a: Rect, b: Rect) => overlaps(rect(a.minX - 0.05, a.maxX + 0.05, a.minZ - 0.05, a.maxZ + 0.05), b)
+
+const GRAPH: ReadonlyMap<string, ReadonlySet<string>> = (() => {
+  const graph = new Map<string, Set<string>>()
+  const link = (a: string, b: string) => {
+    if (a === b) return
+    if (!graph.has(a)) graph.set(a, new Set())
+    if (!graph.has(b)) graph.set(b, new Set())
+    graph.get(a)!.add(b)
+    graph.get(b)!.add(a)
+  }
+  for (const space of SPACES) {
+    space.bounds.forEach((cell, i) => {
+      graph.set(nodeId(space.id, i), graph.get(nodeId(space.id, i)) ?? new Set())
+      space.bounds.forEach((other, j) => {
+        if (j > i && touching(cell, other)) link(nodeId(space.id, i), nodeId(space.id, j))
+      })
+    })
+  }
+  for (const door of Object.values(DOORS)) {
+    const reach = doorRect(door)
+    const joined = SPACES.flatMap((space) => space.bounds.flatMap((cell, i) => (overlaps(cell, reach) ? [nodeId(space.id, i)] : [])))
+    for (const a of joined) for (const b of joined) link(a, b)
+  }
+  return graph
+})()
+
+/** Node ids of each space's cells, built once, so the per-frame checks below allocate nothing. */
+const NODE_IDS: ReadonlyMap<string, readonly string[]> = new Map(SPACES.map((space) => [space.id, space.bounds.map((_, i) => nodeId(space.id, i))]))
+const visibleCache = new Map<string, ReadonlySet<string>[]>()
+
+/** Every cell that can be seen from a cell: itself, and up to VIEW_DEPTH doors away. */
+export function visibleFrom(spaceId: string, cell: number): ReadonlySet<string> {
+  let perCell = visibleCache.get(spaceId)
+  if (!perCell) visibleCache.set(spaceId, (perCell = []))
+  const cached = perCell[cell]
+  if (cached) return cached
+  const from = nodeId(spaceId, cell)
+  const seen = new Set([from])
+  let frontier = [from]
+  for (let depth = 0; depth < VIEW_DEPTH; depth++) {
+    const next: string[] = []
+    for (const node of frontier) {
+      for (const neighbour of GRAPH.get(node) ?? []) {
+        if (seen.has(neighbour)) continue
+        seen.add(neighbour)
+        next.push(neighbour)
+      }
+    }
+    frontier = next
+  }
+  perCell[cell] = seen
+  return seen
+}
+
+/** Whether any of a room's cells (all of them, if none are named) can be seen from where the visitor stands. */
+export function cellsVisible(roomId: string, cells: readonly number[] | undefined, spaceId: string, cell: number) {
+  const visible = visibleFrom(spaceId, cell)
+  const ids = NODE_IDS.get(roomId)
+  if (!ids) return false
+  if (cells) {
+    for (let i = 0; i < cells.length; i++) if (visible.has(ids[cells[i]])) return true
+    return false
+  }
+  for (let i = 0; i < ids.length; i++) if (visible.has(ids[i])) return true
+  return false
+}
+
+/** Index of the cell (bounds rectangle) of a space that contains a point, or -1. */
+export function cellAt(space: SpaceDefinition, x: number, z: number) {
+  for (let i = 0; i < space.bounds.length; i++) if (contains(space.bounds[i], x, z)) return i
+  return -1
+}

@@ -1,7 +1,7 @@
 import { createContext, useContext, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useFrame, type RenderCallback } from '@react-three/fiber'
 import type * as THREE from 'three'
-import { NEIGHBOURS } from './roomRegistry'
+import { cellsVisible, NEIGHBOURS } from './roomRegistry'
 import { museumStore, useMuseumStore } from './store'
 import type { SpaceDefinition, Vec2 } from './types'
 
@@ -25,11 +25,9 @@ export const useRoom = () => useContext(RoomContext)
 
 /*
  * Room activation. A space is `active` while the visitor stands in it, `nearby` while
- * they stand in a space that opens into it (so it can be seen through a door), and
- * `inactive` otherwise. Spaces are only ever seen through their doors, so an inactive
- * room cannot be seen at all: its contents are hidden, its animations paused and its
- * realtime lights handed to rooms that can be seen. Architecture is never hidden, so
- * nothing pops in at a doorway.
+ * they stand in a space that opens into it, and `inactive` otherwise: room-level state
+ * (sound loops, resets) follows this. What is drawn and animated is finer, cell by cell
+ * (RoomContents, useRoomFrame). Architecture is never hidden, so nothing pops in.
  */
 export type Activity = 'active' | 'nearby' | 'inactive'
 
@@ -42,26 +40,46 @@ export function useActivity() {
   return useMuseumStore((state) => activityOf(id, state.spaceId))
 }
 
-/** `useFrame` that sleeps while its room cannot be seen. */
+/** The cells of its room a section of contents belongs to (undefined: the whole room). */
+const CellsContext = createContext<readonly number[] | undefined>(undefined)
+
+/** Whether a room's cells can be seen from where the visitor stands now. */
+export function sectionVisible(roomId: string, cells: readonly number[] | undefined) {
+  const { spaceId, cell } = museumStore.get()
+  return cellsVisible(roomId, cells, spaceId, cell)
+}
+
+/** The cells of the section this component is in, for fixtures that register themselves. */
+export const useSectionCells = () => useContext(CellsContext)
+
+/** `useFrame` that sleeps while its section of the room cannot be seen. */
 export function useRoomFrame(callback: RenderCallback) {
   const { id } = useRoom()
+  const cells = useContext(CellsContext)
   useFrame((state, delta, frame) => {
-    if (activityOf(id, museumStore.get().spaceId) !== 'inactive') callback(state, delta, frame)
+    if (sectionVisible(id, cells)) callback(state, delta, frame)
   })
 }
 
 /**
  * Everything in a room except its merged architecture: exhibits, text, fixtures.
- * Hidden while the room is inactive, which is where most of the museum's draw calls
- * (text in particular) used to go: frustum culling cannot see through walls, this can.
+ * Drawn only where it can be seen, cell by cell: the visitor's cell and up to two
+ * doors beyond it (see VIEW_DEPTH). Frustum culling cannot see through walls; this can,
+ * and it is where most of the museum's draw calls (text in particular) used to go.
+ * `cells` names the room cells a section stands in; without it, the whole room.
  */
-export function RoomContents({ children }: { children: ReactNode }) {
+export function RoomContents({ cells, children }: { cells?: readonly number[]; children: ReactNode }) {
+  const { id } = useRoom()
   const group = useRef<THREE.Group>(null)
-  const visible = useActivity() !== 'inactive'
+  const visible = useMuseumStore((state) => cellsVisible(id, cells, state.spaceId, state.cell))
 
   useLayoutEffect(() => {
     if (group.current) group.current.visible = visible
   }, [visible])
 
-  return <group ref={group}>{children}</group>
+  return (
+    <CellsContext.Provider value={cells}>
+      <group ref={group}>{children}</group>
+    </CellsContext.Provider>
+  )
 }

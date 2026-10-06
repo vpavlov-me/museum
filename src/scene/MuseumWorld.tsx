@@ -19,6 +19,9 @@ import { Lighting } from './Lighting'
 import { PerfReadout } from './PerfReadout'
 import { Player } from './Player'
 
+/** Development tooling: in dev, and in the `profile` build (a production build to measure); never in production. */
+const TOOLS = import.meta.env.DEV || import.meta.env.MODE === 'profile'
+
 const ROOMS: Record<string, ComponentType> = {
   entrance: Entrance,
   'the-button': TheButtonRoom,
@@ -67,8 +70,8 @@ export function MuseumWorld({
       <FocusSystem active={active} />
       <AudioDirector presence={presence} />
       {mode === 'walk' && <Controls onLockChange={onLockChange} />}
-      {import.meta.env.DEV && <DebugBridge setLocked={onLockChange} />}
-      {import.meta.env.DEV && <PerfReadout />}
+      {TOOLS && <DebugBridge setLocked={onLockChange} />}
+      {TOOLS && <PerfReadout />}
     </>
   )
 }

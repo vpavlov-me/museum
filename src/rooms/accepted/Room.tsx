@@ -85,16 +85,12 @@ export function AcceptedRoom() {
         <Luminaire position={[0, feed.height - 0.004, (feed.minZ + feed.maxZ) / 2 + 0.4]} size={[0.06, feed.maxZ - feed.minZ - 1.6]} palette={palette} />
       </StaticMerge>
 
-      <RoomContents>
+      {/* Contents by cell (interrupt 0, pause 1, attend 2, wait 3, feed 4): each drawn only while it can be seen. */}
+      <RoomContents cells={[0]}>
         {/* Fragmented pools under the slots, harder and cooler than anything in Room 01. */}
         {SLOTS.slice(0, 7).map(([x, z, , l]) => (
           <LightPool key={`${x}:${z}`} position={[x, 0.004, z]} size={[1.6, l + 1.8]} color={COOL} strength={0.08} />
         ))}
-        {TUBES.map(([x, z]) => (
-          <LightPool key={`${x}:${z}`} position={[x, 0.004, z]} size={[2.6, 1.6]} color={COOL} strength={0.07} />
-        ))}
-        <LightPool position={[1, 0.004, -19.1]} size={[4.4, 3.6]} color={WARM} strength={0.1} />
-        <LightPool position={[0, 0.004, -33.9]} size={[3.4, 2]} color={COOL} strength={0.1} />
 
         {/* I — INTERRUPT. Title and thesis on the wall the visitor turns towards. */}
         <group position={[interrupt.maxX - 0.02, 0, -6.35]} rotation={[0, -Math.PI / 2, 0]}>
@@ -114,21 +110,39 @@ export function AcceptedRoom() {
         <ChapterMark position={[interrupt.minX + 0.02, 3.75, -1.9]} facing="east" room="02" chapter={CHAPTERS.interrupt} />
         <ExhibitLabel position={[interrupt.minX + 0.02, 1.6, BANNER_Z + 1.55]} rotation={[0, Math.PI / 2, 0]} exhibit={CARDS.banner} />
         <ExhibitLabel position={[interrupt.minX + 0.02, 1.6, -9.6]} rotation={[0, Math.PI / 2, 0]} exhibit={CARDS.modal} />
+        <CookieBanner />
+        <ModalStack />
+      </RoomContents>
 
-        {/* Pause, then II — PROVE / ATTEND. */}
+      {/* The pause: the chapter II title, and its warm light. */}
+      <RoomContents cells={[1]}>
+        <LightPool position={[1, 0.004, -19.1]} size={[4.4, 3.6]} color={WARM} strength={0.1} />
         <ChapterMark position={[pause.minX + 0.25, 2.45, pause.minZ + 0.012]} facing="south" room="02" chapter={CHAPTERS.attend} width={3.1} scale={0.82} />
-        <WallText position={[attend.minX + 0.02, -22.2]} facing="east" layout={COMPACT_LAYOUT} {...OBSERVATIONS.badges} />
+      </RoomContents>
 
-        {/* III — WAIT / CONTINUE. */}
+      {/* II — PROVE / ATTEND. */}
+      <RoomContents cells={[2]}>
+        <LightPool position={[0, 0.004, -33.9]} size={[3.4, 2]} color={COOL} strength={0.1} />
+        <WallText position={[attend.minX + 0.02, -22.2]} facing="east" layout={COMPACT_LAYOUT} {...OBSERVATIONS.badges} />
+        <NotificationBadges />
+      </RoomContents>
+      {/* The CAPTCHA is the wall between II and III, seen from both. */}
+      <RoomContents cells={[2, 3]}>
+        <Captcha />
+      </RoomContents>
+
+      {/* III — WAIT / CONTINUE. */}
+      <RoomContents cells={[3]}>
+        {TUBES.map(([x, z]) => (
+          <LightPool key={`${x}:${z}`} position={[x, 0.004, z]} size={[2.6, 1.6]} color={COOL} strength={0.07} />
+        ))}
         <ChapterMark position={[wait.maxX - 0.02, 2.95, -38.9]} facing="west" room="02" chapter={CHAPTERS.wait} />
         <ExhibitLabel position={[wait.maxX - 0.02, 1.6, -40.6]} rotation={[0, -Math.PI / 2, 0]} exhibit={CARDS.skeleton} />
         <WallText position={[wait.minX + 0.02, -39.9]} facing="east" layout={COMPACT_LAYOUT} {...OBSERVATIONS.waiting} />
-
-        <CookieBanner />
-        <ModalStack />
-        <NotificationBadges />
-        <Captcha />
         <SkeletonLoader />
+      </RoomContents>
+
+      <RoomContents cells={[4]}>
         <InfiniteFeed />
         <FeedEnd />
       </RoomContents>

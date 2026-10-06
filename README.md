@@ -130,6 +130,20 @@ width alone) and always open to the visitor's own choice:
 - Quietest ink raised to ~4.6:1; there is always a way out without pointer lock ("Leave" in the tour
   and on the pause screen).
 
+## Prototype 08 — Performance & runtime budget
+
+- **Sight lines, cell by cell.** Each cell of each space is a node; doors (and open floor between
+  cells) are edges. Room contents, their animations and their realtime lights exist only within two
+  doors of the visitor's cell (`VIEW_DEPTH`): `RoomContents cells={[…]}`, `useRoomFrame`, `LightRig`.
+- **No first-entry stall.** Every shader is compiled behind the front door (`Precompile`), so no room
+  compiles programs the first time it comes into view.
+- **No per-frame garbage on hot paths.** Collision, space, zone, cell and visibility lookups are
+  plain loops over precomputed data.
+- **Caching.** The bundle is split into `three`, `react`, `vendor` and the museum's own ~40 kB gzip,
+  so a deploy invalidates only what changed.
+- **Measuring.** `npm run build:profile` is a production build with the debug bridge and the `` ` ``
+  readout, for measuring; production never includes them.
+
 ### Controls
 
 - `W A S D` — move
@@ -162,6 +176,7 @@ Production build:
 ```bash
 npm run build
 npm run preview
+npm run build:profile   # production build with measuring tools, in dist-profile/
 ```
 
 ## Direction

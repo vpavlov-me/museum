@@ -40,7 +40,12 @@ const POOLS = createPoolMaterial('#dfe6e8', POOL_STRENGTH)
 /** How much of the room survives a power cut: enough to see the walls, not to read them. */
 const DARK = 0.09
 
+let appliedPower = 1
+
 function applyPower(power: number) {
+  // Settled (fully on, or fully dark): nothing to recolour this frame.
+  if (Math.abs(power - appliedPower) < 1e-4) return
+  appliedPower = power
   const k = DARK + (1 - DARK) * power
   OFFLINE_PALETTE.wall.color.copy(BASE.wall).multiplyScalar(k)
   OFFLINE_PALETTE.floor.color.copy(BASE.floor).multiplyScalar(k)
@@ -145,6 +150,7 @@ export function OfflineState() {
 
   useEffect(
     () => () => {
+      appliedPower = Number.NaN
       applyPower(1)
       ambience.setVariant(OFFLINE_PLACE, null)
     },

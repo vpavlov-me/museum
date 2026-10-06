@@ -73,6 +73,10 @@ const LINE_CLIP: [number, number, number, number] = [-0.1, -0.37, 2.35, 0.1]
 const MESSAGE_AT: [number, number, number] = [-4.6, 2.2, cell.minZ + 0.3]
 
 const UNIT_BOX = new THREE.BoxGeometry(1, 1, 1)
+
+/** Frame time for `ease`, set at the top of each frame: one shared function, nothing allocated per frame. */
+let frameDelta = 0
+const ease = (from: number, to: number, speed = 5) => THREE.MathUtils.damp(from, to, speed, frameDelta)
 const SLOT_SIZE: [number, number] = [0.12, 1.5]
 
 /**
@@ -139,7 +143,7 @@ export function ErrorState() {
   useLayoutEffect(placePilasters, [placePilasters])
 
   useRoomFrame((_, delta) => {
-    const ease = (from: number, to: number, speed = 5) => THREE.MathUtils.damp(from, to, speed, delta)
+    frameDelta = delta
 
     let moving = false
     PILASTERS[layout].forEach((target, i) => {
