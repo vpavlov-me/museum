@@ -1,7 +1,7 @@
 import { createContext, useContext, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useFrame, type RenderCallback } from '@react-three/fiber'
 import type * as THREE from 'three'
-import { cellsVisible, NEIGHBOURS } from './roomRegistry'
+import { ARCHITECTURE_DEPTH, cellsVisible, NEIGHBOURS, spaceWithin } from './roomRegistry'
 import { museumStore, useMuseumStore } from './store'
 import type { SpaceDefinition, Vec2 } from './types'
 
@@ -9,14 +9,26 @@ type RoomContextValue = { id: string; origin: Vec2 }
 
 const RoomContext = createContext<RoomContextValue>({ id: '', origin: [0, 0] })
 
-/** Places a room at its origin and lets its children register colliders and focus targets in local space. */
+/**
+ * Places a room at its origin and lets its children register colliders and focus
+ * targets in local space. The whole room, architecture included, is hidden while it is
+ * too many doors away to be seen (see ARCHITECTURE_DEPTH).
+ */
 export function RoomGroup({ space, children }: { space: SpaceDefinition; children: ReactNode }) {
   const [x, z] = space.origin
   const value = useMemo(() => ({ id: space.id, origin: [x, z] as Vec2 }), [space.id, x, z])
+  const group = useRef<THREE.Group>(null)
+  const near = useMuseumStore((state) => spaceWithin(space.id, state.spaceId, state.cell, ARCHITECTURE_DEPTH))
+
+  useLayoutEffect(() => {
+    if (group.current) group.current.visible = near
+  }, [near])
 
   return (
     <RoomContext.Provider value={value}>
-      <group position={[x, 0, z]}>{children}</group>
+      <group ref={group} position={[x, 0, z]}>
+        {children}
+      </group>
     </RoomContext.Provider>
   )
 }

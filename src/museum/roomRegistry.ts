@@ -221,7 +221,7 @@ export const SPACES: SpaceDefinition[] = [
     id: 'entrance',
     number: null,
     title: 'Entrance',
-    hudLabel: 'ENTRANCE',
+    hudLabel: 'PERMANENT EXHIBITION',
     origin: [0, 20],
     bounds: [rect(-4.5, 4.5, 14, 26)],
   },
@@ -229,7 +229,7 @@ export const SPACES: SpaceDefinition[] = [
     id: 'the-button',
     number: '01',
     title: 'The Button',
-    hudLabel: '01 / THE BUTTON',
+    hudLabel: 'ROOM 01 / THE BUTTON',
     origin: [0, 0],
     bounds: [rect(-8.7, 8.7, -13.8, 13.8)],
   },
@@ -237,7 +237,7 @@ export const SPACES: SpaceDefinition[] = [
     id: 'passage',
     number: null,
     title: 'Passage',
-    hudLabel: 'PASSAGE / 01 → 02',
+    hudLabel: 'PASSAGE / ROOM 01 → 02',
     origin: [0, 0],
     bounds: [THRESHOLD.a, THRESHOLD.b],
   },
@@ -245,7 +245,7 @@ export const SPACES: SpaceDefinition[] = [
     id: 'accepted',
     number: '02',
     title: 'Things We Somehow Accepted',
-    hudLabel: '02 / THINGS WE SOMEHOW ACCEPTED',
+    hudLabel: 'ROOM 02 / THINGS WE SOMEHOW ACCEPTED',
     origin: ACCEPTED_ORIGIN,
     bounds: Object.values(ACCEPTED_CELLS).map((c) => offsetRect(c, ACCEPTED_ORIGIN)),
   },
@@ -253,7 +253,7 @@ export const SPACES: SpaceDefinition[] = [
     id: 'transition-03',
     number: null,
     title: 'Passage',
-    hudLabel: 'PASSAGE / 02 → 03',
+    hudLabel: 'PASSAGE / ROOM 02 → 03',
     origin: STATES_ORIGIN,
     bounds: [TRANSITION_03.a, TRANSITION_03.b].map((r) => offsetRect(r, STATES_ORIGIN)),
   },
@@ -261,7 +261,7 @@ export const SPACES: SpaceDefinition[] = [
     id: 'states',
     number: '03',
     title: 'Interface States',
-    hudLabel: '03 / INTERFACE STATES',
+    hudLabel: 'ROOM 03 / INTERFACE STATES',
     origin: STATES_ORIGIN,
     bounds: Object.values(STATES_CELLS).map((c) => offsetRect(c, STATES_ORIGIN)),
     zones: (
@@ -294,7 +294,7 @@ export const SPACES: SpaceDefinition[] = [
     id: 'dark-patterns',
     number: null,
     title: 'Dark Patterns',
-    hudLabel: '03 / DARK PATTERNS',
+    hudLabel: 'DARK PATTERNS',
     origin: DARK_ORIGIN,
     bounds: Object.values(DARK_CELLS).map((c) => offsetRect(c, DARK_ORIGIN)),
     zones: [
@@ -317,7 +317,7 @@ export const SPACES: SpaceDefinition[] = [
     id: 'archaeology',
     number: null,
     title: 'Interface Archaeology',
-    hudLabel: '02 / INTERFACE ARCHAEOLOGY',
+    hudLabel: 'INTERFACE ARCHAEOLOGY',
     origin: ARCHAEOLOGY_ORIGIN,
     bounds: Object.values(ARCHAEOLOGY_CELLS).map((c) => offsetRect(c, ARCHAEOLOGY_ORIGIN)),
     zones: (
@@ -427,16 +427,17 @@ const GRAPH: ReadonlyMap<string, ReadonlySet<string>> = (() => {
 const NODE_IDS: ReadonlyMap<string, readonly string[]> = new Map(SPACES.map((space) => [space.id, space.bounds.map((_, i) => nodeId(space.id, i))]))
 const visibleCache = new Map<string, ReadonlySet<string>[]>()
 
-/** Every cell that can be seen from a cell: itself, and up to VIEW_DEPTH doors away. */
-export function visibleFrom(spaceId: string, cell: number): ReadonlySet<string> {
-  let perCell = visibleCache.get(spaceId)
-  if (!perCell) visibleCache.set(spaceId, (perCell = []))
+/** Every cell within `depth` steps of a cell (itself included): by default, what can be seen from it. */
+export function visibleFrom(spaceId: string, cell: number, depth = VIEW_DEPTH): ReadonlySet<string> {
+  const key = `${spaceId}:${depth}`
+  let perCell = visibleCache.get(key)
+  if (!perCell) visibleCache.set(key, (perCell = []))
   const cached = perCell[cell]
   if (cached) return cached
   const from = nodeId(spaceId, cell)
   const seen = new Set([from])
   let frontier = [from]
-  for (let depth = 0; depth < VIEW_DEPTH; depth++) {
+  for (let step = 0; step < depth; step++) {
     const next: string[] = []
     for (const node of frontier) {
       for (const neighbour of GRAPH.get(node) ?? []) {
@@ -449,6 +450,23 @@ export function visibleFrom(spaceId: string, cell: number): ReadonlySet<string> 
   }
   perCell[cell] = seen
   return seen
+}
+
+/**
+ * How far a space's architecture is kept: two doors beyond where its contents stop, so
+ * a doorway at the edge of sight always shows a room, never the void. Further than that
+ * a whole space (walls and all) is hidden: the wings stand side by side, and their
+ * walls would otherwise be drawn through one another.
+ */
+export const ARCHITECTURE_DEPTH = VIEW_DEPTH + 2
+
+/** Whether any cell of a space is within `depth` steps of where the visitor stands. */
+export function spaceWithin(roomId: string, spaceId: string, cell: number, depth: number) {
+  const near = visibleFrom(spaceId, cell, depth)
+  const ids = NODE_IDS.get(roomId)
+  if (!ids) return false
+  for (let i = 0; i < ids.length; i++) if (near.has(ids[i])) return true
+  return false
 }
 
 /** Whether any of a room's cells (all of them, if none are named) can be seen from where the visitor stands. */

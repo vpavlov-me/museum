@@ -27,7 +27,7 @@ const euros = (value: number) => `€${value.toFixed(2)}`
 
 /** The passage off the lobby: the same low turn as before every exhibition, mirrored. */
 export function DarkPassage() {
-  return <TurnPassage plan={DARK_PASSAGE} entry="darkEntry" number="03" title={'DARK\nPATTERNS'} turn="west" />
+  return <TurnPassage plan={DARK_PASSAGE} entry="darkEntry" kicker="TEMPORARY EXHIBITION" number="03" title={'DARK\nPATTERNS'} turn="west" />
 }
 
 /* I — WELCOME. The title and thesis ahead; on the right, a countdown and a crowd. */

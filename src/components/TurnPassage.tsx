@@ -25,6 +25,7 @@ export function TurnPassage({
   entry: entryKey,
   number,
   title,
+  kicker = 'NEXT',
   turn = 'east',
 }: {
   plan: { a: Rect; b: Rect; height: number }
@@ -33,6 +34,8 @@ export function TurnPassage({
   /** The next room, as signed on the wall that turns the visitor. */
   number: string
   title: string
+  /** Over the number: NEXT for a room, EXHIBITION for a wing. */
+  kicker?: string
   turn?: 'east' | 'west'
 }) {
   const { origin } = useRoom()
@@ -81,7 +84,7 @@ export function TurnPassage({
         {/* The wall that ends the first leg, and turns the visitor. */}
         <group position={[midA, 0, b.minZ + 0.012]}>
           <Text position={[-0.78, 2.02, 0]} fontSize={0.075} letterSpacing={0.16} color={INK.muted} anchorX="left" anchorY="top">
-            NEXT
+            {kicker}
           </Text>
           <Text position={[-0.8, 1.86, 0]} fontSize={0.42} letterSpacing={-0.03} color={INK.text} anchorX="left" anchorY="top">
             {`${number} →`}

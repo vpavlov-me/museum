@@ -89,6 +89,12 @@ export const SOUNDS = {
     return tone(c, out, t, { freq: 196, to: 185, duration: 0.5, gain: 0.04, attack: 0.02, delay: 0.95 })
   },
 
+  // The lobby: an exhibition's door sliding into the wall, once its rooms are ready.
+  'lobby-door': (c, out, t) => {
+    noise(c, out, t, { duration: 1.1, gain: 0.045, filter: 'lowpass', freq: 700, to: 220, attack: 0.15 })
+    return tone(c, out, t, { freq: 73, duration: 0.25, gain: 0.05, delay: 1.05 })
+  },
+
   // The way out.
   'exit-door': (c, out, t) => {
     noise(c, out, t, { duration: 0.25, gain: 0.04, filter: 'lowpass', freq: 900 })
