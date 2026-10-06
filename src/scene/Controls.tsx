@@ -1,14 +1,14 @@
 import { useCallback } from 'react'
 import { PointerLockControls } from '@react-three/drei'
 
-/** Mouse look. Pointer lock is requested from the entry, pause and colophon buttons; Esc always releases it. */
+/** Mouse look. Pointer lock is requested from the entry, pause, plan and colophon buttons; Esc always releases it. */
 export function Controls({ onLockChange }: { onLockChange: (locked: boolean) => void }) {
   const handleLock = useCallback(() => onLockChange(true), [onLockChange])
   const handleUnlock = useCallback(() => onLockChange(false), [onLockChange])
 
   return (
     <PointerLockControls
-      selector="#enter-museum, #resume-museum, #restart-museum"
+      selector="#enter-museum, #resume-museum, #restart-museum, #plan-back"
       onLock={handleLock}
       onUnlock={handleUnlock}
       pointerSpeed={0.8}

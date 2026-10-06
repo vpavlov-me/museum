@@ -3,6 +3,10 @@ import { Canvas } from '@react-three/fiber'
 import { sound } from './audio/engine'
 import { INK } from './identity'
 import { detectCapabilities, type VisitMode } from './museum/capabilities'
+import { museumEvent } from './museum/events'
+import { exhibitions, useExhibitionStatus } from './museum/exhibitionLoader'
+import { exhibitionOf, getExhibition } from './museum/exhibitions'
+import { navigation, syncPath } from './museum/navigation'
 import { SPAWN } from './museum/roomRegistry'
 import { museumStore, useMuseumStore } from './museum/store'
 import { MuseumWorld } from './scene/MuseumWorld'
@@ -12,9 +16,11 @@ import { ColophonScreen } from './ui/ColophonScreen'
 import { ContextLost } from './ui/ContextLost'
 import { Entry } from './ui/Entry'
 import { ExhibitCard } from './ui/ExhibitCard'
+import { Fade } from './ui/Fade'
 import { GuidedControls } from './ui/GuidedControls'
 import { HUD } from './ui/HUD'
 import { Pause } from './ui/Pause'
+import { Plan } from './ui/Plan'
 import { TextExhibition } from './ui/TextExhibition'
 
 /** If the 3D scene cannot start (a WebGL context that fails late), the visitor gets the text, not a blank page. */
@@ -44,12 +50,52 @@ function App() {
   const [visit, setVisit] = useState(0)
   const [contextLost, setContextLost] = useState(false)
   const [lockRefused, setLockRefused] = useState(false)
+  const [planOpen, setPlanOpen] = useState(false)
   const ended = useMuseumStore((state) => state.ended)
+  const spaceId = useMuseumStore((state) => state.spaceId)
   const guided = mode === 'guided'
   // Walking needs the cursor; the guided tour never asks for it.
-  const active = entered && !ended && !reading && !contextLost && (guided || locked)
+  const active = entered && !ended && !reading && !contextLost && !planOpen && (guided || locked)
+  const exhibition = exhibitionOf(spaceId)
 
-  const markReady = useCallback(() => setReady(true), [])
+  // A visit that starts from a direct link waits at the door until that exhibition has loaded.
+  const target = navigation.target
+  const targetStatus = useExhibitionStatus(target ?? 'permanent')
+  const [lobbyReady, setLobbyReady] = useState(false)
+  const markReady = useCallback(() => setLobbyReady(true), [])
+  useEffect(() => {
+    if (target) exhibitions.request(target)
+  }, [target])
+  useEffect(() => {
+    if (lobbyReady && (!target || targetStatus === 'open')) setReady(true)
+  }, [lobbyReady, target, targetStatus])
+
+  // The address bar follows the exhibition the visitor is in; entering one is an event, and a visit.
+  useEffect(() => {
+    if (!entered) return
+    syncPath(exhibition)
+    if (!exhibition) return
+    museumEvent('exhibition_entered', { id: exhibition })
+    const { visited } = museumStore.get()
+    if (!visited.includes(exhibition)) museumStore.set({ visited: [...visited, exhibition] })
+  }, [entered, exhibition])
+
+  const openPlan = useCallback(() => {
+    museumEvent('map_opened')
+    setPlanOpen(true)
+    document.exitPointerLock?.()
+  }, [])
+  const closePlan = useCallback(() => setPlanOpen(false), [])
+
+  // P opens the plan while visiting (Esc or P closes it again).
+  useEffect(() => {
+    if (!active) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.code === 'KeyP' && !event.repeat) openPlan()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [active, openPlan])
 
   // Some browsers, extensions and kiosk modes refuse pointer lock: the pause screen then offers the tour.
   useEffect(() => {
@@ -68,10 +114,14 @@ function App() {
     sound.unlock()
     setMode(chosen)
     setEntered(true)
+    museumEvent('museum_entered', { start: navigation.target ?? 'lobby' })
+    museumEvent('visit_mode_selected', { mode: chosen })
   }, [])
 
+  // Visiting again starts in the lobby.
   const restart = useCallback(() => {
     sound.unlock()
+    navigation.startInLobby()
     museumStore.reset()
     setVisit((n) => n + 1)
   }, [])
@@ -116,20 +166,25 @@ function App() {
 
       <Entry
         ready={ready}
+        startAt={target ? (getExhibition(target)?.title ?? null) : null}
         hidden={entered || reading}
         recommended={capabilities.recommended === 'walk' ? 'walk' : 'guided'}
         onEnter={enter}
         onRead={() => setReading(true)}
       />
       <HUD visible={active} guided={guided} />
-      <GuidedControls visible={active && guided} />
+      <GuidedControls visible={active && guided} onPlan={openPlan} />
       <Pause
-        visible={entered && !guided && !locked && !ended && !reading && !contextLost}
+        visible={entered && !guided && !locked && !ended && !reading && !contextLost && !planOpen}
         lockRefused={lockRefused}
+        exhibition={exhibition}
         onResume={sound.unlock}
         onGuided={() => setMode('guided')}
+        onPlan={openPlan}
         onRead={() => setReading(true)}
       />
+      <Plan visible={planOpen && entered && !ended && !reading} onClose={closePlan} />
+      <Fade />
       <ColophonScreen visible={ended && !reading} onRestart={restart} onRead={() => setReading(true)} />
       <ExhibitCard visible={active} />
       <Announcer active={active} />

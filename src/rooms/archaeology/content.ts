@@ -3,13 +3,14 @@ import { ARCHAEOLOGY_CELLS } from '../../museum/roomRegistry'
 import type { ExhibitCardData } from '../../museum/types'
 
 /*
- * Room 04 plan, room-local metres. The room is entered from the passage at
- * z = -7.8 and walked towards -z:
+ * Interface Archaeology, the museum's second exhibition: one room in four cells,
+ * room-local metres. It is entered from the passage off the lobby at z = -7.8 and
+ * walked towards -z:
  *
  *   I   ACCESSION       z  -7.9 … -15    the archive's lobby: title, thesis, its own sign
  *   II  THE TRENCH      z -15.2 … -33    a hall around a stepped excavation; finds under soil
  *   III THE STORE       z -33.2 … -47    low shelving and three vitrines
- *   IV  RECONSTRUCTION  z -47.2 … -57    a dark room with the archive's diorama; then the colophon
+ *   IV  RECONSTRUCTION  z -47.2 … -57    a dark room with the archive's diorama; a door back to the lobby
  *
  * Two voices. The museum speaks on the walls, in its own ink. The archive speaks on
  * its catalogue cards, dark on pale: confident, often wrong, not always.
@@ -26,13 +27,13 @@ export const ARCHIVE = {
 }
 
 export const TITLE = {
-  kicker: 'ROOM 04',
+  kicker: 'EXHIBITION 02',
   title: 'INTERFACE ARCHAEOLOGY',
   subtitle: 'OUR INTERFACES, AS A FUTURE ARCHIVE CATALOGUES THEM',
 }
 
 export const THESIS = {
-  kicker: 'ROOM 04 / THESIS',
+  kicker: 'INTERFACE ARCHAEOLOGY / THESIS',
   title: 'Read by someone else.',
   body: 'An interface only makes sense to the people using it. Imagine ours found by a future that never used them: the gestures gone, only the signs left. The labels in this room are written by that future. They are confident. They are often wrong. Not always.',
 }
@@ -48,7 +49,7 @@ export const INSTITUTE = {
 }
 
 export const AFTERWORD = {
-  kicker: 'ROOM 04 / AFTERWORD',
+  kicker: 'INTERFACE ARCHAEOLOGY / AFTERWORD',
   title: 'Not entirely wrong.',
   body: 'A future that never used our interfaces would misread nearly every object. It would still see what they asked of us: our attention, our agreement, our hours.',
 }
@@ -153,5 +154,12 @@ export const CARDS = {
     category: 'ACCESSION',
     title: 'Institute for Early Screens',
     description: `The archive's sign. ${INSTITUTE.gallery}, ${INSTITUTE.dates}. ${INSTITUTE.line}`,
+  },
+  exit: {
+    index: 'END',
+    year: 'EXHIBITION 02',
+    category: 'INTERFACE ARCHAEOLOGY',
+    title: 'The end of Interface Archaeology',
+    description: 'The door ahead leads back to the lobby, and to the museum’s other exhibitions.',
   },
 } satisfies Record<string, ExhibitCardData>

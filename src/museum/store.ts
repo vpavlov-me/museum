@@ -21,9 +21,11 @@ type MuseumState = {
   focus: FocusInfo | null
   /** The visitor has left through the exit: the visit is over until they start another. */
   ended: boolean
+  /** Exhibitions entered this session, for the plan and the lobby signs. Kept across visits. */
+  visited: readonly string[]
 }
 
-const initial: MuseumState = { spaceId: SPAWN.spaceId, zoneId: null, cell: 0, focus: null, ended: false }
+const initial: MuseumState = { spaceId: SPAWN.spaceId, zoneId: null, cell: 0, focus: null, ended: false, visited: [] }
 let state: MuseumState = initial
 const listeners = new Set<() => void>()
 
@@ -35,7 +37,7 @@ export const museumStore = {
   get: () => state,
   /** Back to the state of a fresh visit. */
   reset() {
-    museumStore.set(initial)
+    museumStore.set({ ...initial, visited: state.visited })
   },
   set(patch: Partial<MuseumState>) {
     state = { ...state, ...patch }
@@ -57,7 +59,12 @@ export function useMuseumStore<T>(selector: (state: MuseumState) => T): T {
  * Records where the visitor is standing. Inside a doorway no space matches,
  * so the previous space and zone are kept.
  */
+/** Where the visitor stands, world [x, z]: read by the plan when it opens, never rendered from. */
+export const visitor = { x: SPAWN.position[0], z: SPAWN.position[2] }
+
 export function trackVisitor(x: number, z: number) {
+  visitor.x = x
+  visitor.z = z
   const space = spaceAt(x, z)
   if (!space) return
   const zoneId = zoneAt(space, x, z)?.id ?? null

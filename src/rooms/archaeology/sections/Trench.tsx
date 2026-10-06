@@ -387,7 +387,7 @@ export function Trench() {
       <Dig find={FINDS.tablet} piece="tablet" step={1} />
       <Dig find={FINDS.arrowheads} piece="arrowheads" step={2} />
 
-      <CellSign position={[cell.maxX - 3.4, 3.1, cell.minZ + 0.02]} kicker="04 / II" name="THE TRENCH" />
+      <CellSign position={[cell.maxX - 3.4, 3.1, cell.minZ + 0.02]} kicker="02 / II" name="THE TRENCH" />
     </>
   )
 }

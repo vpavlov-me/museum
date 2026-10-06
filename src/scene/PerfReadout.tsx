@@ -1,5 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
+import { exhibitions } from '../museum/exhibitionLoader'
+import { activityOf } from '../museum/RoomContext'
+import { EXHIBITIONS, exhibitionOf } from '../museum/exhibitions'
+import { museumStore } from '../museum/store'
 
 /**
  * Development only: a quiet readout of frame time and render cost in the corner.
@@ -47,6 +51,14 @@ export function PerfReadout() {
       `${render.calls} calls · ${(render.triangles / 1000).toFixed(1)}k tris`,
       `${memory.geometries} geo · ${memory.textures} tex · ${programs?.length ?? 0} programs · ${lights} lights`,
       `dpr ${gl.getPixelRatio().toFixed(2)}`,
+      `in ${exhibitionOf(museumStore.get().spaceId) ?? 'lobby'} · loaded ${exhibitions.loaded().join(', ') || 'none'}`,
+      EXHIBITIONS.filter((e) => e.spaces.length)
+        .map((e) => {
+          const { spaceId } = museumStore.get()
+          const activity = e.spaces.map((space) => activityOf(space, spaceId))
+          return `${e.id} ${activity.includes('active') ? 'active' : activity.includes('nearby') ? 'nearby' : 'inactive'} (${exhibitions.status(e.id)})`
+        })
+        .join(' · '),
     ].join('\n')
     frames.current = 0
     worst.current = 0

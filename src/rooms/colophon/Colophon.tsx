@@ -1,28 +1,28 @@
 import { useSound } from '../../audio/useSound'
+import { DoorLeaf } from '../../components/DoorLeaf'
 import { RoomShell } from '../../components/RoomShell'
 import { Text } from '../../components/Text'
-import { INK, MUSEUM, ROOM_COUNT, TYPE } from '../../identity'
-import { COLOPHON, DOORS, localDoor } from '../../museum/roomRegistry'
-import { RoomContents, useRoom } from '../../museum/RoomContext'
-import { museumStore } from '../../museum/store'
+import { INK, MUSEUM, TYPE } from '../../identity'
+import { navigation } from '../../museum/navigation'
+import { COLOPHON } from '../../museum/roomRegistry'
+import { RoomContents } from '../../museum/RoomContext'
 import type { ExhibitCardData } from '../../museum/types'
-import { useFocusTarget } from '../../scene/Interaction'
 import { LightPool, Luminaire } from '../../scene/Light'
-import { basicMaterial, PALETTES } from '../../scene/materials'
+import { PALETTES } from '../../scene/materials'
 import { StaticMerge } from '../../scene/StaticMerge'
 
 const palette = PALETTES.entrance
 const WALL = COLOPHON.minZ + 0.02
 const TEXT_X = COLOPHON.minX + 0.5
-const EXIT = { x: COLOPHON.maxX - 1.4, width: 1.2, height: 2.3 }
+const EXIT_X = COLOPHON.maxX - 1.4
 const WARM = '#efe6d6'
 
 const CARD: ExhibitCardData = {
-  index: 'EXIT',
+  index: 'END',
   year: MUSEUM.year,
-  category: 'COLOPHON',
-  title: 'Thank you for visiting',
-  description: `The end of the exhibition. ${MUSEUM.name}, in ${ROOM_COUNT} rooms, conceived and built by ${MUSEUM.author}. The door ahead leaves the museum.`,
+  category: 'PERMANENT EXHIBITION',
+  title: 'The end of the permanent exhibition',
+  description: `Three rooms, conceived and built by ${MUSEUM.author}. The door ahead leads back to the lobby, and to the museum's other exhibitions.`,
 }
 
 const ROOMS = MUSEUM.rooms.map(([number, title]) => `${number}   ${title}`).join('\n')
@@ -31,53 +31,18 @@ const CREDITS_Y = 1.55 - MUSEUM.rooms.length * 0.075 * 1.7 - 0.13
 
 /**
  * After the last room, a colophon: a low, warm room in the entrance's palette, so the
- * visit closes the way it opened. The credits are on the wall; the door beside them
- * is the way out. Leaving ends the visit and hands over to the 2D colophon.
+ * exhibition closes the way it opened. The credits are on the wall; the door beside
+ * them leads back to the lobby.
  */
 export function Colophon() {
   const play = useSound()
-  const { origin } = useRoom()
-  useFocusTarget({
-    id: 'exit',
-    position: [EXIT.x, 1.3, WALL],
-    distance: 3,
-    facing: 0.6,
-    card: CARD,
-    labelled: true,
-    prompt: 'LEAVE THE MUSEUM',
-    onInteract: () => {
-      play('exit-door', [EXIT.x, 1.2, WALL])
-      museumStore.set({ ended: true })
-    },
-  })
 
   return (
     <>
       <StaticMerge>
-        {/* Its half of the wall shared with Room 04's reconstruction, in its own warm palette. */}
-        <RoomShell {...COLOPHON} palette={palette} south={{ door: localDoor(DOORS.archaeologyExit, origin), split: true }} north={{}} />
+        {/* SUCCESS, taller, builds the shared wall and its doorway. */}
+        <RoomShell {...COLOPHON} palette={palette} south={null} north={{}} />
         <Luminaire position={[(COLOPHON.minX + COLOPHON.maxX) / 2, COLOPHON.height - 0.004, COLOPHON.minZ + 1.6]} size={[4.4, 0.12]} palette={palette} />
-
-        {/* The way out: a plain door with a lit sign over it. */}
-        <group position={[EXIT.x, 0, WALL]}>
-          <mesh position={[0, EXIT.height / 2, 0]} material={PALETTES.passage.floor}>
-            <planeGeometry args={[EXIT.width, EXIT.height]} />
-          </mesh>
-          {[-1, 1].map((side) => (
-            <mesh key={side} position={[side * (EXIT.width / 2 + 0.03), EXIT.height / 2, 0.015]} material={palette.reveal}>
-              <boxGeometry args={[0.06, EXIT.height, 0.03]} />
-            </mesh>
-          ))}
-          <mesh position={[0, EXIT.height + 0.03, 0.015]} material={palette.reveal}>
-            <boxGeometry args={[EXIT.width + 0.12, 0.06, 0.03]} />
-          </mesh>
-          <mesh position={[EXIT.width / 2 - 0.22, 1.05, 0.006]} material={palette.reveal}>
-            <boxGeometry args={[0.3, 0.035, 0.012]} />
-          </mesh>
-          <mesh position={[0, EXIT.height + 0.3, 0.004]} material={basicMaterial('#1a1918')}>
-            <planeGeometry args={[0.5, 0.17]} />
-          </mesh>
-        </group>
       </StaticMerge>
 
       <RoomContents>
@@ -86,13 +51,13 @@ export function Colophon() {
 
         <group position={[TEXT_X, 0, WALL]}>
           <Text position={[0, 2.62, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
-            END OF EXHIBITION
+            END OF THE PERMANENT EXHIBITION
           </Text>
           <Text position={[0, 2.46, 0]} fontSize={0.3} letterSpacing={-0.02} color={INK.text} anchorX="left" anchorY="top">
             Thank you for visiting.
           </Text>
           <Text position={[0, 2.0, 0]} fontSize={0.085} lineHeight={1.55} maxWidth={3.3} color={INK.body} anchorX="left" anchorY="top">
-            {`${MUSEUM.name} is an exhibition in ${ROOM_COUNT} rooms about the interfaces we use every day without noticing them.`}
+            The permanent exhibition is three rooms about the interfaces we use every day without noticing them.
           </Text>
           <Text position={[0, 1.55, 0]} fontSize={0.075} lineHeight={1.7} color={INK.body} anchorX="left" anchorY="top">
             {ROOMS}
@@ -102,9 +67,19 @@ export function Colophon() {
           </Text>
         </group>
 
-        <Text position={[EXIT.x, EXIT.height + 0.3, WALL + 0.006]} fontSize={0.075} letterSpacing={0.24} color={INK.text} anchorX="center" anchorY="middle">
-          EXIT
-        </Text>
+        <DoorLeaf
+          id="permanent-return"
+          x={EXIT_X}
+          wall={WALL}
+          palette={palette}
+          sign="LOBBY"
+          prompt="RETURN TO THE LOBBY"
+          card={CARD}
+          onUse={() => {
+            play('exit-door', [EXIT_X, 1.2, WALL])
+            navigation.returnToLobby('permanent')
+          }}
+        />
       </RoomContents>
     </>
   )

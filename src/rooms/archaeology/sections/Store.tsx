@@ -287,7 +287,7 @@ export function Store() {
       <Hoard />
       <Oath />
 
-      <CellSign position={[cell.minX + 0.9, 2.95, cell.minZ + 0.02]} kicker="04 / III" name="THE STORE" />
+      <CellSign position={[cell.minX + 0.9, 2.95, cell.minZ + 0.02]} kicker="02 / III" name="THE STORE" />
     </>
   )
 }

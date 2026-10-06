@@ -12,7 +12,7 @@ import type { ExhibitCardData } from '../../museum/types'
  *   II  EMPTY    z -27.2 … -49    vast and almost bare
  *   III ERROR    z -49.2 … -63    structurally wrong; a wall slab plugs the exit
  *   IV  OFFLINE  z -63.2 … -77    the lights go; reconnect to continue
- *   V   SUCCESS  z -77.2 … -93    tall and bright; a low doorway on to the passage to Room 04
+ *   V   SUCCESS  z -77.2 … -93    tall and bright; a low doorway on to the colophon
  */
 export const CELLS = STATES_CELLS
 
@@ -109,6 +109,6 @@ export const CARDS = {
     year: 'STATE',
     category: 'SUCCESS',
     title: 'Done.',
-    description: 'A tall, bright and almost empty room: the end of Room 03. A low doorway leads on to Room 04.',
+    description: 'A tall, bright and almost empty room: the end of Room 03. A low doorway leads on to the end of the exhibition.',
   },
 } satisfies Record<string, ExhibitCardData>
