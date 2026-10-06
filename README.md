@@ -1,8 +1,9 @@
 # Interface Museum
 
-An exhibition in three rooms about the interfaces we use every day without noticing them, given
+An exhibition in four rooms about the interfaces we use every day without noticing them, given
 physical form. You walk through it in a browser: buttons on plinths, interface conventions turned
-into architecture, and interface states that become the state of the room you are standing in.
+into architecture, interface states that become the state of the room you are standing in, and
+our interfaces as a future archive might dig them up.
 
 **Visit:** https://museum-dquality.vercel.app
 
@@ -13,6 +14,7 @@ into architecture, and interface states that become the state of the room you ar
 | **01 The Button** | Interface as an object: four buttons, four eras, one promise. |
 | **02 Things We Somehow Accepted** | Interface behavior as architecture: the conventions that block, interrupt and keep you inside. |
 | **03 Interface States** | Interface state as the state of the world: what happens between the ideal screens. |
+| **04 Interface Archaeology** | The interface outside its own time: our interfaces as a future archive finds and catalogues them. |
 
 Each room holds one idea, told through space first and short wall texts second. A colophon and an
 exit close the visit.
@@ -55,7 +57,7 @@ src/
   scene/       world, player, collision, focus + E, light rig and fixtures, materials, precompile
   audio/       engine, synthesis, sound catalogue, room tone
   components/  architecture and signage: RoomShell, Wall, WallText, ChapterMark, ExhibitLabel, Text…
-  rooms/       entrance, the-button, passage, accepted, states, colophon (each with its content.ts)
+  rooms/       entrance, the-button, passage, accepted, states, archaeology, colophon (each with its content.ts)
   ui/          entry, HUD, pause, guided tour controls, colophon, text exhibition, notices
 ```
 

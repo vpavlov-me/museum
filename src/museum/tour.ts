@@ -1,9 +1,11 @@
+import { inArchaeology } from './roomRegistry'
+
 /*
  * The guided tour: an authored walk through the same museum, for touch screens and
  * for anyone who prefers not to steer. Each stop is a place to stand and a direction
  * to face, in route order; `via` are the points walked through on the way there
  * (door centres, the way round a plinth), in world metres. Yaw 0 faces north (-z),
- * positive turns left.
+ * positive turns left; pitch 0 is level, negative looks down (into the trench).
  *
  * The tour walks the same floor as the visitor and is stopped by the same things:
  * a closed CAPTCHA gate or an unloaded doorway holds it until the room allows it.
@@ -14,12 +16,19 @@ export type TourStop = {
   title: string
   at: [number, number]
   yaw: number
+  pitch?: number
   via?: [number, number][]
 }
 
 const N = 0
 const W = Math.PI / 2
 const E = -Math.PI / 2
+
+/** Room 04 and the colophon are authored from the door out of SUCCESS. */
+const r4 = (x: number, z: number): [number, number] => {
+  const point = inArchaeology(x, z)
+  return [point.x, point.z]
+}
 
 export const TOUR: TourStop[] = [
   // Entrance
@@ -54,7 +63,20 @@ export const TOUR: TourStop[] = [
   { id: 'offline', title: 'IV. Offline', at: [-12.4, -151.6], yaw: N, via: [[-12.4, -148]] },
   { id: 'offline-node', title: 'Reconnect', at: [-9, -156.6], yaw: E + 0.25 },
   { id: 'success', title: 'V. Success', at: [-15.4, -167], yaw: N, via: [[-15.4, -162.4]] },
+  // 04 Interface Archaeology
+  { id: 'archaeology', title: 'Interface Archaeology', at: r4(6.4, -9.8), yaw: N, via: [[-15.4, -178.4], r4(0, -2), r4(0, -6.6), r4(7, -6.6), r4(7, -8.6)] },
+  { id: 'institute', title: 'Institute for Early Screens', at: r4(5.6, -11.4), yaw: W },
+  { id: 'trench', title: 'II. The Trench', at: r4(11.6, -17), yaw: N + 0.35, via: [r4(10.5, -13.6), r4(10.5, -16.2)] },
+  { id: 'seal', title: 'Seal of the hidden chamber', at: r4(10.5, -21.1), yaw: W, pitch: -0.55 },
+  { id: 'tablet', title: 'Votive tablet', at: r4(10.5, -24.2), yaw: W, pitch: -0.6 },
+  { id: 'arrowheads', title: 'Arrowheads', at: r4(10.5, -27.4), yaw: W, pitch: -0.65 },
+  { id: 'store', title: 'III. The Store', at: r4(0, -35.4), yaw: N, via: [r4(11.2, -31.2), r4(0, -31.2)] },
+  { id: 'inscriptions', title: 'Sealed inscriptions', at: r4(2.5, -35.7), yaw: N },
+  { id: 'hoard', title: 'Token hoard', at: r4(2.5, -39.7), yaw: N, via: [r4(4.4, -36.6), r4(4.4, -39.7)] },
+  { id: 'oath', title: 'The oath', at: r4(2.5, -43.7), yaw: N, via: [r4(4.4, -40.6), r4(4.4, -43.7)] },
+  { id: 'reconstruction', title: 'IV. Reconstruction', at: r4(4.9, -50.6), yaw: W + 0.15, via: [r4(4.6, -44.6), r4(5, -46)] },
+  { id: 'afterword', title: 'Not entirely wrong', at: r4(1.2, -55.6), yaw: N, via: [r4(5, -55.6)] },
   // Colophon
-  { id: 'colophon', title: 'Thank you for visiting', at: [-16.2, -183.6], yaw: 0.15, via: [[-15.4, -178.4]] },
-  { id: 'exit', title: 'Exit', at: [-13.6, -185.9], yaw: N },
+  { id: 'colophon', title: 'Thank you for visiting', at: r4(2.7, -61), yaw: 0.15, via: [r4(5.5, -56), r4(5.5, -58.4)] },
+  { id: 'exit', title: 'Exit', at: r4(5.3, -63.3), yaw: N },
 ]

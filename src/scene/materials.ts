@@ -142,6 +142,10 @@ export const PALETTES = {
   empty: createPalette({ wall: '#6c6a64', floor: '#3b3a37', ceiling: '#3d3b38', glow: '#dcd8cf', floorRoughness: 0.66 }),
   // The brightest space in the museum.
   success: createPalette({ wall: '#a9a59c', floor: '#68655f', ceiling: '#bfbaaf', glow: '#fbf8f0', floorRoughness: 0.5 }),
+  // Room 04, an archive: the gallery grey, a little warmer and drier, like a store kept for a long time.
+  archive: createPalette({ wall: '#514b44', floor: '#2b2825', ceiling: '#2e2b27', glow: '#e9dfcd', floorRoughness: 0.64 }),
+  // The reconstruction: a dark room, so that the only light in it is the diorama's.
+  diorama: createPalette({ wall: '#2b2927', floor: '#1c1b19', ceiling: '#201f1d', glow: '#8f887c' }),
 } satisfies Record<string, Palette>
 
 /** Dark satin lacquer: plinths answer the downlights with a soft highlight the walls do not have. */

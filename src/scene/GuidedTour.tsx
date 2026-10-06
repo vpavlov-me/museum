@@ -12,7 +12,7 @@ const SPEED = 2.6
 const RADIUS = 0.3
 const LOOK = { yaw: 1.3, pitch: 0.4, sensitivity: 0.005 }
 
-type Path = { points: THREE.Vector2[]; lengths: number[]; total: number; fromYaw: number; toYaw: number }
+type Path = { points: THREE.Vector2[]; lengths: number[]; total: number; fromYaw: number; toYaw: number; fromPitch: number; toPitch: number }
 
 /** Whether the visitor could walk this polyline right now: the same floor and obstacles as walking. */
 function walkable(points: THREE.Vector2[]) {
@@ -42,6 +42,7 @@ export function GuidedTour() {
   const path = useRef<Path | null>(null)
   const travelled = useRef(0)
   const baseYaw = useRef(TOUR[0].yaw)
+  const basePitch = useRef(TOUR[0].pitch ?? 0)
   const look = useRef({ yaw: 0, pitch: 0 })
 
   // Every guided visit begins at the first stop.
@@ -51,6 +52,7 @@ export function GuidedTour() {
     camera.position.x = x
     camera.position.z = z
     baseYaw.current = TOUR[0].yaw
+    basePitch.current = TOUR[0].pitch ?? 0
     look.current = { yaw: 0, pitch: 0 }
     trackVisitor(x, z)
   }, [camera])
@@ -105,7 +107,8 @@ export function GuidedTour() {
       } else {
         const lengths = points.slice(1).map((p, i) => p.distanceTo(points[i]))
         const fromYaw = baseYaw.current + look.current.yaw
-        path.current = { points, lengths, total: lengths.reduce((a, b) => a + b, 0), fromYaw, toYaw: shortestTurn(fromYaw, stop.yaw) }
+        const fromPitch = basePitch.current + look.current.pitch
+        path.current = { points, lengths, total: lengths.reduce((a, b) => a + b, 0), fromYaw, toYaw: shortestTurn(fromYaw, stop.yaw), fromPitch, toPitch: stop.pitch ?? 0 }
         travelled.current = motion.reduced ? Number.POSITIVE_INFINITY : 0
         look.current = { yaw: 0, pitch: 0 }
         tour.set({ request: null, index: request, moving: true, blocked: false })
@@ -124,7 +127,9 @@ export function GuidedTour() {
       camera.position.x = a.x + (b.x - a.x) * t
       camera.position.z = a.y + (b.y - a.y) * t
       const progress = current.total > 0 ? Math.min(1, travelled.current / current.total) : 1
-      baseYaw.current = THREE.MathUtils.lerp(current.fromYaw, current.toYaw, THREE.MathUtils.smoothstep(progress, 0, 1))
+      const eased = THREE.MathUtils.smoothstep(progress, 0, 1)
+      baseYaw.current = THREE.MathUtils.lerp(current.fromYaw, current.toYaw, eased)
+      basePitch.current = THREE.MathUtils.lerp(current.fromPitch, current.toPitch, eased)
       trackVisitor(camera.position.x, camera.position.z)
       if (progress >= 1) {
         path.current = null
@@ -132,7 +137,7 @@ export function GuidedTour() {
       }
     }
 
-    camera.rotation.set(look.current.pitch, baseYaw.current + look.current.yaw, 0, 'YXZ')
+    camera.rotation.set(basePitch.current + look.current.pitch, baseYaw.current + look.current.yaw, 0, 'YXZ')
   })
 
   return null

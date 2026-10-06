@@ -3,9 +3,19 @@ import { contains, offsetRect, overlaps, rect, type DoorDefinition, type Rect, t
 /*
  * Museum plan, in metres. North is -z, the general direction of travel.
  *
- *                      ┌────────┐
- *                      │colophon│  → EXIT: the end of the visit
- *                    ┌─┴────────┴───┐
+ *                    ┌────────┐
+ *                    │colophon│  → EXIT: the end of the visit
+ *                 ┌──┴─────┬──┘
+ *                 │IV RECON│
+ *                 ├────────┴─┐
+ *                 │ III STORE│
+ *                ┌┴──────────┴──────┐
+ *                │ II TRENCH  [pit] │      04 INTERFACE ARCHAEOLOGY
+ *                └──────┬───────────┘
+ *                       │I ACCESSION│
+ *                     ┌─┴──┬────────┘
+ *                     │  ┌─┘ passage: low, dark, one turn
+ *                    ┌┴────┴────────┐
  *                    │  V SUCCESS   │
  *                    └───┬──────┬───┘
  *                        │IV OFF│
@@ -49,6 +59,8 @@ export const WALL_THICKNESS = 0.2
 const ACCEPTED_ORIGIN: Vec2 = [-12.9, -20.3]
 /** Room 03 and the transition before it are authored from the door at the end of the feed. */
 const STATES_ORIGIN: Vec2 = [-12.9, -86.6]
+/** Room 04, the passage before it and the colophon after it are authored from the door out of SUCCESS. */
+export const ARCHAEOLOGY_ORIGIN: Vec2 = [STATES_ORIGIN[0] - 2.5, STATES_ORIGIN[1] - 93.1]
 
 /** A rectangular cell with its own ceiling height, room-local. */
 export type Cell = Rect & { height: number }
@@ -101,11 +113,27 @@ export const STATES_CELLS = {
   success: cell(-9, 4, -93, -77.2, 8.5),
 }
 
-/** After the last room: a low, warm room with the credits and the way out. Local to Room 03. */
-export const COLOPHON = cell(-6, 1, -101, -93.2, 3.2)
+/** The passage between Room 03 and Room 04, local to Room 04: the same low turn as before Room 03. */
+export const TRANSITION_04 = TRANSITION_03
+
+/**
+ * Room 04 as a sequence of cells, room-local: the lobby of a future archive, a hall
+ * around an excavation, a low store, and a small dark room with a reconstruction.
+ */
+export const ARCHAEOLOGY_CELLS = {
+  accession: cell(2, 12, -15, -7.9, 4.2),
+  trench: cell(-2, 14, -33, -15.2, 5.2),
+  store: cell(-2, 7, -47, -33.2, 3.2),
+  reconstruction: cell(-2, 7, -57, -47.2, 3.4),
+}
+
+/** After the last room: a low, warm room with the credits and the way out. Local to Room 04. */
+export const COLOPHON = cell(0, 7, -65, -57.2, 3.2)
 
 const inAccepted = (x: number, z: number) => ({ x: ACCEPTED_ORIGIN[0] + x, z: ACCEPTED_ORIGIN[1] + z })
 const inStates = (x: number, z: number) => ({ x: STATES_ORIGIN[0] + x, z: STATES_ORIGIN[1] + z })
+/** A point local to Room 04, in world metres. */
+export const inArchaeology = (x: number, z: number) => ({ x: ARCHAEOLOGY_ORIGIN[0] + x, z: ARCHAEOLOGY_ORIGIN[1] + z })
 
 export const DOORS = {
   entrance: { x: 0, z: 13.9, width: 2.4, height: 3 },
@@ -126,6 +154,11 @@ export const DOORS = {
   /** Closed by a sliding panel until the connection is restored. */
   offlineExit: { ...inStates(-2.5, -77.1), width: 1.8, height: 2.6 },
   successExit: { ...inStates(-2.5, -93.1), width: 1.6, height: 2.5 },
+  archaeologyEntry: { ...inArchaeology(7, -7.8), width: 1.8, height: 2.4 },
+  trenchEntry: { ...inArchaeology(10.5, -15.1), width: 1.8, height: 2.6 },
+  storeEntry: { ...inArchaeology(0, -33.1), width: 1.8, height: 2.4 },
+  reconstructionEntry: { ...inArchaeology(5, -47.1), width: 1.6, height: 2.3 },
+  archaeologyExit: { ...inArchaeology(5.5, -57.1), width: 1.6, height: 2.4 },
 } satisfies Record<string, DoorDefinition>
 
 export const SPACES: SpaceDefinition[] = [
@@ -187,12 +220,36 @@ export const SPACES: SpaceDefinition[] = [
     ).map(([id, label]) => ({ id, label, bounds: [offsetRect(STATES_CELLS[id], STATES_ORIGIN)] })),
   },
   {
+    id: 'transition-04',
+    number: null,
+    title: 'Passage',
+    hudLabel: 'PASSAGE / 03 → 04',
+    origin: ARCHAEOLOGY_ORIGIN,
+    bounds: [TRANSITION_04.a, TRANSITION_04.b].map((r) => offsetRect(r, ARCHAEOLOGY_ORIGIN)),
+  },
+  {
+    id: 'archaeology',
+    number: '04',
+    title: 'Interface Archaeology',
+    hudLabel: '04 / INTERFACE ARCHAEOLOGY',
+    origin: ARCHAEOLOGY_ORIGIN,
+    bounds: Object.values(ARCHAEOLOGY_CELLS).map((c) => offsetRect(c, ARCHAEOLOGY_ORIGIN)),
+    zones: (
+      [
+        ['accession', 'I / ACCESSION'],
+        ['trench', 'II / THE TRENCH'],
+        ['store', 'III / THE STORE'],
+        ['reconstruction', 'IV / RECONSTRUCTION'],
+      ] as const
+    ).map(([id, label]) => ({ id, label, bounds: [offsetRect(ARCHAEOLOGY_CELLS[id], ARCHAEOLOGY_ORIGIN)] })),
+  },
+  {
     id: 'colophon',
     number: null,
     title: 'Colophon',
     hudLabel: 'END OF EXHIBITION',
-    origin: STATES_ORIGIN,
-    bounds: [offsetRect(COLOPHON, STATES_ORIGIN)],
+    origin: ARCHAEOLOGY_ORIGIN,
+    bounds: [offsetRect(COLOPHON, ARCHAEOLOGY_ORIGIN)],
   },
 ]
 

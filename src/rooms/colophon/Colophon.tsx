@@ -1,9 +1,9 @@
 import { useSound } from '../../audio/useSound'
 import { RoomShell } from '../../components/RoomShell'
 import { Text } from '../../components/Text'
-import { INK, MUSEUM, TYPE } from '../../identity'
-import { COLOPHON } from '../../museum/roomRegistry'
-import { RoomContents } from '../../museum/RoomContext'
+import { INK, MUSEUM, ROOM_COUNT, TYPE } from '../../identity'
+import { COLOPHON, DOORS, localDoor } from '../../museum/roomRegistry'
+import { RoomContents, useRoom } from '../../museum/RoomContext'
 import { museumStore } from '../../museum/store'
 import type { ExhibitCardData } from '../../museum/types'
 import { useFocusTarget } from '../../scene/Interaction'
@@ -22,10 +22,12 @@ const CARD: ExhibitCardData = {
   year: MUSEUM.year,
   category: 'COLOPHON',
   title: 'Thank you for visiting',
-  description: `The end of the exhibition. ${MUSEUM.name}, in three rooms, conceived and built by ${MUSEUM.author}. The door ahead leaves the museum.`,
+  description: `The end of the exhibition. ${MUSEUM.name}, in ${ROOM_COUNT} rooms, conceived and built by ${MUSEUM.author}. The door ahead leaves the museum.`,
 }
 
 const ROOMS = MUSEUM.rooms.map(([number, title]) => `${number}   ${title}`).join('\n')
+/** The credit line sits under the list of rooms, however long it is. */
+const CREDITS_Y = 1.55 - MUSEUM.rooms.length * 0.075 * 1.7 - 0.13
 
 /**
  * After the last room, a colophon: a low, warm room in the entrance's palette, so the
@@ -34,6 +36,7 @@ const ROOMS = MUSEUM.rooms.map(([number, title]) => `${number}   ${title}`).join
  */
 export function Colophon() {
   const play = useSound()
+  const { origin } = useRoom()
   useFocusTarget({
     id: 'exit',
     position: [EXIT.x, 1.3, WALL],
@@ -51,8 +54,8 @@ export function Colophon() {
   return (
     <>
       <StaticMerge>
-        {/* SUCCESS, taller, builds the shared wall and its doorway. */}
-        <RoomShell {...COLOPHON} palette={palette} south={null} north={{}} />
+        {/* Its half of the wall shared with Room 04's reconstruction, in its own warm palette. */}
+        <RoomShell {...COLOPHON} palette={palette} south={{ door: localDoor(DOORS.archaeologyExit, origin), split: true }} north={{}} />
         <Luminaire position={[(COLOPHON.minX + COLOPHON.maxX) / 2, COLOPHON.height - 0.004, COLOPHON.minZ + 1.6]} size={[4.4, 0.12]} palette={palette} />
 
         {/* The way out: a plain door with a lit sign over it. */}
@@ -89,12 +92,12 @@ export function Colophon() {
             Thank you for visiting.
           </Text>
           <Text position={[0, 2.0, 0]} fontSize={0.085} lineHeight={1.55} maxWidth={3.3} color={INK.body} anchorX="left" anchorY="top">
-            {`${MUSEUM.name} is an exhibition in three rooms about the interfaces we use every day without noticing them.`}
+            {`${MUSEUM.name} is an exhibition in ${ROOM_COUNT} rooms about the interfaces we use every day without noticing them.`}
           </Text>
           <Text position={[0, 1.55, 0]} fontSize={0.075} lineHeight={1.7} color={INK.body} anchorX="left" anchorY="top">
             {ROOMS}
           </Text>
-          <Text position={[0, 1.05, 0]} fontSize={0.06} letterSpacing={0.06} lineHeight={1.6} maxWidth={3.3} color={INK.muted} anchorX="left" anchorY="top">
+          <Text position={[0, CREDITS_Y, 0]} fontSize={0.06} letterSpacing={0.06} lineHeight={1.6} maxWidth={3.3} color={INK.muted} anchorX="left" anchorY="top">
             {`Conceived, written, designed and built by ${MUSEUM.author}, ${MUSEUM.year}.`}
           </Text>
         </group>

@@ -60,15 +60,17 @@ Do not introduce this folder structure prematurely if a change is still small, b
 - Prefer proximity, gaze or clear interaction prompts.
 - Always preserve an obvious way to release pointer lock.
 
-## Current state: v1 is frozen
+## Current state: v2, growing the gallery
 
-The first public version is **Rooms 01–03** (The Button · Things We Somehow Accepted · Interface
-States), with the entrance, the colophon and the exit. Its scope is frozen.
+v1 shipped as **Rooms 01–03** (#12). v2 (#21) grows the gallery one room at a time, each from an
+approved issue: **Room 04 — Interface Archaeology** (#22) sits between Room 03 and the colophon.
 
-- **Room 04 and any further rooms are post-launch work.** Do not start them, or other new
-  exhibits, without an approved issue. Candidate directions are listed in the v1 roadmap issue (#12).
-- Between releases, only fix bugs, regressions, accessibility and performance problems, small copy
-  errors and deployment issues. Record anything else as a post-launch issue instead of building it.
+- **Do not start a room or new exhibit without an approved issue.** Ideas go into the v2 roadmap
+  (#21) as backlog first.
+- Every merge to `main` deploys: each change must leave walking, the guided tour and the text
+  version complete, with entry, colophon, metadata and the OG image matching the room count.
+- Otherwise, only fix bugs, regressions, accessibility and performance problems, small copy errors
+  and deployment issues.
 
 ## How the museum is built (read before changing it)
 
@@ -82,8 +84,9 @@ States), with the entrance, the colophon and the exit. Its scope is frozen.
   usable with `E`; the guided tour's action button does the same. Things that block the way must
   never close on the visitor.
 - **Three ways to visit:** walk (desktop), guided tour (`museum/tour.ts`; every stop must stay
-  reachable) and the text version (built from each room's `content.ts`). Whatever changes in a room
-  must still work in all three.
+  reachable, and may set a `pitch` to look down) and the text version (built from each room's
+  `content.ts`). Whatever changes in a room must still work in all three.
+- **Passages:** the low, dark turn between rooms is `components/TurnPassage`; a new room gets one.
 - **Identity:** `identity.ts` and `styles.css` hold the ink, the type and the name; use them, not
   new hex values. Every 3D text uses `components/Text` (Inter, self-hosted).
 - **Sound:** synthesised in `audio/`. It is optional, never carries information, and only starts
