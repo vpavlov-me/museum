@@ -58,7 +58,7 @@ for (const [path, id, title, space] of [
     expect(here.path).toBe(path)
 
     // What is around the start is drawn: compiling the wing must not leave it hidden.
-    await settle(page, 1200)
+    await settle(page, 400)
     expect(await strayVisibility(page)).toEqual([])
     errors.expectClean()
   })

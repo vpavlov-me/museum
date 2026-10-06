@@ -67,7 +67,8 @@ async function runRoute(page: Page, title: string) {
 }
 
 test('every guided route, from the lobby and back', async ({ page }) => {
-  test.setTimeout(20 * 60_000)
+  // Three routes on software WebGL: about 17 minutes on a CI runner, with room to spare.
+  test.setTimeout(30 * 60_000)
   const errors = watchConsole(page)
   await open(page, '/')
   await page.click('#enter-guided')

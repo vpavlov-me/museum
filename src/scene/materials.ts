@@ -224,6 +224,30 @@ function worldMapped<T extends THREE.MeshStandardMaterial>(material: T, repeat: 
   return material
 }
 
+/*
+ * Reflections are kept to the surfaces that show them: stone floors, skirting, trim,
+ * plinths and fixtures. Walls, ceilings and exhibits do not sample the environment at
+ * all, which keeps every other fragment as cheap as before.
+ */
+const reflective = new Set<THREE.MeshStandardMaterial>()
+let environment: THREE.Texture | null = null
+
+/** Marks a material as reflecting the museum's environment (see scene/Lighting). */
+export function reflects<T extends THREE.MeshStandardMaterial>(material: T): T {
+  reflective.add(material)
+  if (environment) material.envMap = environment
+  return material
+}
+
+/** Hands the generated environment to every reflective material, present and future. */
+export function setEnvironment(texture: THREE.Texture | null) {
+  environment = texture
+  for (const material of reflective) {
+    material.envMap = texture
+    material.needsUpdate = true
+  }
+}
+
 /** Kept for floors laid outside RoomShell: plain planes, mapped by world position like every floor. */
 const floors = new Map<string, THREE.PlaneGeometry>()
 
@@ -271,8 +295,8 @@ export function createPalette(colors: PaletteColors): Palette {
   // Light stone trim keeps a trace of its own light, like the ceilings, so the undersides of beams and cornices stay stone, not shadow.
   const trimGlow = colors.floorKind === 'marble' ? 0.32 : 0
   return {
-    wall: worldMapped(new THREE.MeshStandardMaterial({ color: colors.wall, roughness: 0.92, map: PLASTER, envMapIntensity: 0.25 }), PLASTER_REPEAT),
-    floor: worldMapped(
+    wall: worldMapped(new THREE.MeshStandardMaterial({ color: colors.wall, roughness: 0.92, map: PLASTER }), PLASTER_REPEAT),
+    floor: reflects(worldMapped(
       new THREE.MeshStandardMaterial({
         color: colors.floor,
         roughness: colors.floorRoughness ?? 0.5,
@@ -282,12 +306,12 @@ export function createPalette(colors: PaletteColors): Palette {
         envMapIntensity: colors.floorKind === 'marble' ? 0.8 : 0.6,
       }),
       STONE_REPEAT,
-    ),
+    )),
     // Ceilings face away from the sky light; a trace of self-illumination keeps them a surface, not a void.
-    ceiling: new THREE.MeshStandardMaterial({ color: colors.ceiling, roughness: 1, emissive: colors.ceiling, emissiveIntensity: 0.9, envMapIntensity: 0 }),
-    skirting: new THREE.MeshStandardMaterial({ color: trim, roughness: 0.42, envMapIntensity: 1.2 }),
+    ceiling: new THREE.MeshStandardMaterial({ color: colors.ceiling, roughness: 1, emissive: colors.ceiling, emissiveIntensity: 0.9 }),
+    skirting: reflects(new THREE.MeshStandardMaterial({ color: trim, roughness: 0.42, envMapIntensity: 1.2 })),
     reveal: new THREE.MeshStandardMaterial({ color: '#1c1b1a', roughness: 0.8 }),
-    trim: new THREE.MeshStandardMaterial({ color: trim, roughness: 0.42, envMapIntensity: 1.2, emissive: trim, emissiveIntensity: trimGlow }),
+    trim: reflects(new THREE.MeshStandardMaterial({ color: trim, roughness: 0.42, envMapIntensity: 1.2, emissive: trim, emissiveIntensity: trimGlow })),
     threshold: new THREE.MeshBasicMaterial({ color: '#141413' }),
     glow: new THREE.MeshBasicMaterial({ color: colors.glow }),
   }
@@ -325,7 +349,7 @@ export const PALETTES = {
 } satisfies Record<string, Palette>
 
 /** Dark satin lacquer: plinths answer the downlights with a soft highlight the walls do not have. */
-export const PLINTH_MATERIAL = new THREE.MeshStandardMaterial({ color: '#1c1b1a', roughness: 0.38 })
+export const PLINTH_MATERIAL = reflects(new THREE.MeshStandardMaterial({ color: '#1c1b1a', roughness: 0.38 }))
 
 const basics = new Map<string, THREE.MeshBasicMaterial>()
 

@@ -1,9 +1,7 @@
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-
-/** How much of the environment every surface sees; each material scales it again (floors most, walls little). */
-const REFLECTION = 1
+import { setEnvironment } from './materials'
 
 /**
  * What polished surfaces reflect: a dark gallery, its ceiling broken by long light
@@ -32,17 +30,16 @@ function galleryEnvironment() {
 
 /**
  * A soft environment for reflections, generated once (no image files): stone floors,
- * plinths and trim get a sheen that moves as the visitor walks. Matte walls barely see it.
+ * plinths and trim get a sheen that moves as the visitor walks. Only the materials that
+ * show it sample it (see `reflects`); it is in place before the first shader compile.
  */
 function Reflections() {
   const gl = useThree((state) => state.gl)
-  const scene = useThree((state) => state.scene)
-  useEffect(() => {
+  useLayoutEffect(() => {
     const generator = new THREE.PMREMGenerator(gl)
     const room = galleryEnvironment()
     const target = generator.fromScene(room, 0.04)
-    scene.environment = target.texture
-    scene.environmentIntensity = REFLECTION
+    setEnvironment(target.texture)
     room.traverse((object) => {
       if (object instanceof THREE.Mesh) {
         object.geometry.dispose()
@@ -51,10 +48,10 @@ function Reflections() {
     })
     generator.dispose()
     return () => {
-      scene.environment = null
+      setEnvironment(null)
       target.dispose()
     }
-  }, [gl, scene])
+  }, [gl])
   return null
 }
 
