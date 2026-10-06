@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Text } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
 import type * as THREE from 'three'
+import { useRoomFrame } from '../../../museum/RoomContext'
 import { BUTTON, sincePress, type ArtifactProps } from './shared'
 
 const IDLE = '#2f63f0'
@@ -20,7 +20,7 @@ export function FlatButton({ label, pressedAt }: ArtifactProps) {
   const face = useRef<THREE.MeshBasicMaterial>(null)
   const [done, setDone] = useState(false)
 
-  useFrame(({ clock }) => {
+  useRoomFrame(({ clock }) => {
     const t = sincePress(pressedAt, clock.elapsedTime)
     const pressing = t >= 0 && t < PRESS_FLASH
     const isDone = t >= PRESS_FLASH && t < DONE_FOR

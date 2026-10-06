@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Text } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { ExhibitLabel } from '../../../components/ExhibitLabel'
 import { Wall } from '../../../components/Wall'
+import { useRoomFrame } from '../../../museum/RoomContext'
 import { rect } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
 import { CIRCLE } from '../../../scene/geometry'
@@ -126,7 +127,7 @@ export function Captcha() {
     if (passed) timers.current.push(window.setTimeout(() => setPassable(true), CHECK_MS + 700))
   }, [clock])
 
-  useFrame(() => {
+  useRoomFrame(() => {
     const now = clock.elapsedTime
     const flips = attempts.current
     tiles.current.forEach((tile, i) => {

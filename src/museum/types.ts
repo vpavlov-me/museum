@@ -14,6 +14,8 @@ export const contains = (r: Rect, x: number, z: number) => x >= r.minX && x <= r
 
 export const offsetRect = (r: Rect, [x, z]: Vec2): Rect => rect(r.minX + x, r.maxX + x, r.minZ + z, r.maxZ + z)
 
+export const overlaps = (a: Rect, b: Rect) => a.minX < b.maxX && a.maxX > b.minX && a.minZ < b.maxZ && a.maxZ > b.minZ
+
 /** Gallery-label metadata for an exhibit: shown on physical labels, the overlay card and to screen readers. */
 export type ExhibitCardData = {
   index: string
@@ -34,7 +36,11 @@ export type SpaceDefinition = {
   origin: Vec2
   /** Walkable floor, in world coordinates (inner faces of the walls). */
   bounds: Rect[]
+  /** Named parts of the space (a room's chapters or states), shown quietly in the HUD. World coordinates. */
+  zones?: ZoneDefinition[]
 }
+
+export type ZoneDefinition = { id: string; label: string; bounds: Rect[] }
 
 /**
  * An opening in a wall that runs along x (every door in the current plan does).

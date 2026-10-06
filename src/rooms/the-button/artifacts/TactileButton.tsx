@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { RoundedBox, Text } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
 import type * as THREE from 'three'
+import { useRoomFrame } from '../../../museum/RoomContext'
 import { BUTTON, sincePress, type ArtifactProps } from './shared'
 
 /**
@@ -15,7 +15,7 @@ export function TactileButton({ label, pressedAt }: ArtifactProps) {
   const body = useRef<THREE.Group>(null)
   const highlight = useRef<THREE.MeshBasicMaterial>(null)
 
-  useFrame(({ clock }) => {
+  useRoomFrame(({ clock }) => {
     const t = sincePress(pressedAt, clock.elapsedTime)
     // Quick squash, then a damped spring back to rest.
     const v = t >= 0 && t < 2.5 ? (1 - Math.exp(-45 * t)) * Math.exp(-5.5 * t) * Math.cos(15 * t) : 0

@@ -1,6 +1,7 @@
 import { Text } from '@react-three/drei'
 import { Wall } from '../../components/Wall'
 import { DOORS, THRESHOLD, WALL_THICKNESS } from '../../museum/roomRegistry'
+import { RoomContents } from '../../museum/RoomContext'
 import { LightPool, Luminaire } from '../../scene/Light'
 import { floorGeometry, PALETTES } from '../../scene/materials'
 import { StaticMerge } from '../../scene/StaticMerge'
@@ -45,21 +46,23 @@ export function Passage() {
         <Luminaire position={[(entry.x + midA + STRIP / 2) / 2, height - 0.004, midB]} size={[midA + STRIP / 2 - entry.x, STRIP]} palette={palette} />
       </StaticMerge>
 
-      {/* The wall that ends the first leg, and turns the visitor. */}
-      <group position={[midA, 0, b.minZ + 0.012]}>
-        <Text position={[-0.78, 2.02, 0]} fontSize={0.075} letterSpacing={0.16} color="#8f8c85" anchorX="left" anchorY="top">
-          NEXT
-        </Text>
-        <Text position={[-0.8, 1.86, 0]} fontSize={0.42} letterSpacing={-0.03} color="#efede6" anchorX="left" anchorY="top">
-          ← 02
-        </Text>
-        <Text position={[-0.78, 1.36, 0]} fontSize={0.075} letterSpacing={0.14} lineHeight={1.5} color="#bdbab2" anchorX="left" anchorY="top">
-          {'THINGS WE\nSOMEHOW ACCEPTED'}
-        </Text>
-      </group>
+      <RoomContents>
+        {/* The wall that ends the first leg, and turns the visitor. */}
+        <group position={[midA, 0, b.minZ + 0.012]}>
+          <Text position={[-0.78, 2.02, 0]} fontSize={0.075} letterSpacing={0.16} color="#8f8c85" anchorX="left" anchorY="top">
+            NEXT
+          </Text>
+          <Text position={[-0.8, 1.86, 0]} fontSize={0.42} letterSpacing={-0.03} color="#efede6" anchorX="left" anchorY="top">
+            ← 02
+          </Text>
+          <Text position={[-0.78, 1.36, 0]} fontSize={0.075} letterSpacing={0.14} lineHeight={1.5} color="#bdbab2" anchorX="left" anchorY="top">
+            {'THINGS WE\nSOMEHOW ACCEPTED'}
+          </Text>
+        </group>
 
-      {/* Light from Room 02 spills through its door onto the threshold floor. */}
-      <LightPool position={[entry.x, 0.004, b.minZ + 0.9]} size={[2.6, 2]} color="#dfe6e8" strength={0.12} />
+        {/* Light from Room 02 spills through its door onto the threshold floor. */}
+        <LightPool position={[entry.x, 0.004, b.minZ + 0.9]} size={[2.6, 2]} color="#dfe6e8" strength={0.12} />
+      </RoomContents>
     </>
   )
 }

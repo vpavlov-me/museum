@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import { SPAWN } from './roomRegistry'
+import { SPAWN, spaceAt, zoneAt } from './roomRegistry'
 import type { ExhibitCardData } from './types'
 
 export type FocusInfo = {
@@ -14,10 +14,12 @@ export type FocusInfo = {
 type MuseumState = {
   /** Space the visitor is physically standing in. */
   spaceId: string
+  /** Named part of that space (a state, a chapter), or null. */
+  zoneId: string | null
   focus: FocusInfo | null
 }
 
-let state: MuseumState = { spaceId: SPAWN.spaceId, focus: null }
+let state: MuseumState = { spaceId: SPAWN.spaceId, zoneId: null, focus: null }
 const listeners = new Set<() => void>()
 
 /**
@@ -40,4 +42,15 @@ export const museumStore = {
 
 export function useMuseumStore<T>(selector: (state: MuseumState) => T): T {
   return useSyncExternalStore(museumStore.subscribe, () => selector(museumStore.get()))
+}
+
+/**
+ * Records where the visitor is standing. Inside a doorway no space matches,
+ * so the previous space and zone are kept.
+ */
+export function trackVisitor(x: number, z: number) {
+  const space = spaceAt(x, z)
+  if (!space) return
+  const zoneId = zoneAt(space, x, z)?.id ?? null
+  if (space.id !== state.spaceId || zoneId !== state.zoneId) museumStore.set({ spaceId: space.id, zoneId })
 }

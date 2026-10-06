@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Text } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useRoomFrame } from '../../../museum/RoomContext'
 import { rect } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
 import { useFocusTarget } from '../../../scene/Interaction'
@@ -44,7 +44,7 @@ export function CookieBanner() {
     }
   }, [away, accepted])
 
-  useFrame((_, delta) => {
+  useRoomFrame((_, delta) => {
     sunk.current = THREE.MathUtils.damp(sunk.current, accepted ? 1 : 0, 2.6, delta)
     if (group.current) {
       group.current.position.y = -(BANNER.height + 0.1) * sunk.current

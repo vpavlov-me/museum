@@ -1,7 +1,7 @@
 export function Intro({ hidden, onEnter }: { hidden: boolean; onEnter: () => void }) {
   return (
     <section className={`intro ${hidden ? 'intro--hidden' : ''}`}>
-      <div className="intro__eyebrow">INTERFACE MUSEUM / PROTOTYPE 03</div>
+      <div className="intro__eyebrow">INTERFACE MUSEUM / PROTOTYPE 04</div>
       <h1>
         Interfaces,
         <br />

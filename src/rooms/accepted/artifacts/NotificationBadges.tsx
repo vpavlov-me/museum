@@ -1,10 +1,10 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Text } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { ExhibitLabel } from '../../../components/ExhibitLabel'
 import { Plinth } from '../../../components/Plinth'
-import { useRoom } from '../../../museum/RoomContext'
+import { useRoom, useRoomFrame } from '../../../museum/RoomContext'
 import { museumStore } from '../../../museum/store'
 import { box } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
@@ -191,7 +191,7 @@ export function NotificationBadges() {
     },
   })
 
-  useFrame(({ camera }, delta) => {
+  useRoomFrame(({ camera }, delta) => {
     const now = clock.elapsedTime
     if (museumStore.get().spaceId === roomId) deepest.current = Math.min(deepest.current, camera.position.z - origin[1])
     else deepest.current = Infinity

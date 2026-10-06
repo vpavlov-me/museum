@@ -102,7 +102,10 @@ export type Palette = {
   glow: THREE.MeshBasicMaterial
 }
 
-function palette(colors: { wall: string; floor: string; ceiling: string; glow: string; floorRoughness?: number }): Palette {
+export type PaletteColors = { wall: string; floor: string; ceiling: string; glow: string; floorRoughness?: number }
+
+/** A new set of palette materials. Use the shared PALETTES unless a space needs to animate its own. */
+export function createPalette(colors: PaletteColors): Palette {
   return {
     wall: new THREE.MeshStandardMaterial({ color: colors.wall, roughness: 0.94 }),
     floor: new THREE.MeshStandardMaterial({
@@ -120,16 +123,25 @@ function palette(colors: { wall: string; floor: string; ceiling: string; glow: s
   }
 }
 
+/** Room 03's base: a plain, neutral grey between the gallery and Room 02. */
+export const STATES_COLORS: PaletteColors = { wall: '#53514d', floor: '#292826', ceiling: '#2e2c2a', glow: '#e4e0d6', floorRoughness: 0.58 }
+
 /** One palette per kind of space: the same museum, different temperatures. */
 export const PALETTES = {
   // Lightest: warm, welcoming, establishes scale.
-  entrance: palette({ wall: '#77736c', floor: '#45423e', ceiling: '#47443f', glow: '#bdb6a8' }),
+  entrance: createPalette({ wall: '#77736c', floor: '#45423e', ceiling: '#47443f', glow: '#bdb6a8' }),
   // Neutral gallery: calm grey walls, a satin floor that catches the downlights.
-  gallery: palette({ wall: '#5c5954', floor: '#2f2d2b', ceiling: '#36332f', glow: '#e8e1d2', floorRoughness: 0.55 }),
+  gallery: createPalette({ wall: '#5c5954', floor: '#2f2d2b', ceiling: '#36332f', glow: '#e8e1d2', floorRoughness: 0.55 }),
   // Darker, lower, quieter.
-  passage: palette({ wall: '#2e2d2b', floor: '#1d1c1b', ceiling: '#222120', glow: '#9a9488' }),
+  passage: createPalette({ wall: '#2e2d2b', floor: '#1d1c1b', ceiling: '#222120', glow: '#9a9488' }),
   // Cooler and harder: the same grey, slightly green, under harsher light.
-  accepted: palette({ wall: '#454742', floor: '#262726', ceiling: '#272927', glow: '#d6dfe0', floorRoughness: 0.5 }),
+  accepted: createPalette({ wall: '#454742', floor: '#262726', ceiling: '#272927', glow: '#d6dfe0', floorRoughness: 0.5 }),
+  // Room 03: one plain grey, which each state then bends.
+  states: createPalette(STATES_COLORS),
+  // Paler and quieter: a large room with nothing to look at.
+  empty: createPalette({ wall: '#6c6a64', floor: '#3b3a37', ceiling: '#3d3b38', glow: '#dcd8cf', floorRoughness: 0.66 }),
+  // The brightest space in the museum.
+  success: createPalette({ wall: '#a9a59c', floor: '#68655f', ceiling: '#bfbaaf', glow: '#fbf8f0', floorRoughness: 0.5 }),
 } satisfies Record<string, Palette>
 
 /** Dark satin lacquer: plinths answer the downlights with a soft highlight the walls do not have. */
@@ -167,18 +179,23 @@ function radialGlow() {
 const GLOW = radialGlow()
 const pools = new Map<string, THREE.MeshBasicMaterial>()
 
-/** Additive radial falloff: a light pool painted on a surface, without a realtime light. */
-export function poolMaterial(color: string, strength: number) {
-  const key = `${color}:${strength}`
-  const cached = pools.get(key)
-  if (cached) return cached
-  const material = new THREE.MeshBasicMaterial({
+/** A pool material of its own, whose colour (and so strength) can be animated. */
+export function createPoolMaterial(color: string, strength: number) {
+  return new THREE.MeshBasicMaterial({
     color: new THREE.Color(color).multiplyScalar(strength),
     map: GLOW,
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
   })
+}
+
+/** Additive radial falloff: a light pool painted on a surface, without a realtime light. Shared by colour and strength. */
+export function poolMaterial(color: string, strength: number) {
+  const key = `${color}:${strength}`
+  const cached = pools.get(key)
+  if (cached) return cached
+  const material = createPoolMaterial(color, strength)
   pools.set(key, material)
   return material
 }

@@ -4,13 +4,13 @@ import { ExhibitLabel } from '../../components/ExhibitLabel'
 import { RoomShell } from '../../components/RoomShell'
 import { WallText } from '../../components/WallText'
 import { DOORS, localDoor } from '../../museum/roomRegistry'
-import { useRoom } from '../../museum/RoomContext'
+import { RoomContents, useRoom } from '../../museum/RoomContext'
 import { Downlight, LightPool, Luminaire } from '../../scene/Light'
 import { PALETTES } from '../../scene/materials'
 import { StaticMerge } from '../../scene/StaticMerge'
 import { Captcha } from './artifacts/Captcha'
-import { ClosedPassage } from './artifacts/ClosedPassage'
 import { CookieBanner } from './artifacts/CookieBanner'
+import { FeedEnd } from './artifacts/FeedEnd'
 import { InfiniteFeed } from './artifacts/InfiniteFeed'
 import { ModalStack } from './artifacts/ModalStack'
 import { NotificationBadges } from './artifacts/NotificationBadges'
@@ -70,7 +70,7 @@ export function AcceptedRoom() {
         {/* The CAPTCHA partition is this cell's north wall, built by the exhibit. */}
         <RoomShell {...attend} palette={palette} south={{ door: localDoor(DOORS.attendEntry, origin) }} north={null} />
         <RoomShell {...wait} palette={palette} south={null} north={{ door: localDoor(DOORS.feed, origin) }} />
-        <RoomShell {...feed} palette={palette} south={null} north={{}} />
+        <RoomShell {...feed} palette={palette} south={null} north={{ door: localDoor(DOORS.acceptedExit, origin) }} />
 
         {SLOTS.map(([x, z, w, l]) => (
           <Luminaire key={`${x}:${z}`} position={[x, z > attend.maxZ ? interrupt.height - 0.004 : attend.height - 0.004, z]} size={[w, l]} palette={palette} />
@@ -84,51 +84,53 @@ export function AcceptedRoom() {
         <Luminaire position={[0, feed.height - 0.004, (feed.minZ + feed.maxZ) / 2 + 0.4]} size={[0.06, feed.maxZ - feed.minZ - 1.6]} palette={palette} />
       </StaticMerge>
 
-      {/* Fragmented pools under the slots, harder and cooler than anything in Room 01. */}
-      {SLOTS.slice(0, 7).map(([x, z, , l]) => (
-        <LightPool key={`${x}:${z}`} position={[x, 0.004, z]} size={[1.6, l + 1.8]} color={COOL} strength={0.08} />
-      ))}
-      {TUBES.map(([x, z]) => (
-        <LightPool key={`${x}:${z}`} position={[x, 0.004, z]} size={[2.6, 1.6]} color={COOL} strength={0.07} />
-      ))}
-      <LightPool position={[1, 0.004, -19.1]} size={[4.4, 3.6]} color={WARM} strength={0.1} />
-      <LightPool position={[0, 0.004, -33.9]} size={[3.4, 2]} color={COOL} strength={0.1} />
+      <RoomContents>
+        {/* Fragmented pools under the slots, harder and cooler than anything in Room 01. */}
+        {SLOTS.slice(0, 7).map(([x, z, , l]) => (
+          <LightPool key={`${x}:${z}`} position={[x, 0.004, z]} size={[1.6, l + 1.8]} color={COOL} strength={0.08} />
+        ))}
+        {TUBES.map(([x, z]) => (
+          <LightPool key={`${x}:${z}`} position={[x, 0.004, z]} size={[2.6, 1.6]} color={COOL} strength={0.07} />
+        ))}
+        <LightPool position={[1, 0.004, -19.1]} size={[4.4, 3.6]} color={WARM} strength={0.1} />
+        <LightPool position={[0, 0.004, -33.9]} size={[3.4, 2]} color={COOL} strength={0.1} />
 
-      {/* I — INTERRUPT. Title and thesis on the wall the visitor turns towards. */}
-      <group position={[interrupt.maxX - 0.02, 0, -6.35]} rotation={[0, -Math.PI / 2, 0]}>
-        <Text position={[0, 4.55, 0]} fontSize={0.1} letterSpacing={0.14} color="#8f8c85" anchorX="left" anchorY="top">
-          ROOM 02
-        </Text>
-        <Text position={[0, 4.36, 0]} fontSize={0.42} lineHeight={1} letterSpacing={-0.03} color="#efede6" anchorX="left" anchorY="top">
-          {'THINGS WE\nSOMEHOW ACCEPTED'}
-        </Text>
-        <Text position={[0, 3.4, 0]} fontSize={0.1} letterSpacing={0.12} color="#8f8c85" anchorX="left" anchorY="top">
-          ON INTERRUPTIONS THAT BECAME NORMAL
-        </Text>
-      </group>
-      <WallText position={[interrupt.maxX - 0.02, -6.35]} facing="west" layout={COMPACT_LAYOUT} {...THESIS} />
-      <Downlight at={[interrupt.maxX - 1.6, -3.2]} aim={[interrupt.maxX, 1.9, -3.2]} ceiling={interrupt.height} palette={palette} angle={0.62} penumbra={0.25} intensity={55} color={COOL} />
+        {/* I — INTERRUPT. Title and thesis on the wall the visitor turns towards. */}
+        <group position={[interrupt.maxX - 0.02, 0, -6.35]} rotation={[0, -Math.PI / 2, 0]}>
+          <Text position={[0, 4.55, 0]} fontSize={0.1} letterSpacing={0.14} color="#8f8c85" anchorX="left" anchorY="top">
+            ROOM 02
+          </Text>
+          <Text position={[0, 4.36, 0]} fontSize={0.42} lineHeight={1} letterSpacing={-0.03} color="#efede6" anchorX="left" anchorY="top">
+            {'THINGS WE\nSOMEHOW ACCEPTED'}
+          </Text>
+          <Text position={[0, 3.4, 0]} fontSize={0.1} letterSpacing={0.12} color="#8f8c85" anchorX="left" anchorY="top">
+            ON INTERRUPTIONS THAT BECAME NORMAL
+          </Text>
+        </group>
+        <WallText position={[interrupt.maxX - 0.02, -6.35]} facing="west" layout={COMPACT_LAYOUT} {...THESIS} />
+        <Downlight at={[interrupt.maxX - 1.6, -3.2]} aim={[interrupt.maxX, 1.9, -3.2]} ceiling={interrupt.height} palette={palette} angle={0.62} penumbra={0.25} intensity={55} color={COOL} />
 
-      <ChapterMark position={[interrupt.minX + 0.02, 3.75, -1.9]} facing="east" room="02" chapter={CHAPTERS.interrupt} />
-      <ExhibitLabel position={[interrupt.minX + 0.02, 1.6, BANNER_Z + 1.55]} rotation={[0, Math.PI / 2, 0]} exhibit={CARDS.banner} />
-      <ExhibitLabel position={[interrupt.minX + 0.02, 1.6, -9.6]} rotation={[0, Math.PI / 2, 0]} exhibit={CARDS.modal} />
+        <ChapterMark position={[interrupt.minX + 0.02, 3.75, -1.9]} facing="east" room="02" chapter={CHAPTERS.interrupt} />
+        <ExhibitLabel position={[interrupt.minX + 0.02, 1.6, BANNER_Z + 1.55]} rotation={[0, Math.PI / 2, 0]} exhibit={CARDS.banner} />
+        <ExhibitLabel position={[interrupt.minX + 0.02, 1.6, -9.6]} rotation={[0, Math.PI / 2, 0]} exhibit={CARDS.modal} />
 
-      {/* Pause, then II — PROVE / ATTEND. */}
-      <ChapterMark position={[pause.minX + 0.25, 2.45, pause.minZ + 0.012]} facing="south" room="02" chapter={CHAPTERS.attend} width={3.1} scale={0.82} />
-      <WallText position={[attend.minX + 0.02, -22.2]} facing="east" layout={COMPACT_LAYOUT} {...OBSERVATIONS.badges} />
+        {/* Pause, then II — PROVE / ATTEND. */}
+        <ChapterMark position={[pause.minX + 0.25, 2.45, pause.minZ + 0.012]} facing="south" room="02" chapter={CHAPTERS.attend} width={3.1} scale={0.82} />
+        <WallText position={[attend.minX + 0.02, -22.2]} facing="east" layout={COMPACT_LAYOUT} {...OBSERVATIONS.badges} />
 
-      {/* III — WAIT / CONTINUE. */}
-      <ChapterMark position={[wait.maxX - 0.02, 2.95, -38.9]} facing="west" room="02" chapter={CHAPTERS.wait} />
-      <ExhibitLabel position={[wait.maxX - 0.02, 1.6, -40.6]} rotation={[0, -Math.PI / 2, 0]} exhibit={CARDS.skeleton} />
-      <WallText position={[wait.minX + 0.02, -39.9]} facing="east" layout={COMPACT_LAYOUT} {...OBSERVATIONS.waiting} />
+        {/* III — WAIT / CONTINUE. */}
+        <ChapterMark position={[wait.maxX - 0.02, 2.95, -38.9]} facing="west" room="02" chapter={CHAPTERS.wait} />
+        <ExhibitLabel position={[wait.maxX - 0.02, 1.6, -40.6]} rotation={[0, -Math.PI / 2, 0]} exhibit={CARDS.skeleton} />
+        <WallText position={[wait.minX + 0.02, -39.9]} facing="east" layout={COMPACT_LAYOUT} {...OBSERVATIONS.waiting} />
 
-      <CookieBanner />
-      <ModalStack />
-      <NotificationBadges />
-      <Captcha />
-      <SkeletonLoader />
-      <InfiniteFeed />
-      <ClosedPassage />
+        <CookieBanner />
+        <ModalStack />
+        <NotificationBadges />
+        <Captcha />
+        <SkeletonLoader />
+        <InfiniteFeed />
+        <FeedEnd />
+      </RoomContents>
     </>
   )
 }

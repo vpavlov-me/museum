@@ -1,10 +1,24 @@
-import { contains, offsetRect, rect, type DoorDefinition, type Rect, type SpaceDefinition, type Vec2 } from './types'
+import { contains, offsetRect, overlaps, rect, type DoorDefinition, type Rect, type SpaceDefinition, type Vec2 } from './types'
 
 /*
  * Museum plan, in metres. North is -z, the general direction of travel.
  *
+ *                    ┌──────────────┐
+ *                    │  V SUCCESS   │  → closed passage (Room 04)
+ *                    └───┬──────┬───┘
+ *                        │IV OFF│
+ *                     ┌──┴──────┴┐
+ *                     │III ERROR │
+ *                ┌────┴──────────┴──────┐
+ *                │      II EMPTY        │
+ *                └───────────┬─────┬────┘
+ *                            │I LOAD│
+ *                            ├──────┴─┐
+ *                            │prologue│      03 INTERFACE STATES
+ *                          ┌─┴──┬─────┘
+ *                          │  ┌─┘ transition: low, dark, one turn
  *                          ┌──────┐
- *                          │ feed │  → closed passage (Room 03)
+ *                          │ feed │
  *                        ┌─┴──────┴─┐
  *                        │ III WAIT │
  *                       ┌┴──────────┴┐
@@ -31,6 +45,8 @@ export const WALL_THICKNESS = 0.2
 
 /** Room 02 is authored from the door it is entered through. */
 const ACCEPTED_ORIGIN: Vec2 = [-12.9, -20.3]
+/** Room 03 and the transition before it are authored from the door at the end of the feed. */
+const STATES_ORIGIN: Vec2 = [-12.9, -86.6]
 
 /** A rectangular cell with its own ceiling height, room-local. */
 export type Cell = Rect & { height: number }
@@ -58,7 +74,33 @@ export const THRESHOLD = {
   b: rect(-14.4, -5, -20.2, -18),
 }
 
+/**
+ * The transition between Room 02 and Room 03, local to Room 03. A low, dark corridor
+ * heads north from the end of the feed, meets a wall and turns east; Room 03 opens
+ * to the left, at the far end.
+ */
+export const TRANSITION_03 = {
+  height: 2.4,
+  a: rect(-0.8, 0.8, -5.5, -0.1),
+  b: rect(-0.8, 8.2, -7.7, -5.5),
+}
+
+/**
+ * Room 03 as a sequence of cells, room-local, one per interface state. Each is a
+ * different kind of space (low and unresolved, vast, wrong, dark, tall and bright),
+ * and each opening is offset from the last.
+ */
+export const STATES_CELLS = {
+  prologue: cell(-1, 10, -15, -7.9, 4.4),
+  loading: cell(-1, 7, -27, -15.2, 4),
+  empty: cell(-6, 12, -49, -27.2, 7.5),
+  error: cell(-7, 3, -63, -49.2, 4.2),
+  offline: cell(-4, 5, -77, -63.2, 3.8),
+  success: cell(-9, 4, -93, -77.2, 8.5),
+}
+
 const inAccepted = (x: number, z: number) => ({ x: ACCEPTED_ORIGIN[0] + x, z: ACCEPTED_ORIGIN[1] + z })
+const inStates = (x: number, z: number) => ({ x: STATES_ORIGIN[0] + x, z: STATES_ORIGIN[1] + z })
 
 export const DOORS = {
   entrance: { x: 0, z: 13.9, width: 2.4, height: 3 },
@@ -68,6 +110,16 @@ export const DOORS = {
   attendEntry: { ...inAccepted(2.4, -21.1), width: 1.8, height: 2.5 },
   captcha: { ...inAccepted(0, -35.15), width: 2.7, height: 2.95, thickness: 0.3 },
   feed: { ...inAccepted(0, -46.1), width: 2, height: 2.6 },
+  acceptedExit: { ...inAccepted(0, -66.3), width: 1.6, height: 2.4 },
+  statesEntry: { ...inStates(7, -7.8), width: 1.8, height: 2.4 },
+  loadingEntry: { ...inStates(0.6, -15.1), width: 1.8, height: 2.6 },
+  /** Held shut by a placeholder until the room has loaded. */
+  loadingExit: { ...inStates(4.4, -27.1), width: 2.4, height: 3 },
+  errorEntry: { ...inStates(-3.5, -49.1), width: 1.8, height: 2.6 },
+  /** Plugged by a misplaced wall slab until the error is resolved. */
+  errorExit: { ...inStates(0.5, -63.1), width: 1.8, height: 2.6 },
+  /** Closed by a sliding panel until the connection is restored. */
+  offlineExit: { ...inStates(-2.5, -77.1), width: 1.8, height: 2.6 },
 } satisfies Record<string, DoorDefinition>
 
 export const SPACES: SpaceDefinition[] = [
@@ -103,6 +155,31 @@ export const SPACES: SpaceDefinition[] = [
     origin: ACCEPTED_ORIGIN,
     bounds: Object.values(ACCEPTED_CELLS).map((c) => offsetRect(c, ACCEPTED_ORIGIN)),
   },
+  {
+    id: 'transition-03',
+    number: null,
+    title: 'Passage',
+    hudLabel: 'PASSAGE / 02 → 03',
+    origin: STATES_ORIGIN,
+    bounds: [TRANSITION_03.a, TRANSITION_03.b].map((r) => offsetRect(r, STATES_ORIGIN)),
+  },
+  {
+    id: 'states',
+    number: '03',
+    title: 'Interface States',
+    hudLabel: '03 / INTERFACE STATES',
+    origin: STATES_ORIGIN,
+    bounds: Object.values(STATES_CELLS).map((c) => offsetRect(c, STATES_ORIGIN)),
+    zones: (
+      [
+        ['loading', 'I / LOADING'],
+        ['empty', 'II / EMPTY'],
+        ['error', 'III / ERROR'],
+        ['offline', 'IV / OFFLINE'],
+        ['success', 'V / SUCCESS'],
+      ] as const
+    ).map(([id, label]) => ({ id, label, bounds: [offsetRect(STATES_CELLS[id], STATES_ORIGIN)] })),
+  },
 ]
 
 export const SPAWN = {
@@ -122,6 +199,24 @@ export const getSpace = (id: string) => SPACES.find((space) => space.id === id) 
 
 export const spaceAt = (x: number, z: number) =>
   SPACES.find((space) => space.bounds.some((bounds) => contains(bounds, x, z))) ?? null
+
+export const zoneAt = (space: SpaceDefinition, x: number, z: number) =>
+  space.zones?.find((zone) => zone.bounds.some((bounds) => contains(bounds, x, z))) ?? null
+
+/**
+ * Which spaces open into which, derived from the doors: a door joins every space whose
+ * floor reaches it. Spaces are only ever seen through their doors, so this is also
+ * what can be seen from where.
+ */
+export const NEIGHBOURS: ReadonlyMap<string, ReadonlySet<string>> = (() => {
+  const map = new Map(SPACES.map((space) => [space.id, new Set<string>()]))
+  for (const door of Object.values(DOORS)) {
+    const reach = doorRect(door)
+    const joined = SPACES.filter((space) => space.bounds.some((bounds) => overlaps(bounds, reach)))
+    for (const a of joined) for (const b of joined) if (a !== b) map.get(a.id)!.add(b.id)
+  }
+  return map
+})()
 
 /** A door expressed along its wall in a room's local coordinates. */
 export const localDoor = (door: DoorDefinition, origin: Vec2) => ({

@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
-import { useRoom } from '../../../museum/RoomContext'
+import { useRoom, useRoomFrame } from '../../../museum/RoomContext'
 import { museumStore } from '../../../museum/store'
 import { useFocusTarget } from '../../../scene/Interaction'
 import { basicMaterial } from '../../../scene/materials'
@@ -95,7 +94,7 @@ export function InfiniteFeed() {
   const focusPoint = useRef<[number, number, number]>([0, 1.6, FEED.maxZ - 2])
   useFocusTarget({ id: 'feed', position: focusPoint.current, distance: 3, facing: 0.7, card: CARDS.feed })
 
-  useFrame(({ camera }) => {
+  useRoomFrame(({ camera }) => {
     const inRoom = museumStore.get().spaceId === roomId
     const localZ = camera.position.z - origin[1]
     const drift = inRoom ? Math.max(0, FEED.maxZ - localZ) * DRIFT : 0
