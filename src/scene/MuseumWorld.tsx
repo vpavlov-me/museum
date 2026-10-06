@@ -1,4 +1,6 @@
 import { Fragment, type ComponentType } from 'react'
+import { AudioDirector } from '../audio/AudioDirector'
+import type { Presence } from '../audio/engine'
 import { SPACES } from '../museum/roomRegistry'
 import { RoomGroup } from '../museum/RoomContext'
 import { AcceptedRoom } from '../rooms/accepted/Room'
@@ -31,7 +33,17 @@ const ROOMS: Record<string, ComponentType> = {
  * visitor (every room back to its first state, the visitor back at the door), while the
  * controls, lights and focus system carry on.
  */
-export function MuseumWorld({ visit, active, onLockChange }: { visit: number; active: boolean; onLockChange: (locked: boolean) => void }) {
+export function MuseumWorld({
+  visit,
+  active,
+  presence,
+  onLockChange,
+}: {
+  visit: number
+  active: boolean
+  presence: Presence
+  onLockChange: (locked: boolean) => void
+}) {
   return (
     <>
       <Lighting />
@@ -49,6 +61,7 @@ export function MuseumWorld({ visit, active, onLockChange }: { visit: number; ac
         <Player active={active} />
       </Fragment>
       <FocusSystem active={active} />
+      <AudioDirector presence={presence} />
       <Controls onLockChange={onLockChange} />
       {import.meta.env.DEV && <DebugBridge setLocked={onLockChange} />}
       {import.meta.env.DEV && <PerfReadout />}

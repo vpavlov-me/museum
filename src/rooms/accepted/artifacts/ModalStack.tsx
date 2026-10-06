@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import { useSound } from '../../../audio/useSound'
 import { Text } from '../../../components/Text'
 import { INK } from '../../../identity'
 import { useRoom, useRoomFrame } from '../../../museum/RoomContext'
@@ -141,6 +142,7 @@ export function ModalStack() {
   const away = useVisitorAway()
   const initial = () => MODALS.map(() => ({ shown: false, closed: false }))
   const [states, setStates] = useState<State[]>(initial)
+  const play = useSound()
 
   useEffect(() => {
     if (away) setStates(initial)
@@ -157,8 +159,14 @@ export function ModalStack() {
           layer={layer}
           index={i}
           state={states[i]}
-          onShow={() => update(i, { shown: true })}
-          onClose={() => update(i, { closed: true })}
+          onShow={() => {
+            update(i, { shown: true })
+            play('modal-open', [layer.x, layer.y, layer.z + DIALOG_OFFSET])
+          }}
+          onClose={() => {
+            update(i, { closed: true })
+            play('modal-close', [layer.x, layer.y, layer.z + DIALOG_OFFSET])
+          }}
         />
       ))}
     </>

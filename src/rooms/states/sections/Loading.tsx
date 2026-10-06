@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useSound, useSoundLoop } from '../../../audio/useSound'
 import { ChapterMark, type FadingText } from '../../../components/ChapterMark'
 import { Text } from '../../../components/Text'
 import { DOORS, localDoor } from '../../../museum/roomRegistry'
@@ -163,6 +164,8 @@ export function LoadingState() {
   const activity = useActivity()
   const startedAt = useRef<number | null>(null)
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const play = useSound()
   const sunk = useRef(0)
   const barrier = useRef<THREE.Group>(null)
   const bar = useRef<THREE.Mesh>(null)
@@ -178,11 +181,15 @@ export function LoadingState() {
     startedAt.current = null
     sunk.current = 0
     setOpen(false)
+    setLoading(false)
   }, [activity])
 
   useRoomFrame((_, delta) => {
     const now = clock.elapsedTime
-    if (startedAt.current === null && stateZoneNow(roomId) === 'loading') startedAt.current = now
+    if (startedAt.current === null && stateZoneNow(roomId) === 'loading') {
+      startedAt.current = now
+      setLoading(true)
+    }
     const progress = startedAt.current === null ? 0 : progressAt(now - startedAt.current)
 
     solids.update(now, progress, LIT)
@@ -205,13 +212,21 @@ export function LoadingState() {
       bar.current.position.x = -BARRIER.width / 2 + 0.08 + ((BARRIER.width - 0.16) * progress) / 2
     }
 
-    if (progress >= 1 && !open) setOpen(true)
+    if (progress >= 1 && !open) {
+      setOpen(true)
+      setLoading(false)
+      play('loading-done', [exit.center, 1.4, DOOR_Z])
+      play('barrier-sink', [exit.center, 0.5, DOOR_Z])
+    }
     sunk.current = THREE.MathUtils.damp(sunk.current, progress >= 1 ? 1 : 0, 3, delta)
     if (barrier.current) {
       barrier.current.position.y = -(BARRIER.height + 0.05) * sunk.current
       barrier.current.visible = sunk.current < 0.995
     }
   })
+
+  // While it loads, the doorway quietly processes; the sound stops the moment it is done.
+  useSoundLoop('loading', [exit.center, 1, DOOR_Z], 0.5, loading)
 
   useObstacle('loading-barrier', open ? null : rect(exit.center - exit.width / 2, exit.center + exit.width / 2, DOOR_Z - 0.12, DOOR_Z + 0.12))
   useObstacle('loading-bench', box(BENCH.x, BENCH.z, BENCH.width, BENCH.depth))

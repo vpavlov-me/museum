@@ -92,12 +92,33 @@ front door (loads, then opens) → ENTRANCE → 01 → 02 → 03 → colophon �
 - **Sharing.** Title, description, canonical, Open Graph / Twitter card (`public/og.png`), favicon,
   touch icon and `robots.txt`.
 
+## Prototype 06 — Sound & spatial ambience
+
+Quiet, physical sound, entirely synthesised with Web Audio: no audio files, nothing to license,
+0 bytes of audio assets. The museum is fully usable, and complete, muted.
+
+- **Room tone** (`audio/ambience.ts`): brown noise through a low-pass (air handling), a faint
+  electrical hum and a little high "air", mixed per space and glided between them. Room 02 hums
+  most; the passages are lower and duller; Room 03 bends it per state: EMPTY is near silence,
+  ERROR adds a hum 3 Hz out of tune with itself, OFFLINE's power cut stops the air handling,
+  SUCCESS is quieter, brighter and hum-free.
+- **Deliberate acts** (`audio/sounds.ts`) get small positional sounds: each Room 01 era answers a
+  press in its own material; accept, CAPTCHA, RETRY, RECONNECT and EXIT have their own. Things that
+  happen as you walk (modals, badges) are quieter; LOADING processes softly at its doorway until done.
+- **Lifecycle.** No `AudioContext` until a click (enter, resume, visit again). One-shots release
+  their nodes when they end; loops (`useSoundLoop`) stop when their state ends or their room goes out
+  of sight, so revisiting never stacks them. The level ducks while paused, fades out when the visit
+  ends, and the context suspends in a background tab.
+- **Control.** "Sound on / off" on the front door and the pause screen, and `M` anywhere; the choice is
+  remembered by the browser and never switched back on for the visitor.
+
 ### Controls
 
 - `W A S D` — move
 - Mouse — look
 - `E` — interact with the object in focus
 - `Esc` — pause and release the cursor
+- `M` — sound on / off
 
 Desktop is the target for this prototype.
 
@@ -144,6 +165,8 @@ src/
   scene/       MuseumWorld, Player, Controls, Collision, Interaction (focus + E), Lighting,
                materials (palettes), Light (Downlight, LightRig, LightPool, Luminaire), StaticMerge, geometry
   identity.ts  name, credits, ink, typeface and signage type scale (mirrored in styles.css)
+  audio/       engine (context, mute, presence), synth vocabulary, sound catalogue, room tone,
+               AudioDirector (listener + room tone), useSound / useSoundLoop for rooms
   components/  Text (troika text in the museum's typeface), RoomShell, Wall, WallText, ChapterMark, Plinth,
                ExhibitLabel
   rooms/       entrance/, the-button/, passage/, accepted/, states/, colophon/ — each owns its composition
@@ -182,7 +205,7 @@ This version deliberately avoids:
 - CMS integration;
 - complex shaders;
 - post-processing;
-- audio;
+- recorded audio or music;
 - asset pipelines and GLTF models.
 
 Those should only be introduced after the spatial concept is proven.

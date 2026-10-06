@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { ambience } from '../../../audio/ambience'
+import { useSound } from '../../../audio/useSound'
 import { ChapterMark } from '../../../components/ChapterMark'
 import { Text } from '../../../components/Text'
 import { DOORS, localDoor, WALL_THICKNESS } from '../../../museum/roomRegistry'
@@ -101,6 +103,9 @@ function guideMarks() {
 
 type Phase = 'online' | 'offline' | 'reconnecting' | 'restored'
 
+const OFFLINE_PLACE = 'states:offline'
+const NODE_AT: [number, number, number] = [LINE.x, LINE.y, (BREAK.z0 + BREAK.z1) / 2]
+
 /** Seconds into reconnecting: the bridge lifts, a pulse runs back along the line, light follows, the door opens. */
 const RECONNECT = { pulse: [0.6, 1.8] as const, light: [1.1, 2.6] as const, door: 2.3, done: 3 }
 
@@ -126,6 +131,7 @@ export function OfflineState() {
   const power = useRef(1)
   const lineLive = useRef(1)
   const fills = useRef(PIECES.map(() => 1))
+  const play = useSound()
 
   const bridge = useRef<THREE.Group>(null)
   const pulse = useRef<THREE.Mesh>(null)
@@ -137,7 +143,13 @@ export function OfflineState() {
   const exit = localDoor(DOORS.offlineExit, origin)
   const doorEdge = exit.center + exit.width / 2
 
-  useEffect(() => () => applyPower(1), [])
+  useEffect(
+    () => () => {
+      applyPower(1)
+      ambience.setVariant(OFFLINE_PLACE, null)
+    },
+    [],
+  )
 
   useLayoutEffect(() => {
     const { object } = scratch
@@ -161,13 +173,18 @@ export function OfflineState() {
   const reconnect = useCallback(() => {
     reconnectedAt.current = clock.elapsedTime
     setPhase('reconnecting')
-  }, [clock])
+    play('reconnect', NODE_AT)
+    ambience.setVariant(OFFLINE_PLACE, null)
+  }, [clock, play])
 
   useRoomFrame((_, delta) => {
     const now = clock.elapsedTime
     if (phase === 'online' && stateZoneNow(roomId) === 'offline') {
       droppedAt.current = now
       setPhase('offline')
+      // The air handling stops with the connection; only the building's own quiet is left.
+      play('power-down', [0.5, 3, -70])
+      ambience.setVariant(OFFLINE_PLACE, 'states:offline-dark')
     }
 
     const sinceDrop = now - droppedAt.current

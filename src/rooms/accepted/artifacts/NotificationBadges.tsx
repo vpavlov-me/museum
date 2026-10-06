@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useSound } from '../../../audio/useSound'
 import { ExhibitLabel } from '../../../components/ExhibitLabel'
 import { Plinth } from '../../../components/Plinth'
 import { Text } from '../../../components/Text'
@@ -167,6 +168,8 @@ export function NotificationBadges() {
   const deepest = useRef(Infinity)
   const clearedAt = useRef(-Infinity)
   const [count, setCount] = useState(1)
+  const play = useSound()
+  const tickedAt = useRef(-Infinity)
   const placements = useMemo(
     () =>
       badges.map((badge) => {
@@ -188,6 +191,7 @@ export function NotificationBadges() {
     prompt: 'MARK ALL AS READ',
     onInteract: () => {
       clearedAt.current = clock.elapsedTime
+      play('badges-clear', [PLINTH.x, 1.3, PLINTH.z])
     },
   })
 
@@ -200,7 +204,14 @@ export function NotificationBadges() {
     let visible = 0
     for (let i = 0; i < COUNT; i++) {
       const show = deepest.current < badges[i].threshold && now > clearedAt.current + QUIET_FOR + i * 0.12
-      if (show && shownAt.current[i] < 0) shownAt.current[i] = now
+      if (show && shownAt.current[i] < 0) {
+        shownAt.current[i] = now
+        // The faintest tick as a badge appears, never more than a few a second.
+        if (now - tickedAt.current > 0.25) {
+          tickedAt.current = now
+          play('badge', badges[i].position)
+        }
+      }
       if (!show) shownAt.current[i] = -1
 
       const before = scales.current[i]

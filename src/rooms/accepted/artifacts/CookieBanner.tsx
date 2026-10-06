@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import { useSound } from '../../../audio/useSound'
 import { Text } from '../../../components/Text'
 import { INK } from '../../../identity'
 import { useRoomFrame } from '../../../museum/RoomContext'
@@ -31,6 +32,7 @@ export function CookieBanner() {
   const [blocking, setBlocking] = useState(true)
   const group = useRef<THREE.Group>(null)
   const sunk = useRef(0)
+  const play = useSound()
 
   useEffect(() => {
     if (!accepted) return
@@ -64,7 +66,10 @@ export function CookieBanner() {
     card: accepted ? null : CARDS.banner,
     labelled: true,
     prompt: accepted ? null : 'ACCEPT ALL',
-    onInteract: () => setAccepted(true),
+    onInteract: () => {
+      setAccepted(true)
+      play('banner-accept', [CENTER_X, 1.2, BANNER_Z])
+    },
   })
 
   return (

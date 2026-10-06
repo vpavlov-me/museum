@@ -1,4 +1,5 @@
 import { MUSEUM } from '../identity'
+import { SoundToggle } from './SoundToggle'
 
 /**
  * The museum's front door. It is also the loading screen: until the rooms are ready
@@ -23,12 +24,15 @@ export function Entry({ ready, hidden, onEnter }: { ready: boolean; hidden: bool
             {ready ? 'Enter exhibition' : 'Opening the rooms'}
             {!ready && <span className="loading-line" aria-hidden />}
           </button>
-          <p className="entry__controls meta">W A S D walk · Mouse look · E interact · Esc pause</p>
+          <p className="entry__controls meta">W A S D walk · Mouse look · E interact · Esc pause · M sound</p>
         </div>
         <span className="sr-only" role="status">
           {ready ? 'The exhibition is ready.' : 'The exhibition is loading.'}
         </span>
-        <p className="entry__requirement meta">Made for a desktop browser with a keyboard and mouse.</p>
+        <div className="entry__requirement">
+          <p className="meta">Made for a desktop browser with a keyboard and mouse. Quiet sound, best with headphones.</p>
+          <SoundToggle />
+        </div>
       </div>
 
       <footer className="entry__foot meta">

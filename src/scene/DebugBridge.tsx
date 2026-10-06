@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { advance, useThree } from '@react-three/fiber'
+import { sound } from '../audio/engine'
 import { museumStore, trackVisitor } from '../museum/store'
 import { moveWithCollision } from './Collision'
 import { PLAYER_RADIUS } from './Player'
@@ -66,7 +67,7 @@ export function DebugBridge({ setLocked }: { setLocked: (locked: boolean) => voi
       for (let i = 0; i < frames; i++) advance((clock += 1000 / 60), true)
     }
 
-    window.__museum = { camera, scene, gl, store: museumStore, setLocked, walkTo, teleport, look, sample, step }
+    window.__museum = { camera, scene, gl, store: museumStore, sound, setLocked, walkTo, teleport, look, sample, step }
     return () => {
       delete window.__museum
     }

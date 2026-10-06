@@ -1,3 +1,4 @@
+import { useSound } from '../../audio/useSound'
 import { RoomShell } from '../../components/RoomShell'
 import { Text } from '../../components/Text'
 import { INK, MUSEUM, TYPE } from '../../identity'
@@ -32,6 +33,7 @@ const ROOMS = MUSEUM.rooms.map(([number, title]) => `${number}   ${title}`).join
  * is the way out. Leaving ends the visit and hands over to the 2D colophon.
  */
 export function Colophon() {
+  const play = useSound()
   useFocusTarget({
     id: 'exit',
     position: [EXIT.x, 1.3, WALL],
@@ -40,7 +42,10 @@ export function Colophon() {
     card: CARD,
     labelled: true,
     prompt: 'LEAVE THE MUSEUM',
-    onInteract: () => museumStore.set({ ended: true }),
+    onInteract: () => {
+      play('exit-door', [EXIT.x, 1.2, WALL])
+      museumStore.set({ ended: true })
+    },
   })
 
   return (

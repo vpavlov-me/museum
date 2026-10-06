@@ -1,5 +1,6 @@
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
+import { sound } from './audio/engine'
 import { INK } from './identity'
 import { SPAWN } from './museum/roomRegistry'
 import { museumStore, useMuseumStore } from './museum/store'
@@ -37,7 +38,14 @@ function App() {
     if (ended) document.exitPointerLock?.()
   }, [ended])
 
+  // Sound may only start from a click: entering, resuming and visiting again are all clicks.
+  const enter = useCallback(() => {
+    sound.unlock()
+    setEntered(true)
+  }, [])
+
   const restart = useCallback(() => {
+    sound.unlock()
     museumStore.reset()
     setVisit((n) => n + 1)
   }, [])
@@ -48,14 +56,14 @@ function App() {
         <color attach="background" args={[INK.void]} />
         <fog attach="fog" args={[INK.void, 18, 40]} />
         <Suspense fallback={null}>
-          <MuseumWorld visit={visit} active={active} onLockChange={setLocked} />
+          <MuseumWorld visit={visit} active={active} presence={ended ? 'away' : active ? 'visiting' : 'paused'} onLockChange={setLocked} />
           <Ready onReady={markReady} />
         </Suspense>
       </Canvas>
 
-      <Entry ready={ready} hidden={entered} onEnter={() => setEntered(true)} />
+      <Entry ready={ready} hidden={entered} onEnter={enter} />
       <HUD visible={active} />
-      <Pause visible={entered && !locked && !ended} />
+      <Pause visible={entered && !locked && !ended} onResume={sound.unlock} />
       <ColophonScreen visible={ended} onRestart={restart} />
       <ExhibitCard visible={active} />
     </main>
