@@ -1,4 +1,4 @@
-import { Text } from '@react-three/drei'
+import { Text } from '../../../components/Text'
 import { useFocusTarget } from '../../../scene/Interaction'
 import { Downlight, LightPool, Luminaire } from '../../../scene/Light'
 import { basicMaterial, PALETTES } from '../../../scene/materials'

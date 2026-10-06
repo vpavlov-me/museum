@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#0a0a0a"/>
+  <!-- A doorway into a lit room: the museum's mark. -->
+  <rect x="21" y="14" width="22" height="36" fill="#efede6"/>
+  <rect x="12" y="50" width="40" height="2.5" fill="#8f8c85"/>
+</svg>

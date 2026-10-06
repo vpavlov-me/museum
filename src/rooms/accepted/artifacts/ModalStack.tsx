@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Text } from '@react-three/drei'
 import * as THREE from 'three'
+import { Text } from '../../../components/Text'
+import { INK } from '../../../identity'
 import { useRoom, useRoomFrame } from '../../../museum/RoomContext'
 import { museumStore } from '../../../museum/store'
 import { box } from '../../../museum/types'
@@ -110,7 +111,7 @@ function Modal({ layer, index, state, onShow, onClose }: { layer: ModalLayer; in
             {layer.body}
           </Text>
           <mesh position={[w / 2 - 0.55, -h / 2 + 0.26, 0.002]} geometry={roundedRect(0.78, 0.24, 0.12)} material={basicMaterial('#141414')} />
-          <Text position={[w / 2 - 0.55, -h / 2 + 0.26, 0.004]} fontSize={0.08} color="#efede6" anchorX="center" anchorY="middle">
+          <Text position={[w / 2 - 0.55, -h / 2 + 0.26, 0.004]} fontSize={0.08} color={INK.text} anchorX="center" anchorY="middle">
             {layer.primary}
           </Text>
           <Text

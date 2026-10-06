@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { EYE_HEIGHT } from '../museum/roomRegistry'
+import { EYE_HEIGHT, SPAWN } from '../museum/roomRegistry'
 import { trackVisitor } from '../museum/store'
 import { moveWithCollision } from './Collision'
 
@@ -10,6 +10,7 @@ const WALK_SPEED = 2.2
 
 /** First-person walking: WASD relative to the view, eased, at exhibition pace. */
 export function Player({ active }: { active: boolean }) {
+  const camera = useThree((state) => state.camera)
   const keys = useRef<Record<string, boolean>>({})
   const velocity = useRef(new THREE.Vector3())
   const forward = useRef(new THREE.Vector3())
@@ -36,6 +37,13 @@ export function Player({ active }: { active: boolean }) {
       window.removeEventListener('blur', reset)
     }
   }, [])
+
+  // Every visit starts at the door, looking into the entrance hall.
+  useEffect(() => {
+    camera.position.set(...SPAWN.position)
+    camera.rotation.set(0, 0, 0, 'YXZ')
+    trackVisitor(camera.position.x, camera.position.z)
+  }, [camera])
 
   useEffect(() => {
     if (!active) {

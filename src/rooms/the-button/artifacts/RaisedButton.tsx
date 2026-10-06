@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { Text } from '@react-three/drei'
 import * as THREE from 'three'
+import { Text } from '../../../components/Text'
 import { useRoomFrame } from '../../../museum/RoomContext'
 import { BUTTON, sincePress, type ArtifactProps } from './shared'
 

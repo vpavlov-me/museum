@@ -1,6 +1,7 @@
 import { useRef } from 'react'
-import { RoundedBox, Text } from '@react-three/drei'
+import { RoundedBox } from '@react-three/drei'
 import type * as THREE from 'three'
+import { Text } from '../../../components/Text'
 import { useRoomFrame } from '../../../museum/RoomContext'
 import { BUTTON, sincePress, type ArtifactProps } from './shared'
 

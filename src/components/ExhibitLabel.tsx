@@ -1,5 +1,6 @@
-import { Text } from '@react-three/drei'
+import { INK } from '../identity'
 import type { ExhibitCardData } from '../museum/types'
+import { Text } from './Text'
 
 /**
  * A gallery label set directly on a surface: index and year, title, a short text.
@@ -20,13 +21,13 @@ export function ExhibitLabel({
 }) {
   return (
     <group position={position} rotation={rotation} scale={scale}>
-      <Text fontSize={0.042} letterSpacing={0.14} color="#8f8c85" anchorX="left" anchorY="top">
+      <Text fontSize={0.042} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
         {`${exhibit.index} / ${exhibit.year} / ${exhibit.category}`}
       </Text>
-      <Text position={[0, -0.085, 0]} fontSize={0.085} letterSpacing={-0.01} maxWidth={width} color="#efede6" anchorX="left" anchorY="top">
+      <Text position={[0, -0.085, 0]} fontSize={0.085} letterSpacing={-0.01} maxWidth={width} color={INK.text} anchorX="left" anchorY="top">
         {exhibit.title}
       </Text>
-      <Text position={[0, -0.215, 0]} fontSize={0.042} lineHeight={1.5} maxWidth={width} color="#bdbab2" anchorX="left" anchorY="top">
+      <Text position={[0, -0.215, 0]} fontSize={0.042} lineHeight={1.5} maxWidth={width} color={INK.body} anchorX="left" anchorY="top">
         {exhibit.description}
       </Text>
     </group>

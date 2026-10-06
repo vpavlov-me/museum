@@ -12,11 +12,11 @@ import type { ExhibitCardData } from '../../museum/types'
  *   II  EMPTY    z -27.2 … -49    vast and almost bare
  *   III ERROR    z -49.2 … -63    structurally wrong; a wall slab plugs the exit
  *   IV  OFFLINE  z -63.2 … -77    the lights go; reconnect to continue
- *   V   SUCCESS  z -77.2 … -93    tall and bright; a closed passage to Room 04
+ *   V   SUCCESS  z -77.2 … -93    tall and bright; a low doorway on to the colophon and the exit
  */
 export const CELLS = STATES_CELLS
 
-export const INK = { muted: '#8f8c85', text: '#efede6', body: '#bdbab2', dark: '#22211f', darkMuted: '#5f5c56' }
+export { INK } from '../../identity'
 
 export const TITLE = {
   kicker: 'ROOM 03',
@@ -74,8 +74,6 @@ export const ERROR_STATUS = {
   resolved: 'Resolved. No explanation was given.',
 }
 
-export const NEXT = { kicker: 'NEXT', title: 'Interfaces That Changed How We Design', note: '04 / IN PREPARATION' }
-
 /** What each state is, for the focus system and screen readers. The walls carry the same words. */
 export const CARDS = {
   loading: {
@@ -111,13 +109,6 @@ export const CARDS = {
     year: 'STATE',
     category: 'SUCCESS',
     title: 'Done.',
-    description: 'A tall, bright and empty room: the end of Room 03.',
-  },
-  next: {
-    index: 'NEXT',
-    year: 'IN PREPARATION',
-    category: 'ROOM 04',
-    title: 'Interfaces That Changed How We Design',
-    description: 'A subjective collection of influential products and patterns. This passage opens in a later prototype.',
+    description: 'A tall, bright and almost empty room: the end of Room 03. A low doorway leads on to the exit.',
   },
 } satisfies Record<string, ExhibitCardData>

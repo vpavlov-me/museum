@@ -1,7 +1,8 @@
-import type { ComponentType } from 'react'
+import { Fragment, type ComponentType } from 'react'
 import { SPACES } from '../museum/roomRegistry'
 import { RoomGroup } from '../museum/RoomContext'
 import { AcceptedRoom } from '../rooms/accepted/Room'
+import { Colophon } from '../rooms/colophon/Colophon'
 import { Entrance } from '../rooms/entrance/Entrance'
 import { Passage } from '../rooms/passage/Passage'
 import { StatesRoom } from '../rooms/states/Room'
@@ -22,24 +23,31 @@ const ROOMS: Record<string, ComponentType> = {
   accepted: AcceptedRoom,
   'transition-03': StatesTransition,
   states: StatesRoom,
+  colophon: Colophon,
 }
 
-export function MuseumWorld({ active, onLockChange }: { active: boolean; onLockChange: (locked: boolean) => void }) {
+/**
+ * The whole museum. `visit` counts visits: starting another remounts the rooms and the
+ * visitor (every room back to its first state, the visitor back at the door), while the
+ * controls, lights and focus system carry on.
+ */
+export function MuseumWorld({ visit, active, onLockChange }: { visit: number; active: boolean; onLockChange: (locked: boolean) => void }) {
   return (
     <>
       <Lighting />
       <LightRig />
 
-      {SPACES.map((space) => {
-        const Room = ROOMS[space.id]
-        return (
-          <RoomGroup key={space.id} space={space}>
-            <Room />
-          </RoomGroup>
-        )
-      })}
-
-      <Player active={active} />
+      <Fragment key={visit}>
+        {SPACES.map((space) => {
+          const Room = ROOMS[space.id]
+          return (
+            <RoomGroup key={space.id} space={space}>
+              <Room />
+            </RoomGroup>
+          )
+        })}
+        <Player active={active} />
+      </Fragment>
       <FocusSystem active={active} />
       <Controls onLockChange={onLockChange} />
       {import.meta.env.DEV && <DebugBridge setLocked={onLockChange} />}

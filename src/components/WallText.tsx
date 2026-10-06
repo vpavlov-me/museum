@@ -1,4 +1,5 @@
-import { Text } from '@react-three/drei'
+import { INK } from '../identity'
+import { Text } from './Text'
 
 /** Direction the text faces, i.e. the wall's inward normal. North is -z, the direction of travel. */
 export type Facing = 'north' | 'south' | 'east' | 'west'
@@ -42,7 +43,7 @@ export function WallText({
 
   return (
     <group position={[position[0], 0, position[1]]} rotation={facingRotation(facing)}>
-      <Text position={[0, top + 0.32, 0]} fontSize={0.11} letterSpacing={0.14} color="#8f8c85" anchorX="left" anchorY="top">
+      <Text position={[0, top + 0.32, 0]} fontSize={0.11} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
         {kicker}
       </Text>
       <Text
@@ -51,7 +52,7 @@ export function WallText({
         lineHeight={1.05}
         letterSpacing={-0.02}
         maxWidth={titleWidth}
-        color="#efede6"
+        color={INK.text}
         anchorX="left"
         anchorY="top"
       >
@@ -62,7 +63,7 @@ export function WallText({
         fontSize={0.155}
         lineHeight={1.55}
         maxWidth={bodyWidth}
-        color="#bdbab2"
+        color={INK.body}
         anchorX="left"
         anchorY="top"
       >

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Text } from '@react-three/drei'
 import * as THREE from 'three'
 import { ChapterMark } from '../../../components/ChapterMark'
+import { Text } from '../../../components/Text'
 import { Wall } from '../../../components/Wall'
 import { DOORS, localDoor, WALL_THICKNESS } from '../../../museum/roomRegistry'
 import { useRoom, useRoomFrame } from '../../../museum/RoomContext'

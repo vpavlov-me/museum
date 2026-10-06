@@ -72,12 +72,32 @@ passage with one turn resets the visitor before a new chapter:
   walking between rooms never recompiles shaders.
 - The HUD names the current state under the room (`03 / INTERFACE STATES` · `III / ERROR`).
 
+## Prototype 05 — Identity & exhibition shell
+
+The three rooms now read as one exhibition, from the first load to the last door:
+
+```
+front door (loads, then opens) → ENTRANCE → 01 → 02 → 03 → colophon → EXIT → colophon page → visit again
+```
+
+- **Entry.** The 2D front door is also the loading state: until every room and its text are ready the
+  button reads "Opening the rooms" (no percentage: none would be true), then "Enter exhibition".
+- **Ending.** SUCCESS opens onto a small, warm colophon room in the entrance's palette (credits on the
+  wall, an EXIT door). Leaving through it ends the visit with a 2D colophon; "Visit again" restarts at
+  the entrance with every room back in its first state.
+- **Identity.** `src/identity.ts` holds the name, credits, ink colours, typeface and signage type scale;
+  `styles.css` mirrors them as custom properties. One typeface everywhere: Inter (OFL), subset and
+  self-hosted in `public/fonts` and used by the 2D shell and every wall (`components/Text`). No text is
+  fetched from a CDN any more.
+- **Sharing.** Title, description, canonical, Open Graph / Twitter card (`public/og.png`), favicon,
+  touch icon and `robots.txt`.
+
 ### Controls
 
 - `W A S D` — move
 - Mouse — look
 - `E` — interact with the object in focus
-- `Esc` — release pointer lock
+- `Esc` — pause and release the cursor
 
 Desktop is the target for this prototype.
 
@@ -123,9 +143,12 @@ src/
                types, store, room context and activation (RoomContents, useRoomFrame)
   scene/       MuseumWorld, Player, Controls, Collision, Interaction (focus + E), Lighting,
                materials (palettes), Light (Downlight, LightRig, LightPool, Luminaire), StaticMerge, geometry
-  components/  RoomShell, Wall, WallText, ChapterMark, Plinth, ExhibitLabel, ClosedDoor
-  rooms/       entrance/, the-button/, passage/, accepted/, states/ — each owns its composition and content
-  ui/          HUD, ExhibitCard, Intro, Pause
+  identity.ts  name, credits, ink, typeface and signage type scale (mirrored in styles.css)
+  components/  Text (troika text in the museum's typeface), RoomShell, Wall, WallText, ChapterMark, Plinth,
+               ExhibitLabel
+  rooms/       entrance/, the-button/, passage/, accepted/, states/, colophon/ — each owns its composition
+               and content
+  ui/          Entry (front door and loading), HUD, ExhibitCard, Pause, ColophonScreen
 ```
 
 Rooms are authored in local coordinates and placed at their registry `origin`. They register

@@ -1,3 +1,4 @@
+import { MUSEUM } from '../identity'
 import { getSpace } from '../museum/roomRegistry'
 import { useMuseumStore } from '../museum/store'
 
@@ -10,17 +11,17 @@ export function HUD({ visible }: { visible: boolean }) {
 
   return (
     <div className={`hud ${visible ? 'hud--visible' : ''}`} aria-hidden={!visible}>
-      <div className="hud__brand">INTERFACE MUSEUM</div>
-      <div className="hud__room">
+      <div className="hud__brand meta">{MUSEUM.name}</div>
+      <div className="hud__room meta">
         {space?.hudLabel}
         <span className={`hud__zone ${zone ? 'hud__zone--visible' : ''}`}>{zone ?? ''}</span>
       </div>
       <div className="crosshair" />
-      <div className={`hud__prompt ${prompt ? 'hud__prompt--visible' : ''}`}>
+      <div className={`hud__prompt meta ${prompt ? 'hud__prompt--visible' : ''}`}>
         <span className="hud__key">E</span>
         <span>{prompt ?? ''}</span>
       </div>
-      <div className="hud__hint">Esc to release cursor</div>
+      <div className="hud__hint meta">Esc to pause</div>
     </div>
   )
 }

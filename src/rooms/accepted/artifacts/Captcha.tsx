@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Text } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { ExhibitLabel } from '../../../components/ExhibitLabel'
+import { Text } from '../../../components/Text'
 import { Wall } from '../../../components/Wall'
+import { INK } from '../../../identity'
 import { useRoomFrame } from '../../../museum/RoomContext'
 import { rect } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
@@ -173,7 +174,7 @@ export function Captcha() {
       />
       <ExhibitLabel position={[CELLS.attend.minX + 0.2, 1.6, face]} exhibit={CARDS.captcha} width={1.15} />
 
-      <Text position={[0, 3.62, face]} fontSize={0.075} letterSpacing={0.16} color="#8f8c85" anchorX="center" anchorY="middle">
+      <Text position={[0, 3.62, face]} fontSize={0.075} letterSpacing={0.16} color={INK.muted} anchorX="center" anchorY="middle">
         VERIFY THAT YOU ARE HUMAN
       </Text>
       <Text position={[0, 3.32, face]} fontSize={0.17} color={stage === 'retry' ? '#e8a598' : '#efede6'} anchorX="center" anchorY="middle">
