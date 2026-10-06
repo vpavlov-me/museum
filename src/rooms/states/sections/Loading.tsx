@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { useSound, useSoundLoop } from '../../../audio/useSound'
 import { ChapterMark, type FadingText } from '../../../components/ChapterMark'
 import { Text } from '../../../components/Text'
+import { motion } from '../../../museum/capabilities'
 import { DOORS, localDoor } from '../../../museum/roomRegistry'
 import { useActivity, useRoom, useRoomFrame } from '../../../museum/RoomContext'
 import { box, rect } from '../../../museum/types'
@@ -92,7 +93,8 @@ const SLOTS: Placeholder[] = [-18, -21.1, -24.2].map((z, i) => ({
 const LIT = { base: new THREE.Color('#6a6863'), shine: new THREE.Color('#87847e') }
 const UNLIT = { base: new THREE.Color('#3b3a37'), shine: new THREE.Color('#5a5853') }
 
-const shimmer = (now: number, along: number) => Math.pow(0.5 + 0.5 * Math.sin(now * 2.2 + along * 1.1), 3)
+/** The placeholder sweep; with reduced motion, the placeholders hold one quiet tone. */
+const shimmer = (now: number, along: number) => (motion.reduced ? 0.2 : Math.pow(0.5 + 0.5 * Math.sin(now * 2.2 + along * 1.1), 3))
 
 function usePlaceholders(items: Placeholder[], material: THREE.Material) {
   const mesh = useRef<THREE.InstancedMesh>(null)

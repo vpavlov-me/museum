@@ -1,9 +1,9 @@
 import { MUSEUM } from '../identity'
 import { getSpace } from '../museum/roomRegistry'
-import { useMuseumStore } from '../museum/store'
+import { museumStore, useMuseumStore } from '../museum/store'
 import { SoundToggle } from './SoundToggle'
 
-export function Pause({ visible, onResume }: { visible: boolean; onResume: () => void }) {
+export function Pause({ visible, onResume, onRead }: { visible: boolean; onResume: () => void; onRead: () => void }) {
   const spaceId = useMuseumStore((state) => state.spaceId)
 
   return (
@@ -13,7 +13,15 @@ export function Pause({ visible, onResume }: { visible: boolean; onResume: () =>
         Continue exploring
       </button>
       <p className="pause__hint meta">W A S D walk · Mouse look · E interact · Esc pause · M sound</p>
-      <SoundToggle />
+      <div className="pause__options">
+        <SoundToggle />
+        <button className="text-button meta" type="button" onClick={() => museumStore.set({ ended: true })}>
+          Leave the exhibition
+        </button>
+        <button className="text-button meta" type="button" onClick={onRead}>
+          Read as text
+        </button>
+      </div>
       <p className="pause__context meta">
         {MUSEUM.name} · An exhibition by {MUSEUM.author} ·{' '}
         <a href={MUSEUM.source} target="_blank" rel="noreferrer">

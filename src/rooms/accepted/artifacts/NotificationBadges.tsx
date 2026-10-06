@@ -5,6 +5,7 @@ import { useSound } from '../../../audio/useSound'
 import { ExhibitLabel } from '../../../components/ExhibitLabel'
 import { Plinth } from '../../../components/Plinth'
 import { Text } from '../../../components/Text'
+import { motion } from '../../../museum/capabilities'
 import { useRoom, useRoomFrame } from '../../../museum/RoomContext'
 import { museumStore } from '../../../museum/store'
 import { box } from '../../../museum/types'
@@ -215,7 +216,7 @@ export function NotificationBadges() {
       if (!show) shownAt.current[i] = -1
 
       const before = scales.current[i]
-      scales.current[i] = show ? popScale(now - shownAt.current[i]) : THREE.MathUtils.damp(before, 0, 16, delta)
+      scales.current[i] = show ? (motion.reduced ? 1 : popScale(now - shownAt.current[i])) : THREE.MathUtils.damp(before, 0, 16, delta)
       if (mesh && scales.current[i] !== before) {
         const placement = placements[i]
         placement.scale.setScalar(Math.max(1e-4, scales.current[i] * badges[i].radius))

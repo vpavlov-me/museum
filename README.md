@@ -112,6 +112,24 @@ Quiet, physical sound, entirely synthesised with Web Audio: no audio files, noth
 - **Control.** "Sound on / off" on the front door and the pause screen, and `M` anywhere; the choice is
   remembered by the browser and never switched back on for the visitor.
 
+## Prototype 07 — Mobile fallback & accessibility
+
+Three ways to visit the same exhibition, chosen from what the device can do (never from screen
+width alone) and always open to the visitor's own choice:
+
+| Mode | When | How |
+|---|---|---|
+| **Walk** | fine pointer with hover, pointer lock, WebGL | WASD, mouse look, E; the full experience |
+| **Guided tour** | touch / coarse pointer or no pointer lock; or chosen | 29 authored stops along the route; Next / Back (or ← →), drag to look, a tap for E; closed gates hold it until the room allows |
+| **Text** | no WebGL (or the scene fails to start); or chosen | every wall and label, in order, as a page |
+
+- Screen readers: the room (and Room 03's state) is announced once the visitor has settled in it;
+  focused exhibits are announced with their action; the colophon and text pages take focus.
+- `prefers-reduced-motion`: 2D transitions off; skeleton shimmer, the feed's drift and the badges'
+  bounce settle; the guided tour cuts between stops instead of walking.
+- Quietest ink raised to ~4.6:1; there is always a way out without pointer lock ("Leave" in the tour
+  and on the pause screen).
+
 ### Controls
 
 - `W A S D` — move
@@ -119,6 +137,7 @@ Quiet, physical sound, entirely synthesised with Web Audio: no audio files, noth
 - `E` — interact with the object in focus
 - `Esc` — pause and release the cursor
 - `M` — sound on / off
+- Guided tour: Next / Back (or ← →), drag to look, tap the action button
 
 Desktop is the target for this prototype.
 
@@ -171,7 +190,9 @@ src/
                ExhibitLabel
   rooms/       entrance/, the-button/, passage/, accepted/, states/, colophon/ — each owns its composition
                and content
-  ui/          Entry (front door and loading), HUD, ExhibitCard, Pause, ColophonScreen
+  museum/      … also capabilities (visit mode, reduced motion) and the guided tour's stops and state
+  ui/          Entry (front door and loading), HUD, ExhibitCard, Pause, ColophonScreen, GuidedControls,
+               TextExhibition, Announcer, SoundToggle
 ```
 
 Rooms are authored in local coordinates and placed at their registry `origin`. They register
@@ -201,7 +222,6 @@ This keeps art direction separate from the reusable museum engine.
 This version deliberately avoids:
 
 - physics-heavy collisions;
-- mobile controls;
 - CMS integration;
 - complex shaders;
 - post-processing;

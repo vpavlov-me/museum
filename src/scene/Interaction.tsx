@@ -38,6 +38,16 @@ type RegisteredTarget = {
 }
 
 const targets = new Set<RegisteredTarget>()
+/** What the visitor is focused on right now: E (or the guided tour's action button) acts on it. */
+let focused: RegisteredTarget | null = null
+
+/** Performs the focused object's action, if it has one right now. Returns whether anything happened. */
+export function interactWithFocus() {
+  const spec = focused?.spec.current
+  if (!spec?.onInteract || !spec.prompt) return false
+  spec.onInteract()
+  return true
+}
 
 const DEFAULT_DISTANCE = 3.2
 const DEFAULT_FACING = 0.5
@@ -58,7 +68,6 @@ export function useFocusTarget(spec: FocusTargetSpec) {
 
 export function FocusSystem({ active }: { active: boolean }) {
   const look = useRef(new THREE.Vector3())
-  const focused = useRef<RegisteredTarget | null>(null)
 
   useFrame(({ camera }) => {
     if (!active) return
@@ -91,7 +100,7 @@ export function FocusSystem({ active }: { active: boolean }) {
       }
     }
 
-    focused.current = best
+    focused = best
     const spec = best?.spec.current
     const prompt = spec?.onInteract ? (spec.prompt ?? null) : null
     const card = spec?.card ?? null
@@ -103,15 +112,14 @@ export function FocusSystem({ active }: { active: boolean }) {
 
   useEffect(() => {
     if (!active) {
-      focused.current = null
+      focused = null
       museumStore.set({ focus: null })
       return
     }
 
     const onKey = (event: KeyboardEvent) => {
       if (event.code !== 'KeyE' || event.repeat) return
-      const spec = focused.current?.spec.current
-      if (spec?.onInteract && spec.prompt) spec.onInteract()
+      interactWithFocus()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)

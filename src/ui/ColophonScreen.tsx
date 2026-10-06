@@ -6,7 +6,7 @@ import { MUSEUM } from '../identity'
  * at leisure, select and follow links from. "Visit again" starts a fresh visit at
  * the entrance (and takes the cursor back, like the entry button).
  */
-export function ColophonScreen({ visible, onRestart }: { visible: boolean; onRestart: () => void }) {
+export function ColophonScreen({ visible, onRestart, onRead }: { visible: boolean; onRestart: () => void; onRead: () => void }) {
   const heading = useRef<HTMLHeadingElement>(null)
 
   // Move focus to the heading once the overlay has faded in (it cannot take focus while hidden).
@@ -43,6 +43,9 @@ export function ColophonScreen({ visible, onRestart }: { visible: boolean; onRes
         <div className="colophon__actions">
           <button id="restart-museum" className="museum-button" type="button" onClick={onRestart}>
             Visit again
+          </button>
+          <button className="text-button meta" type="button" onClick={onRead}>
+            Read the exhibition as text
           </button>
           <a className="meta" href={MUSEUM.source} target="_blank" rel="noreferrer">
             Source on GitHub

@@ -11,6 +11,7 @@ const DWELL_MS = 900
 export function ExhibitCard({ visible }: { visible: boolean }) {
   const focus = useMuseumStore((state) => state.focus)
   const card = focus?.card ?? null
+  const prompt = focus?.prompt ?? null
   const overlay = card && !focus?.labelled ? card : null
   const [dwelt, setDwelt] = useState<typeof card>(null)
 
@@ -40,7 +41,7 @@ export function ExhibitCard({ visible }: { visible: boolean }) {
         )}
       </aside>
       <div className="sr-only" aria-live="polite">
-        {visible && card ? `${card.title}. ${card.year}, ${card.category.toLowerCase()}. ${card.description}` : ''}
+        {visible && card ? `${card.title}. ${card.year}, ${card.category.toLowerCase()}. ${card.description}${prompt ? ` Action: ${prompt.toLowerCase()}.` : ''}` : ''}
       </div>
     </>
   )
