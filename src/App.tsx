@@ -1,5 +1,4 @@
 import { Component, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { PerformanceMonitor } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { sound } from './audio/engine'
 import { INK } from './identity'
@@ -33,10 +32,8 @@ class SceneBoundary extends Component<{ onError: () => void; children: ReactNode
 
 function App() {
   const capabilities = useMemo(detectCapabilities, [])
-  // Resolution adapts to how the device copes: full sharpness while frames keep up, 1:1 pixels when they
-  // do not. Touch devices start a little lower: smaller screens, hotter hardware.
+  // Touch devices are capped a little lower: smaller screens, hotter hardware.
   const sharpest = capabilities.finePointer ? 1.75 : 1.5
-  const [dpr, setDpr] = useState(sharpest)
   const [webgl, setWebgl] = useState(capabilities.webgl)
   const [mode, setMode] = useState<VisitMode>(capabilities.recommended)
   const [reading, setReading] = useState(!capabilities.webgl)
@@ -78,8 +75,7 @@ function App() {
     <main className="app-shell">
       {webgl && (
         <SceneBoundary onError={sceneFailed}>
-          <Canvas camera={{ position: SPAWN.position, fov: 60, near: 0.1, far: 100 }} dpr={[1, dpr]} gl={{ antialias: true }} aria-hidden>
-            <PerformanceMonitor flipflops={3} onDecline={() => setDpr(1)} onIncline={() => setDpr(sharpest)} onFallback={() => setDpr(1)} />
+          <Canvas camera={{ position: SPAWN.position, fov: 60, near: 0.1, far: 100 }} dpr={[1, sharpest]} gl={{ antialias: true }} aria-hidden>
             <color attach="background" args={[INK.void]} />
             <fog attach="fog" args={[INK.void, 18, 40]} />
             <Suspense fallback={null}>
