@@ -1,11 +1,12 @@
 # Interface Museum
 
 A small museum about the interfaces we use every day without noticing them, given physical form.
-You walk through it in a browser: from a lobby into two exhibitions, and back.
+You walk through it in a browser: from a lobby into three exhibitions, and back.
 
 **Visit:** https://museum-dquality.vercel.app ·
 [permanent exhibition](https://museum-dquality.vercel.app/exhibitions/permanent) ·
-[Interface Archaeology](https://museum-dquality.vercel.app/exhibitions/archaeology)
+[Interface Archaeology](https://museum-dquality.vercel.app/exhibitions/archaeology) ·
+[Dark Patterns](https://museum-dquality.vercel.app/exhibitions/dark-patterns)
 
 ## The museum
 
@@ -17,7 +18,7 @@ to the lobby, and the lobby's front door leaves the museum.
 |---|---|---|
 | **01** | **Permanent Exhibition** | Three rooms: **The Button** (interface as an object), **Things We Somehow Accepted** (interface behavior as architecture) and **Interface States** (interface state as the state of the world). |
 | **02** | **Interface Archaeology** | The interface outside its own time: our interfaces as a future archive digs them up and catalogues them, often wrongly. |
-| 03 | Temporary Exhibition | In preparation. |
+| **03** | **Dark Patterns** (temporary) | Interfaces designed against the people using them, walked as a purchase and a cancellation: the signs use the patterns, small labels name them. |
 
 Each room holds one idea, told through space first and short wall texts second.
 
@@ -63,8 +64,8 @@ src/
   scene/       world, player, collision, focus + E, light rig and fixtures, materials, precompile
   audio/       engine, synthesis, sound catalogue, room tone
   components/  architecture and signage: RoomShell, Wall, TurnPassage, DoorLeaf, WallText, Text…
-  rooms/       lobby; permanent.ts (entrance, the-button, passage, accepted, states, colophon) and
-               archaeology/, each exhibition one chunk (each room with its content.ts)
+  rooms/       lobby; permanent.ts (entrance, the-button, passage, accepted, states, colophon),
+               archaeology/ and dark-patterns/, each exhibition one chunk (each room with its content.ts)
   ui/          entry, HUD, pause, plan, guided tour controls, colophon, text version, notices
 ```
 

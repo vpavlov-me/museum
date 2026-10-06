@@ -62,6 +62,9 @@ const STATES_ORIGIN: Vec2 = [-12.9, -86.6]
 /** Interface Archaeology and the passage into it are authored from its door in the lobby's north wall. */
 export const ARCHAEOLOGY_ORIGIN: Vec2 = [12, 26.1]
 
+/** Dark Patterns (the temporary exhibition) and its passage are authored from its door in the lobby's north wall. */
+export const DARK_ORIGIN: Vec2 = [-9, 26.1]
+
 /** The lobby, in world coordinates: south of the permanent exhibition's entrance hall, across all three entrances. */
 export const LOBBY = { minX: -14, maxX: 16, minZ: 26.2, maxZ: 36, height: 5 }
 
@@ -119,6 +122,29 @@ export const STATES_CELLS = {
 /** The passage from the lobby into Interface Archaeology, local to it: the same low turn as before Room 03. */
 export const ARCHAEOLOGY_PASSAGE = TRANSITION_03
 
+/** The passage from the lobby into Dark Patterns: the same low turn, mirrored, turning west. */
+export const DARK_PASSAGE = {
+  height: 2.4,
+  a: rect(-0.8, 0.8, -5.5, -0.1),
+  b: rect(-8.2, 0.8, -7.7, -5.5),
+}
+
+/**
+ * Dark Patterns as a sequence of cells, room-local: a welcome, a long checkout, two
+ * doors (a big one into a small thank-you room, a small one into the cancellation flow),
+ * the flow itself folded into four corridors, and a last room with the way back.
+ */
+export const DARK_CELLS = {
+  welcome: cell(-12, -2, -15, -7.9, 4.2),
+  checkout: cell(-20, -2, -21, -15.2, 3.4),
+  stay: cell(-7.6, -2, -24, -21.2, 3.4),
+  flow1: cell(-20, -8, -23.4, -21.2, 2.8),
+  flow2: cell(-20, -8, -25.8, -23.6, 2.8),
+  flow3: cell(-20, -8, -28.2, -26, 2.8),
+  flow4: cell(-20, -8, -30.6, -28.4, 2.8),
+  cancelled: cell(-20, -8, -36, -30.8, 3.2),
+}
+
 /**
  * Interface Archaeology as a sequence of cells, room-local: the lobby of a future
  * archive, a hall around an excavation, a low store, and a small dark room with a
@@ -136,6 +162,8 @@ export const COLOPHON = cell(-6, 1, -101, -93.2, 3.2)
 
 const inAccepted = (x: number, z: number) => ({ x: ACCEPTED_ORIGIN[0] + x, z: ACCEPTED_ORIGIN[1] + z })
 const inStates = (x: number, z: number) => ({ x: STATES_ORIGIN[0] + x, z: STATES_ORIGIN[1] + z })
+/** A point local to Dark Patterns, in world metres. */
+export const inDark = (x: number, z: number) => ({ x: DARK_ORIGIN[0] + x, z: DARK_ORIGIN[1] + z })
 /** A point local to Interface Archaeology, in world metres. */
 export const inArchaeology = (x: number, z: number) => ({ x: ARCHAEOLOGY_ORIGIN[0] + x, z: ARCHAEOLOGY_ORIGIN[1] + z })
 
@@ -160,6 +188,18 @@ export const DOORS = {
   /** Closed by a sliding panel until the connection is restored. */
   offlineExit: { ...inStates(-2.5, -77.1), width: 1.8, height: 2.6 },
   successExit: { ...inStates(-2.5, -93.1), width: 1.6, height: 2.5 },
+  /** From the lobby into the passage to Dark Patterns. */
+  lobbyDark: { ...inDark(0, 0), width: 1.8, height: 2.6 },
+  darkEntry: { ...inDark(-7, -7.8), width: 1.8, height: 2.4 },
+  checkoutEntry: { ...inDark(-4, -15.1), width: 1.8, height: 2.6 },
+  /** Confirmshaming: the big, lit door stays… */
+  stayDoor: { ...inDark(-4.6, -21.1), width: 2.4, height: 3 },
+  /** …and the small one, at the far end, leaves. */
+  leaveDoor: { ...inDark(-18.9, -21.1), width: 1.1, height: 2.1 },
+  flow12: { ...inDark(-9, -23.5), width: 1.3, height: 2.2 },
+  flow23: { ...inDark(-19, -25.9), width: 1.3, height: 2.2 },
+  flow34: { ...inDark(-9, -28.3), width: 1.3, height: 2.2 },
+  cancelDoor: { ...inDark(-18.9, -30.7), width: 1.1, height: 2.1 },
   /** From the lobby into the passage to Interface Archaeology. */
   lobbyArchaeology: { ...inArchaeology(0, 0), width: 1.8, height: 2.6 },
   archaeologyEntry: { ...inArchaeology(7, -7.8), width: 1.8, height: 2.4 },
@@ -241,6 +281,29 @@ export const SPACES: SpaceDefinition[] = [
     hudLabel: 'END OF THE PERMANENT EXHIBITION',
     origin: STATES_ORIGIN,
     bounds: [offsetRect(COLOPHON, STATES_ORIGIN)],
+  },
+  {
+    id: 'dark-passage',
+    number: null,
+    title: 'Passage',
+    hudLabel: 'PASSAGE / DARK PATTERNS',
+    origin: DARK_ORIGIN,
+    bounds: [DARK_PASSAGE.a, DARK_PASSAGE.b].map((r) => offsetRect(r, DARK_ORIGIN)),
+  },
+  {
+    id: 'dark-patterns',
+    number: null,
+    title: 'Dark Patterns',
+    hudLabel: '03 / DARK PATTERNS',
+    origin: DARK_ORIGIN,
+    bounds: Object.values(DARK_CELLS).map((c) => offsetRect(c, DARK_ORIGIN)),
+    zones: [
+      { id: 'welcome', label: 'I / WELCOME', cells: ['welcome'] },
+      { id: 'checkout', label: 'II / CHECKOUT', cells: ['checkout'] },
+      { id: 'stay', label: 'III / THANK YOU FOR STAYING', cells: ['stay'] },
+      { id: 'leaving', label: 'III / LEAVING', cells: ['flow1', 'flow2', 'flow3', 'flow4'] },
+      { id: 'cancelled', label: 'IV / CANCELLED', cells: ['cancelled'] },
+    ].map(({ id, label, cells }) => ({ id, label, bounds: cells.map((c) => offsetRect(DARK_CELLS[c as keyof typeof DARK_CELLS], DARK_ORIGIN)) })),
   },
   {
     id: 'archaeology-passage',

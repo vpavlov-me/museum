@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { EXHIBITIONS, exhibitionOf } from '../museum/exhibitions'
-import { DOORS, LOBBY, SPACES } from '../museum/roomRegistry'
+import { LOBBY, SPACES } from '../museum/roomRegistry'
 import { useMuseumStore, visitor } from '../museum/store'
 
 /*
@@ -18,7 +18,7 @@ const MAX_X = Math.max(...bounds.map((r) => r.maxX)) + PAD + 14
 const MIN_Z = Math.min(...bounds.map((r) => r.minZ)) - PAD
 const MAX_Z = Math.max(...bounds.map((r) => r.maxZ)) + PAD
 
-const TONE: Record<string, string> = { lobby: 'plan__lobby', permanent: 'plan__permanent', archaeology: 'plan__archaeology' }
+const TONE: Record<string, string> = { lobby: 'plan__lobby', permanent: 'plan__permanent', archaeology: 'plan__archaeology', 'dark-patterns': 'plan__dark' }
 
 /** Names written on the plan, world [x, z]: the permanent exhibition's rooms, and the archaeology wing. */
 const LABELS: { text: string; at: [number, number] }[] = [
@@ -27,6 +27,7 @@ const LABELS: { text: string; at: [number, number] }[] = [
   { text: 'ROOM 02', at: [-9, -48] },
   { text: 'ROOM 03', at: [-11, -132] },
   { text: 'ARCHAEOLOGY', at: [18, -4] },
+  { text: 'DARK PATTERNS', at: [-24, 7] },
 ]
 
 export function Plan({ visible, onClose }: { visible: boolean; onClose: () => void }) {
@@ -77,8 +78,6 @@ export function Plan({ visible, onClose }: { visible: boolean; onClose: () => vo
       <div className="plan__layout">
         <svg className="plan__drawing" viewBox={`0 0 ${MAX_X - MIN_X} ${MAX_Z - MIN_Z}`} role="img" aria-label="Plan of the museum">
           {rooms}
-          {/* The temporary exhibition: a door, and nothing behind it yet. */}
-          <line className="plan__closed" x1={-9.9 - MIN_X} x2={-8.1 - MIN_X} y1={DOORS.lobbyPermanent.z - MIN_Z} y2={DOORS.lobbyPermanent.z - MIN_Z} />
           {LABELS.map(({ text, at }) => (
             <text key={text} className="plan__label" x={at[0] - MIN_X} y={at[1] - MIN_Z} textAnchor="middle" dominantBaseline="middle">
               {text}
@@ -112,7 +111,7 @@ export function Plan({ visible, onClose }: { visible: boolean; onClose: () => vo
             ))}
           </ol>
           <p className="plan__note">
-            Every exhibition starts from the lobby and ends at a door back to it. The permanent exhibition (01) is three rooms: 01 The Button, 02 Things We Somehow Accepted, 03 Interface States.
+            Every exhibition starts from the lobby and ends at a door back to it. The permanent exhibition (01) is three rooms: 01 The Button, 02 Things We Somehow Accepted, 03 Interface States. Dark Patterns (03) is temporary.
           </p>
           <button id="plan-back" ref={back} className="museum-button" type="button" onClick={onClose}>
             Back to the visit

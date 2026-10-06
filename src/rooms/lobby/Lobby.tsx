@@ -25,7 +25,7 @@ import { StaticMerge } from '../../scene/StaticMerge'
  * The lobby: where every visit starts and ends. Bright, plain and compact. Its north
  * wall holds the museum's three entrances, each signed beside its door: the permanent
  * exhibition straight ahead (START HERE, and a line on the floor leading to it),
- * Interface Archaeology to the right, a temporary exhibition in preparation to the
+ * Interface Archaeology to the right, the temporary exhibition (Dark Patterns) to the
  * left. The front door, the credits and how to visit are behind the visitor.
  *
  * An exhibition's door stays shut until its rooms have loaded; walking towards it is
@@ -47,6 +47,7 @@ const EXIT_X = -3
 const DOOR_OF: Partial<Record<ExhibitionDefinition['id'], keyof typeof DOORS>> = {
   permanent: 'lobbyPermanent',
   archaeology: 'lobbyArchaeology',
+  'dark-patterns': 'lobbyDark',
 }
 
 const STATEMENT_LAYOUT: WallTextLayout = { top: 2.55, titleWidth: 3, gap: 0.45, bodyWidth: 3.6 }
@@ -85,7 +86,7 @@ function Sign({ exhibition, x }: { exhibition: ExhibitionDefinition; x: number }
   return (
     <group position={[x, 0, NORTH]}>
       <Text position={[0, 2.62, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
-        {`EXHIBITION ${exhibition.number}  ↑`}
+        {`${exhibition.kind === 'temporary' ? 'TEMPORARY EXHIBITION' : 'EXHIBITION'} ${exhibition.number}  ↑`}
       </Text>
       <Text position={[0, 2.44, 0]} fontSize={0.24} lineHeight={1.05} letterSpacing={-0.02} maxWidth={2.5} color={INK.text} anchorX="left" anchorY="top">
         {exhibition.title}
@@ -138,7 +139,7 @@ function Entrance({ exhibition }: { exhibition: ExhibitionDefinition }) {
   )
 }
 
-/** The temporary exhibition: a door that stays shut, with its sign. */
+/** An exhibition not open yet: a door that stays shut, with its sign. */
 function ClosedEntrance({ exhibition }: { exhibition: ExhibitionDefinition }) {
   const width = 1.8
   const height = 2.6
@@ -165,17 +166,21 @@ function ClosedEntrance({ exhibition }: { exhibition: ExhibitionDefinition }) {
 
 export function Lobby() {
   const play = useSound()
+  const dark = DOORS.lobbyDark
   const permanent = DOORS.lobbyPermanent
   const archaeology = DOORS.lobbyArchaeology
-  const split = (permanent.x + archaeology.x) / 2
+  const west = (dark.x + permanent.x) / 2
+  const east = (permanent.x + archaeology.x) / 2
+  const opening = (door: typeof dark) => ({ center: door.x, width: door.width, height: door.height })
 
   return (
     <>
       <StaticMerge>
-        {/* The north wall has two openings, so the lobby builds it in two lengths. */}
+        {/* The north wall has three openings, so the lobby builds it in three lengths. */}
         <RoomShell {...LOBBY} palette={palette} north={null} south={{}} />
-        <Wall axis="x" at={LOBBY.minZ - t / 2} from={LOBBY.minX - t} to={split} height={LOBBY.height} palette={palette} door={{ center: permanent.x, width: permanent.width, height: permanent.height }} />
-        <Wall axis="x" at={LOBBY.minZ - t / 2} from={split} to={LOBBY.maxX + t} height={LOBBY.height} palette={palette} door={{ center: archaeology.x, width: archaeology.width, height: archaeology.height }} />
+        <Wall axis="x" at={LOBBY.minZ - t / 2} from={LOBBY.minX - t} to={west} height={LOBBY.height} palette={palette} door={opening(dark)} />
+        <Wall axis="x" at={LOBBY.minZ - t / 2} from={west} to={east} height={LOBBY.height} palette={palette} door={opening(permanent)} />
+        <Wall axis="x" at={LOBBY.minZ - t / 2} from={east} to={LOBBY.maxX + t} height={LOBBY.height} palette={palette} door={opening(archaeology)} />
 
         {/* A laylight over the whole lobby: the brightest, most even light before the galleries. */}
         {[-9, -3, 3, 9].map((x) =>
@@ -211,7 +216,7 @@ export function Lobby() {
           layout={STATEMENT_LAYOUT}
           kicker="INTERFACE MUSEUM"
           title="Interfaces, given physical form."
-          body="A small museum about the controls, conventions and habits we use every day without noticing them. The permanent exhibition starts straight ahead. Each exhibition ends at a door back to this lobby."
+          body="A small museum about the controls, conventions and habits we use every day without noticing them. The permanent exhibition starts straight ahead; Interface Archaeology is on the right, and the temporary exhibition on the left. Each exhibition ends at a door back to this lobby."
         />
 
         {/* How to visit: a quiet gallery label, not a menu. */}

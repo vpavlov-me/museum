@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { ARCHAEOLOGY_ORIGIN } from './roomRegistry'
+import { ARCHAEOLOGY_ORIGIN, DARK_ORIGIN } from './roomRegistry'
 
 /*
  * The museum's exhibitions: what the lobby signs, the plan, the text version and the
@@ -9,13 +9,15 @@ import { ARCHAEOLOGY_ORIGIN } from './roomRegistry'
  * The lobby is not an exhibition; it belongs to the museum and is always there.
  */
 
-export type ExhibitionId = 'permanent' | 'archaeology' | 'temporary'
+export type ExhibitionId = 'permanent' | 'archaeology' | 'dark-patterns'
 
 /** An exhibition's rooms, by space id: what its chunk exports. */
 export type ExhibitionRooms = Record<string, ComponentType>
 
 export type ExhibitionDefinition = {
   id: ExhibitionId
+  /** Permanent or temporary: how the lobby signs it. */
+  kind: 'permanent' | 'temporary'
   number: string
   title: string
   subtitle: string
@@ -35,10 +37,12 @@ export type ExhibitionDefinition = {
 }
 
 const [ax, az] = ARCHAEOLOGY_ORIGIN
+const [dx, dz] = DARK_ORIGIN
 
 export const EXHIBITIONS: ExhibitionDefinition[] = [
   {
     id: 'permanent',
+    kind: 'permanent',
     number: '01',
     title: 'Permanent Exhibition',
     subtitle: 'Three rooms about objects, conventions and states.',
@@ -52,6 +56,7 @@ export const EXHIBITIONS: ExhibitionDefinition[] = [
   },
   {
     id: 'archaeology',
+    kind: 'permanent',
     number: '02',
     title: 'Interface Archaeology',
     subtitle: 'An excavation of digital interfaces from the early 21st century.',
@@ -64,16 +69,18 @@ export const EXHIBITIONS: ExhibitionDefinition[] = [
     load: () => import('../rooms/archaeology'),
   },
   {
-    id: 'temporary',
+    id: 'dark-patterns',
+    kind: 'temporary',
     number: '03',
-    title: 'Temporary Exhibition',
-    subtitle: 'A smaller exhibition that changes.',
-    status: 'in-preparation',
-    slug: 'temporary',
+    title: 'Dark Patterns',
+    subtitle: 'Interfaces designed against the people using them.',
+    status: 'open',
+    slug: 'dark-patterns',
     recommended: 3,
-    spaces: [],
-    door: -9,
-    start: { at: [-9, 28], yaw: 0 },
+    spaces: ['dark-passage', 'dark-patterns'],
+    door: dx,
+    start: { at: [dx - 7, dz - 9.2], yaw: 0 },
+    load: () => import('../rooms/dark-patterns'),
   },
 ]
 

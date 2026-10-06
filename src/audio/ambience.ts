@@ -42,6 +42,12 @@ const PROFILES: Record<string, Profile> = {
   // Release: quieter, but brighter and cleaner, without hum.
   'states:success': profile(0.028, 900, 0, 0.006),
   'archaeology-passage': profile(0.025, 150, 0, 0),
+  'dark-passage': profile(0.025, 150, 0, 0),
+  // Dark Patterns: a shop, under fluorescent light; the cancellation flow, a call-centre hush.
+  'dark-patterns': profile(0.045, 520, 0.008, 0.004),
+  'dark-patterns:stay': profile(0.03, 900, 0, 0.006),
+  'dark-patterns:leaving': profile(0.03, 240, 0.005, 0.001, 0.003),
+  'dark-patterns:cancelled': profile(0.025, 300, 0, 0.002),
   // The archive: dry and still, the air handling of a building kept for storage.
   archaeology: profile(0.035, 230, 0.001, 0.002),
   // The hall over the excavation: taller, so a little more air and less hum.

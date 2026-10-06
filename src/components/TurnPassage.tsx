@@ -15,7 +15,8 @@ const STRIP = 0.08
 /**
  * The passage between two rooms: the darkest, quietest kind of space in the museum, a
  * reset after a room. It heads north from the last room's door, meets a wall and turns
- * east; the next room opens to the left at the far end, so neither room sees the other.
+ * (east, or west with `turn="west"`); the next room opens off the far end, so neither
+ * room sees the other.
  * Authored in the next room's coordinates. Its north wall is shared with that room,
  * each building its own half.
  */
@@ -24,6 +25,7 @@ export function TurnPassage({
   entry: entryKey,
   number,
   title,
+  turn = 'east',
 }: {
   plan: { a: Rect; b: Rect; height: number }
   /** The door into the next room, at the far end of the turn. */
@@ -31,6 +33,7 @@ export function TurnPassage({
   /** The next room, as signed on the wall that turns the visitor. */
   number: string
   title: string
+  turn?: 'east' | 'west'
 }) {
   const { origin } = useRoom()
   const { a, b, height } = plan
@@ -52,15 +55,26 @@ export function TurnPassage({
           <boxGeometry args={[b.maxX - b.minX + 2 * t, 0.18, b.maxZ - b.minZ + 1.5 * t]} />
         </mesh>
 
-        <Wall axis="z" at={a.minX - t / 2} from={b.minZ} to={a.maxZ} height={height} palette={palette} />
-        <Wall axis="z" at={a.maxX + t / 2} from={b.maxZ} to={a.maxZ} height={height} palette={palette} />
-        <Wall axis="x" at={b.maxZ + t / 2} from={a.maxX + t} to={b.maxX + t} height={height} palette={palette} />
-        <Wall axis="z" at={b.maxX + t / 2} from={b.minZ} to={b.maxZ + t} height={height} palette={palette} />
+        {turn === 'east' ? (
+          <>
+            <Wall axis="z" at={a.minX - t / 2} from={b.minZ} to={a.maxZ} height={height} palette={palette} />
+            <Wall axis="z" at={a.maxX + t / 2} from={b.maxZ} to={a.maxZ} height={height} palette={palette} />
+            <Wall axis="x" at={b.maxZ + t / 2} from={a.maxX + t} to={b.maxX + t} height={height} palette={palette} />
+            <Wall axis="z" at={b.maxX + t / 2} from={b.minZ} to={b.maxZ + t} height={height} palette={palette} />
+          </>
+        ) : (
+          <>
+            <Wall axis="z" at={a.maxX + t / 2} from={b.minZ} to={a.maxZ} height={height} palette={palette} />
+            <Wall axis="z" at={a.minX - t / 2} from={b.maxZ} to={a.maxZ} height={height} palette={palette} />
+            <Wall axis="x" at={b.maxZ + t / 2} from={b.minX - t} to={a.minX - t} height={height} palette={palette} />
+            <Wall axis="z" at={b.minX - t / 2} from={b.minZ} to={b.maxZ + t} height={height} palette={palette} />
+          </>
+        )}
         <Wall axis="x" at={b.minZ - t / 4} from={b.minX - t} to={b.maxX + t} height={height} thickness={t / 2} palette={palette} door={entry} />
 
         {/* One luminous line runs ahead, turns the corner with the visitor and stops at the door. */}
         <Luminaire position={[midA, height - 0.004, (a.maxZ - 0.6 + midB - STRIP / 2) / 2]} size={[STRIP, a.maxZ - 0.6 - midB + STRIP / 2]} palette={palette} />
-        <Luminaire position={[(entry.center + midA - STRIP / 2) / 2, height - 0.004, midB]} size={[entry.center - midA + STRIP / 2, STRIP]} palette={palette} />
+        <Luminaire position={[(entry.center + midA) / 2, height - 0.004, midB]} size={[Math.abs(entry.center - midA) + STRIP / 2, STRIP]} palette={palette} />
       </StaticMerge>
 
       <RoomContents>

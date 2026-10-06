@@ -67,7 +67,7 @@ export function GuidedTour() {
   // Every guided visit begins in the lobby, or at the first stop of the exhibition a link names.
   useEffect(() => {
     const target = navigation.target
-    place(target === 'permanent' || target === 'archaeology' ? target : 'lobby')
+    place(target ?? 'lobby')
   }, [place])
 
   // Drag to look around, within limits: the stop chooses the view, the visitor adjusts it.

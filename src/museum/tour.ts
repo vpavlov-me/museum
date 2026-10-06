@@ -1,4 +1,4 @@
-import { inArchaeology } from './roomRegistry'
+import { inArchaeology, inDark } from './roomRegistry'
 
 /*
  * The guided tour: authored walks through the same museum, for touch screens and for
@@ -32,7 +32,14 @@ const r4 = (x: number, z: number): [number, number] => {
   return [point.x, point.z]
 }
 
-export type Route = 'lobby' | 'permanent' | 'archaeology'
+/** Dark Patterns is authored from its door in the lobby. */
+const dk = (x: number, z: number): [number, number] => {
+  const point = inDark(x, z)
+  return [point.x, point.z]
+}
+const S = Math.PI
+
+export type Route = 'lobby' | 'permanent' | 'archaeology' | 'dark-patterns'
 
 /** The lobby: one stop, facing the three entrances, where an exhibition is chosen. */
 const LOBBY: TourStop[] = [{ id: 'lobby', title: 'Lobby', at: [1, 33.2], yaw: N }]
@@ -91,4 +98,21 @@ const ARCHAEOLOGY: TourStop[] = [
   { id: 'archaeology-return', title: 'Back to the lobby', at: r4(5.3, -55.4), yaw: N },
 ]
 
-export const TOURS: Record<Route, TourStop[]> = { lobby: LOBBY, permanent: PERMANENT, archaeology: ARCHAEOLOGY }
+const DARK_PATTERNS: TourStop[] = [
+  { id: 'dark-patterns', title: 'Dark Patterns', at: dk(-7, -10), yaw: N, via: [dk(0, 1.3), dk(0, -2), dk(0, -6.6), dk(-7, -6.6), dk(-7, -8.6)] },
+  { id: 'countdown', title: 'This exhibition closes in…', at: dk(-4.4, -12.2), yaw: E },
+  { id: 'checkout', title: 'II. Checkout', at: dk(-4, -17.4), yaw: N, via: [dk(-4, -14.2), dk(-4, -16)] },
+  { id: 'stay', title: 'Thank you for staying', at: dk(-4.6, -22.6), yaw: N, via: [dk(-4.6, -19.8)] },
+  { id: 'preselected', title: 'Booking protection', at: dk(-11, -18.2), yaw: S, via: [dk(-4.6, -19.8), dk(-10, -19.8)] },
+  { id: 'receipt', title: 'The receipt', at: dk(-13.4, -19), yaw: N },
+  { id: 'total', title: 'The total', at: dk(-16.4, -17.4), yaw: S },
+  { id: 'leave-door', title: 'No thanks', at: dk(-18.6, -19.6), yaw: N + 0.5 },
+  { id: 'flow-1', title: 'Are you sure?', at: dk(-10.2, -22.3), yaw: E, via: [dk(-18.9, -20.4), dk(-18.9, -22.3)] },
+  { id: 'flow-2', title: 'Before you go', at: dk(-17.8, -24.7), yaw: W, via: [dk(-9, -22.3), dk(-9, -24.7)] },
+  { id: 'flow-3', title: 'Tell us why', at: dk(-10.2, -27.1), yaw: E, via: [dk(-19, -24.7), dk(-19, -27.1)] },
+  { id: 'flow-4', title: 'Please hold', at: dk(-17.8, -29.5), yaw: W, via: [dk(-9, -27.1), dk(-9, -29.5)] },
+  { id: 'cancelled', title: 'IV. Cancelled', at: dk(-16.4, -33.6), yaw: N, via: [dk(-18.9, -29.5), dk(-18.9, -31.6)] },
+  { id: 'dark-return', title: 'Back to the lobby', at: dk(-9.8, -34.4), yaw: N },
+]
+
+export const TOURS: Record<Route, TourStop[]> = { lobby: LOBBY, permanent: PERMANENT, archaeology: ARCHAEOLOGY, 'dark-patterns': DARK_PATTERNS }
