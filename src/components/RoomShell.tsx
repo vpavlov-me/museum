@@ -30,6 +30,7 @@ export function RoomShell({
   south,
   east = {},
   west = {},
+  floor = true,
 }: {
   minX: number
   maxX: number
@@ -41,6 +42,8 @@ export function RoomShell({
   south: WallSpec | null
   east?: WallSpec | null
   west?: WallSpec | null
+  /** False when the space lays its own floor (around an opening in it, say). */
+  floor?: boolean
 }) {
   const t = WALL_THICKNESS
   const width = maxX - minX
@@ -59,7 +62,7 @@ export function RoomShell({
 
   return (
     <group>
-      <mesh position={[cx, 0, cz]} geometry={floorGeometry(width, length)} material={palette.floor} />
+      {floor && <mesh position={[cx, 0, cz]} geometry={floorGeometry(width, length)} material={palette.floor} />}
 
       <mesh position={[(outerMinX + outerMaxX) / 2, height + 0.09, (outerMinZ + outerMaxZ) / 2]} material={palette.ceiling}>
         <boxGeometry args={[outerMaxX - outerMinX, 0.18, outerMaxZ - outerMinZ]} />

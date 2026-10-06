@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { MUSEUM } from '../identity'
+import { MUSEUM, ROOM_COUNT } from '../identity'
+import { AFTERWORD, FINDS, INSTITUTE, THESIS as ARCHAEOLOGY_THESIS } from '../rooms/archaeology/content'
 import { CARDS as ACCEPTED, CHAPTERS as ACCEPTED_CHAPTERS, OBSERVATIONS, THESIS as ACCEPTED_THESIS } from '../rooms/accepted/content'
 import { CHAPTERS as STATES, THESIS as STATES_THESIS } from '../rooms/states/content'
 import { EXHIBITS, WALL_TEXTS } from '../rooms/the-button/content'
@@ -44,6 +45,21 @@ const ROOMS: { number: string; title: string; idea: string; entries: Entry[] }[]
       })),
     ],
   },
+  {
+    number: '04',
+    title: 'Interface Archaeology',
+    idea: 'The interface outside its own time. Our interfaces as a future archive finds and catalogues them: a hall around an excavation, a store of numbered boxes and vitrines, and a reconstruction of a dwelling. The archive writes the labels. After each of its readings, in brackets, is what the thing was.',
+    entries: [
+      ARCHAEOLOGY_THESIS,
+      { kicker: 'THE ARCHIVE / SIGN', title: `${INSTITUTE.name}: ${INSTITUTE.gallery}, ${INSTITUTE.dates}`, body: INSTITUTE.line },
+      ...Object.values(FINDS).map((find) => ({
+        kicker: `${find.accession} / ${find.layer}`,
+        title: find.name,
+        body: `${find.reading} [${find.was}]`,
+      })),
+      AFTERWORD,
+    ],
+  },
 ]
 
 /**
@@ -62,15 +78,17 @@ export function TextExhibition({ visible, canVisit, onVisit }: { visible: boolea
   return (
     <article className="text-exhibition" aria-labelledby="text-title">
       <header className="text-exhibition__head">
-        <div className="meta">An exhibition in three rooms · {MUSEUM.year}</div>
+        <div className="meta">
+          An exhibition in {ROOM_COUNT} rooms · {MUSEUM.year}
+        </div>
         <h1 id="text-title" ref={heading} tabIndex={-1}>
           {MUSEUM.name}
         </h1>
         <p className="text-exhibition__premise">{MUSEUM.premise}</p>
         <p className="text-exhibition__note">
           {canVisit
-            ? 'This is the exhibition as text: every wall, label and room in order. The full exhibition is a walk through three rooms in 3D.'
-            : 'The full exhibition is a walk through three rooms in 3D, which needs a browser with WebGL. This is the same exhibition as text: every wall, label and room in order.'}
+            ? `This is the exhibition as text: every wall, label and room in order. The full exhibition is a walk through ${ROOM_COUNT} rooms in 3D.`
+            : `The full exhibition is a walk through ${ROOM_COUNT} rooms in 3D, which needs a browser with WebGL. This is the same exhibition as text: every wall, label and room in order.`}
         </p>
         {canVisit && (
           <button className="museum-button" type="button" onClick={onVisit}>

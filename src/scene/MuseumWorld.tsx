@@ -4,6 +4,8 @@ import type { Presence } from '../audio/engine'
 import { SPACES } from '../museum/roomRegistry'
 import { RoomGroup } from '../museum/RoomContext'
 import { AcceptedRoom } from '../rooms/accepted/Room'
+import { ArchaeologyRoom } from '../rooms/archaeology/Room'
+import { ArchaeologyTransition } from '../rooms/archaeology/Transition'
 import { Colophon } from '../rooms/colophon/Colophon'
 import { Entrance } from '../rooms/entrance/Entrance'
 import { Passage } from '../rooms/passage/Passage'
@@ -29,6 +31,8 @@ const ROOMS: Record<string, ComponentType> = {
   accepted: AcceptedRoom,
   'transition-03': StatesTransition,
   states: StatesRoom,
+  'transition-04': ArchaeologyTransition,
+  archaeology: ArchaeologyRoom,
   colophon: Colophon,
 }
 

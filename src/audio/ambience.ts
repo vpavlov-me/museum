@@ -39,6 +39,14 @@ const PROFILES: Record<string, Profile> = {
   'states:offline-dark': profile(0.014, 110, 0, 0),
   // Release: quieter, but brighter and cleaner, without hum.
   'states:success': profile(0.028, 900, 0, 0.006),
+  'transition-04': profile(0.025, 150, 0, 0),
+  // The archive: dry and still, the air handling of a building kept for storage.
+  archaeology: profile(0.035, 230, 0.001, 0.002),
+  // The hall over the excavation: taller, so a little more air and less hum.
+  'archaeology:trench': profile(0.04, 200, 0, 0.004),
+  'archaeology:store': profile(0.03, 260, 0.002, 0.001),
+  // Dark, and the faint whine of the lit rectangle: the only thing in the room that is on.
+  'archaeology:reconstruction': profile(0.018, 180, 0.004, 0.001),
   colophon: profile(0.03, 300, 0, 0.002),
 }
 

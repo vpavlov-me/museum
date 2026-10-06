@@ -1,4 +1,4 @@
-import { MUSEUM } from '../identity'
+import { MUSEUM, ROOM_COUNT } from '../identity'
 import { SoundToggle } from './SoundToggle'
 
 /**
@@ -26,7 +26,9 @@ export function Entry({
     <section className={`entry ${ready ? 'entry--ready' : ''} ${hidden ? 'entry--hidden' : ''}`} aria-labelledby="entry-title" aria-hidden={hidden}>
       <header className="entry__top meta">
         <span className="brand">{MUSEUM.name}</span>
-        <span>An exhibition in three rooms · {MUSEUM.year}</span>
+        <span>
+          An exhibition in {ROOM_COUNT} rooms · {MUSEUM.year}
+        </span>
       </header>
 
       <div className="entry__main">

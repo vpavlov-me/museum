@@ -77,6 +77,18 @@ export const SOUNDS = {
     return tone(c, out, t, { freq: 55, to: 110, duration: 1.8, gain: 0.05, attack: 0.4 })
   },
 
+  // Room 04: the archive. Dry, close, unhurried.
+  // Three strokes of a soft brush, and a little soil settling.
+  brush: (c, out, t) => {
+    for (let i = 0; i < 3; i++) noise(c, out, t, { duration: 0.32, gain: 0.035, filter: 'bandpass', freq: 3000, to: 1800, q: 0.8, attack: 0.08, delay: i * 0.38 })
+    return noise(c, out, t, { duration: 0.8, gain: 0.03, filter: 'lowpass', freq: 380, attack: 0.1, delay: 1.1 })
+  },
+  // A quick run of ticks, as if something were being read, then one low note: no reading.
+  decipher: (c, out, t) => {
+    for (let i = 0; i < 9; i++) tone(c, out, t, { freq: 1500 + 120 * ((i * 7) % 5), duration: 0.03, gain: 0.012, delay: i * 0.09 })
+    return tone(c, out, t, { freq: 196, to: 185, duration: 0.5, gain: 0.04, attack: 0.02, delay: 0.95 })
+  },
+
   // The way out.
   'exit-door': (c, out, t) => {
     noise(c, out, t, { duration: 0.25, gain: 0.04, filter: 'lowpass', freq: 900 })

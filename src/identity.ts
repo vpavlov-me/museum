@@ -12,11 +12,15 @@ export const MUSEUM = {
     ['01', 'The Button'],
     ['02', 'Things We Somehow Accepted'],
     ['03', 'Interface States'],
+    ['04', 'Interface Archaeology'],
   ] as const,
   author: 'Vladimir Pavlov',
   year: '2026',
   source: 'https://github.com/vpavlov-me/museum',
 }
+
+/** How many rooms, in words: "an exhibition in four rooms". */
+export const ROOM_COUNT = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'][MUSEUM.rooms.length - 1]
 
 /** Ink: the warm off-white of the museum's typography, and its quieter tones. */
 export const INK = {
