@@ -79,7 +79,7 @@ v1 shipped as one exhibition of three rooms (#12). v2 (#20, #21) makes it a smal
   Walkable floor, which rooms open into which, and cell-to-cell sight lines are all derived from it.
 - **Exhibitions:** `museum/exhibitions.ts` lists them (number, title, status, URL slug, spaces,
   lobby door, start point, chunk). Each exhibition's rooms are one dynamic import
-  (`rooms/permanent.ts`, `rooms/archaeology/index.ts`, `rooms/dark-patterns/index.ts`) loaded by `museum/exhibitionLoader.ts`; its
+  (`rooms/permanent.ts`, `rooms/archaeology/archaeology.ts`, `rooms/dark-patterns/dark-patterns.ts`) loaded by `museum/exhibitionLoader.ts`; its
   lobby door stays shut until they are mounted and compiled. Never import an exhibition's rooms
   statically from shared code. Each exhibition ends at a `DoorLeaf` that calls
   `navigation.returnToLobby`; the lobby's front door calls `navigation.leave`.
@@ -104,3 +104,6 @@ v1 shipped as one exhibition of three rooms (#12). v2 (#20, #21) makes it a smal
   after a click.
 - **Measuring:** `npm run build:profile` is a production build with the debug bridge and the
   `` ` `` readout. Never ship either in production.
+- **Tests:** `e2e/` walks the museum through the profile build's debug bridge, in all three ways
+  to visit. CI runs it on every PR; a PR merges only when it passes. A new room adds its tour
+  stops, and the walk and guided specs pick them up; the shared helpers are in `e2e/museum.ts`.

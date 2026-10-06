@@ -8,3 +8,5 @@ dist
 *.tsbuildinfo
 dist-profile
 dist-profile-after
+test-results
+playwright-report

@@ -43,7 +43,14 @@ npm run dev             # development, with the debug bridge and ` frame readout
 npm run build           # production build in dist/
 npm run preview         # serve the production build
 npm run build:profile   # production build plus measuring tools, in dist-profile/
+npm test                # end-to-end tests against dist-profile/ (build it first)
+npm run test:ci         # build:profile, then the tests
 ```
+
+The tests (`e2e/`, Playwright, Chromium with software WebGL) drive the museum through the
+debug bridge: they open every exhibition from its door and from a direct link, walk every guided
+tour stop on foot, take all three guided routes on a phone, and check the text version. GitHub
+Actions runs them, with both builds, on every pull request and every push to `main`.
 
 The project deploys as a static site (Vercel); no server is involved. `vercel.json` rewrites
 `/exhibitions/*` to the page, so direct links to an exhibition work.
