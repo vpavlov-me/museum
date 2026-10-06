@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Text } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { useRoom } from '../../../museum/RoomContext'
+import { useRoom, useRoomFrame } from '../../../museum/RoomContext'
 import { museumStore } from '../../../museum/store'
 import { box } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
@@ -35,7 +34,7 @@ function Modal({ layer, index, state, onShow, onClose }: { layer: ModalLayer; in
   const z = layer.z + DIALOG_OFFSET
   const open = state.shown && !state.closed
 
-  useFrame(({ camera }, delta) => {
+  useRoomFrame(({ camera }, delta) => {
     // Nobody asked for it: the dialog appears as the visitor walks up to it.
     if (!state.shown && museumStore.get().spaceId === roomId) {
       const ahead = camera.position.z - origin[1] - layer.z

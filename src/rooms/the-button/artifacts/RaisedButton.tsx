@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Text } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useRoomFrame } from '../../../museum/RoomContext'
 import { BUTTON, sincePress, type ArtifactProps } from './shared'
 
 const LIGHT = new THREE.Color('#f4f2ec')
@@ -32,7 +32,7 @@ export function RaisedButton({ label, pressedAt }: ArtifactProps) {
     [lit, shade],
   )
 
-  useFrame(({ clock }, delta) => {
+  useRoomFrame(({ clock }, delta) => {
     const t = sincePress(pressedAt, clock.elapsedTime)
     const down = t >= 0 && t < HOLD ? 1 : 0
     // Mechanical, almost instant travel.

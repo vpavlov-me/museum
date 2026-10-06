@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { advance, useThree } from '@react-three/fiber'
-import { spaceAt } from '../museum/roomRegistry'
-import { museumStore } from '../museum/store'
+import { museumStore, trackVisitor } from '../museum/store'
 import { moveWithCollision } from './Collision'
 import { PLAYER_RADIUS } from './Player'
 
@@ -32,8 +31,7 @@ export function DebugBridge({ setLocked }: { setLocked: (locked: boolean) => voi
         const s = Math.min(0.04, d)
         const before = p.clone()
         moveWithCollision(p, (dx / d) * s, (dz / d) * s, PLAYER_RADIUS)
-        const space = spaceAt(p.x, p.z)
-        if (space && space.id !== museumStore.get().spaceId) museumStore.set({ spaceId: space.id })
+        trackVisitor(p.x, p.z)
         if (before.distanceTo(p) < 1e-4) break
       }
       return { x: +p.x.toFixed(2), z: +p.z.toFixed(2), space: museumStore.get().spaceId }
@@ -43,9 +41,8 @@ export function DebugBridge({ setLocked }: { setLocked: (locked: boolean) => voi
     const teleport = (x: number, z: number, yaw = 0, pitch = 0) => {
       camera.position.set(x, camera.position.y, z)
       camera.rotation.set(pitch, yaw, 0, 'YXZ')
-      const space = spaceAt(x, z)
-      if (space && space.id !== museumStore.get().spaceId) museumStore.set({ spaceId: space.id })
-      return space?.id ?? null
+      trackVisitor(x, z)
+      return museumStore.get().spaceId
     }
 
     /** Turn the view: yaw 0 looks north (-z), positive yaw turns left; pitch in radians. */

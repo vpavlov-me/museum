@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { EYE_HEIGHT, spaceAt } from '../museum/roomRegistry'
-import { museumStore } from '../museum/store'
+import { EYE_HEIGHT } from '../museum/roomRegistry'
+import { trackVisitor } from '../museum/store'
 import { moveWithCollision } from './Collision'
 
 export const PLAYER_RADIUS = 0.45
@@ -71,9 +71,7 @@ export function Player({ active }: { active: boolean }) {
     camera.position.y = EYE_HEIGHT
 
     // The active room is wherever the visitor is physically standing.
-    // Inside a doorway no space matches, so the previous one is kept.
-    const space = spaceAt(camera.position.x, camera.position.z)
-    if (space && space.id !== museumStore.get().spaceId) museumStore.set({ spaceId: space.id })
+    trackVisitor(camera.position.x, camera.position.z)
   })
 
   return null

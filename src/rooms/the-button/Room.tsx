@@ -6,7 +6,7 @@ import { Plinth } from '../../components/Plinth'
 import { RoomShell } from '../../components/RoomShell'
 import { WallText } from '../../components/WallText'
 import { DOORS, localDoor } from '../../museum/roomRegistry'
-import { useRoom } from '../../museum/RoomContext'
+import { RoomContents, useRoom } from '../../museum/RoomContext'
 import { box } from '../../museum/types'
 import { useObstacle } from '../../scene/Collision'
 import { useFocusTarget } from '../../scene/Interaction'
@@ -99,28 +99,30 @@ export function TheButtonRoom() {
         ))}
       </StaticMerge>
 
-      {/* The title wall is washed from below the ceiling, not by a lamp you can find. */}
-      <LightPool position={[0, 3, -halfLength + 0.012]} rotation={[0, 0, 0]} size={[11, 5]} strength={0.07} />
+      <RoomContents>
+        {/* The title wall is washed from below the ceiling, not by a lamp you can find. */}
+        <LightPool position={[0, 3, -halfLength + 0.012]} rotation={[0, 0, 0]} size={[11, 5]} strength={0.07} />
 
-      <Text position={[0, 3.3, -halfLength + 0.02]} fontSize={1.05} letterSpacing={-0.04} color="#efede6" anchorX="center" anchorY="middle">
-        THE BUTTON
-      </Text>
-      <Text position={[0, 2.45, -halfLength + 0.02]} fontSize={0.17} letterSpacing={0.12} color="#8f8c85" anchorX="center" anchorY="middle">
-        ROOM 01 / A SMALL HISTORY OF DIGITAL AFFORDANCE
-      </Text>
+        <Text position={[0, 3.3, -halfLength + 0.02]} fontSize={1.05} letterSpacing={-0.04} color="#efede6" anchorX="center" anchorY="middle">
+          THE BUTTON
+        </Text>
+        <Text position={[0, 2.45, -halfLength + 0.02]} fontSize={0.17} letterSpacing={0.12} color="#8f8c85" anchorX="center" anchorY="middle">
+          ROOM 01 / A SMALL HISTORY OF DIGITAL AFFORDANCE
+        </Text>
 
-      {/* Directional sign beside the exit. */}
-      <Text position={[-4.45, 1.75, -halfLength + 0.02]} fontSize={0.075} letterSpacing={0.14} color="#8f8c85" anchorX="left" anchorY="top">
-        {'←  NEXT\n02 / THINGS WE SOMEHOW ACCEPTED'}
-      </Text>
+        {/* Directional sign beside the exit. */}
+        <Text position={[-4.45, 1.75, -halfLength + 0.02]} fontSize={0.075} letterSpacing={0.14} color="#8f8c85" anchorX="left" anchorY="top">
+          {'←  NEXT\n02 / THINGS WE SOMEHOW ACCEPTED'}
+        </Text>
 
-      {WALL_TEXTS.map((text) => (
-        <WallText key={text.id} position={text.position} facing={text.facing} kicker={text.kicker} title={text.title} body={text.body} />
-      ))}
+        {WALL_TEXTS.map((text) => (
+          <WallText key={text.id} position={text.position} facing={text.facing} kicker={text.kicker} title={text.title} body={text.body} />
+        ))}
 
-      {EXHIBITS.map((exhibit) => (
-        <ExhibitStand key={exhibit.id} exhibit={exhibit} />
-      ))}
+        {EXHIBITS.map((exhibit) => (
+          <ExhibitStand key={exhibit.id} exhibit={exhibit} />
+        ))}
+      </RoomContents>
     </>
   )
 }

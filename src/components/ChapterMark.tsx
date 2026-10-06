@@ -1,7 +1,12 @@
+import type { MutableRefObject } from 'react'
 import { Text } from '@react-three/drei'
+import type * as THREE from 'three'
 import { facingRotation, type Facing } from './WallText'
 
 export type Chapter = { numeral: string; name: string; line: string }
+
+/** A troika text mesh whose opacity can be animated without re-rendering. */
+export type FadingText = THREE.Mesh & { fillOpacity: number }
 
 /**
  * Large chapter typography on a wall: where one idea ends and the next begins.
@@ -14,6 +19,8 @@ export function ChapterMark({
   chapter,
   width = 3,
   scale = 1,
+  lineClip,
+  texts,
 }: {
   position: [number, number, number]
   facing: Facing
@@ -21,16 +28,26 @@ export function ChapterMark({
   chapter: Chapter
   width?: number
   scale?: number
+  /** Clips the line to [minX, minY, maxX, maxY], text-local (y runs down from 0). */
+  lineClip?: [number, number, number, number]
+  /** Receives the three text meshes (kicker, name, line), e.g. to fade them. */
+  texts?: MutableRefObject<(FadingText | null)[]>
 }) {
+  const keep = (i: number) => (node: FadingText | null) => {
+    if (texts) texts.current[i] = node
+  }
+
   return (
     <group position={position} rotation={facingRotation(facing)} scale={scale}>
-      <Text fontSize={0.1} letterSpacing={0.16} color="#8f8c85" anchorX="left" anchorY="top">
+      <Text ref={keep(0)} fontSize={0.1} letterSpacing={0.16} color="#8f8c85" anchorX="left" anchorY="top">
         {`${room} / CHAPTER ${chapter.numeral}`}
       </Text>
-      <Text position={[0, -0.2, 0]} fontSize={0.5} lineHeight={0.98} letterSpacing={-0.03} color="#efede6" anchorX="left" anchorY="top">
+      <Text ref={keep(1)} position={[0, -0.2, 0]} fontSize={0.5} lineHeight={0.98} letterSpacing={-0.03} color="#efede6" anchorX="left" anchorY="top">
         {chapter.name}
       </Text>
       <Text
+        ref={keep(2)}
+        clipRect={lineClip}
         position={[0, -0.32 - 0.49 * chapter.name.split('\n').length, 0]}
         fontSize={0.13}
         lineHeight={1.45}

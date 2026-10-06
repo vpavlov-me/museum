@@ -130,6 +130,20 @@ button {
 .hud__room {
   right: 22px;
   color: #72706a;
+  text-align: right;
+}
+
+/* The state or chapter within a room: one quiet line under the room's name. */
+.hud__zone {
+  display: block;
+  margin-top: 7px;
+  color: #5f5d58;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.hud__zone--visible {
+  opacity: 1;
 }
 
 .crosshair {

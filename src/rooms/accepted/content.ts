@@ -12,7 +12,7 @@ import type { ExhibitCardData } from '../../museum/types'
  *   (pause)       z  -17 … -21   low and quiet, the chapter II title
  *   PROVE/ATTEND  z  -21 … -35   one badge on a plinth, then many; CAPTCHA gate at z = -35.15
  *   WAIT/CONTINUE z  -35 … -46   skeleton panels as partitions
- *                 z  -46 … -66   the feed, ending at a closed passage
+ *                 z  -46 … -66   the feed, ending at the door to Room 03
  */
 export const CELLS = ACCEPTED_CELLS
 export const FEED = ACCEPTED_CELLS.feed
@@ -90,13 +90,6 @@ export const CARDS = {
     category: 'ENGAGEMENT',
     title: 'Infinite Scroll',
     description: 'Removing the bottom of the page also removed a natural place to stop. The feed has no last item, only the moment you decide to leave.',
-  },
-  next: {
-    index: 'NEXT',
-    year: 'IN PREPARATION',
-    category: 'ROOM 03',
-    title: 'Interface States',
-    description: 'Loading, empty, error, success, offline and locked, presented as spaces rather than screens. This passage opens in a later prototype.',
   },
 } satisfies Record<string, ExhibitCardData>
 

@@ -44,6 +44,34 @@ ENTRANCE → 01 THE BUTTON → threshold (low, narrow, two 90° turns) →
 - Static architecture is merged per material (`StaticMerge`); badges and feed cards are instanced.
   In development, `` ` `` toggles a small frame-time / draw-call readout.
 
+## Prototype 04 — Interface States
+
+Room 03 makes the interface's state the state of the room itself. After the feed, a low, dark
+passage with one turn resets the visitor before a new chapter:
+
+```
+02 → passage (low, dark, one turn) → 03 INTERFACE STATES
+     prologue   the title and thesis, warm and even
+     I   LOADING   placeholder walls, bench, light and text; stalls at 93%, then 99%; a waist-high
+                   placeholder holds the door until the room has loaded
+     II  EMPTY     the largest, barest volume: one wall, one line, one tiny primary action
+     III ERROR     built wrongly: a wall slab plugs the exit, the rhythm is broken, the copy is cut off;
+                   E — RETRY twice
+     IV  OFFLINE   entering cuts the line and the light; emergency marks remain; E — RECONNECT
+     V   SUCCESS   tall, bright and quiet: DONE., and a closed passage to Room 04
+```
+
+- `E` is used only for RETRY and RECONNECT; loading, the power cut and every lighting change follow
+  the visitor's position. LOADING loads again on every visit; ERROR and OFFLINE stay fixed once fixed,
+  so the room can always be walked backwards.
+- **Room activation.** Each space is `active` (visitor inside), `nearby` (opens into it) or `inactive`,
+  derived from the doors (`NEIGHBOURS`). Inactive rooms hide their contents (`RoomContents`) and pause
+  their animations (`useRoomFrame`); architecture is never hidden, so nothing pops in at a doorway.
+- **Light budget.** `Downlight` is now a fixture; one `LightRig` owns six spotlights and hands them to
+  the fixtures that can be seen, nearest first, cross-fading. The number of lights never changes, so
+  walking between rooms never recompiles shaders.
+- The HUD names the current state under the room (`03 / INTERFACE STATES` · `III / ERROR`).
+
 ### Controls
 
 - `W A S D` — move
@@ -84,26 +112,30 @@ Potential rooms:
 
 1. **The Button** — evolution of digital affordance.
 2. **Things We Somehow Accepted** — cookie banners, CAPTCHA, infinite scroll, notification badges, autoplay and other normalized interface conventions.
-3. **Interface States** — loading, empty, error, success, offline and locked as spatial experiences.
+3. **Interface States** — loading, empty, error, offline and success as spatial conditions (built in Prototype 04).
 4. **Interfaces That Changed How We Design** — a subjective collection of influential products and patterns.
 
 ## Code structure
 
 ```
 src/
-  museum/      plan and shared state: room registry (bounds, cells, doors, spawn), types, store, room context
+  museum/      plan and shared state: room registry (bounds, cells, doors, zones, neighbours, spawn),
+               types, store, room context and activation (RoomContents, useRoomFrame)
   scene/       MuseumWorld, Player, Controls, Collision, Interaction (focus + E), Lighting,
-               materials (palettes), Light (Downlight, LightPool, Luminaire), StaticMerge, geometry
-  components/  RoomShell, Wall, WallText, ChapterMark, Plinth, ExhibitLabel
-  rooms/       entrance/, the-button/, passage/, accepted/ — each owns its composition and content
+               materials (palettes), Light (Downlight, LightRig, LightPool, Luminaire), StaticMerge, geometry
+  components/  RoomShell, Wall, WallText, ChapterMark, Plinth, ExhibitLabel, ClosedDoor
+  rooms/       entrance/, the-button/, passage/, accepted/, states/ — each owns its composition and content
   ui/          HUD, ExhibitCard, Intro, Pause
 ```
 
 Rooms are authored in local coordinates and placed at their registry `origin`. They register
-obstacles with `useObstacle` and focus targets with `useFocusTarget`; walkable floor is derived
-from the registry, so adding a room means adding a registry entry, its doors and its component.
-A room may be several rectangular cells with their own ceiling heights (Room 02 is five); the
-taller neighbour builds a shared wall. Architecture uses palette materials so it can be merged.
+obstacles with `useObstacle` and focus targets with `useFocusTarget`; walkable floor and which
+spaces can see each other are derived from the registry, so adding a room means adding a registry
+entry, its doors and its component. Put everything but merged architecture in `RoomContents`,
+animate with `useRoomFrame`, and light exhibits with `Downlight` fixtures.
+A room may be several rectangular cells with their own ceiling heights (Room 02 is five, Room 03
+six); the taller neighbour builds a shared wall, unless both build half of it (`split`) so each face
+can have its own palette. Architecture uses palette materials so it can be merged.
 
 ## Content model
 

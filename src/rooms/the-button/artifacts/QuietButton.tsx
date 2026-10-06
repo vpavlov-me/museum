@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { Text } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useRoomFrame } from '../../../museum/RoomContext'
 import { BUTTON, sincePress, type ArtifactProps } from './shared'
 
 const SURFACE = new THREE.Color('#1c1c1b')
@@ -23,7 +23,7 @@ export function QuietButton({ label, pressedAt }: ArtifactProps) {
   const lineMaterial = useRef<THREE.MeshBasicMaterial>(null)
   const arrow = useRef<THREE.Mesh>(null)
 
-  useFrame(({ clock }) => {
+  useRoomFrame(({ clock }) => {
     const t = sincePress(pressedAt, clock.elapsedTime)
     const p = t >= 0 && t < DURATION ? t / DURATION : 0
     // Ease out on the way forward, settle back gently.

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { useRoom } from '../../../museum/RoomContext'
+import { useRoom, useRoomFrame } from '../../../museum/RoomContext'
 import { box } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
 import { useFocusTarget } from '../../../scene/Interaction'
@@ -75,7 +75,7 @@ function SkeletonPanel({ panel }: { panel: Panel }) {
 
   const barWidth = panel.width - 0.3
 
-  useFrame(({ camera }) => {
+  useRoomFrame(({ camera }) => {
     const now = clock.elapsedTime
     // Arriving is the refresh: nobody presses anything, the page simply starts loading again.
     const distance = Math.hypot(camera.position.x - origin[0] - panel.x, camera.position.z - origin[1] - panel.z)
