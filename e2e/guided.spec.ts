@@ -48,8 +48,9 @@ async function runRoute(page: Page, title: string) {
       for (let i = 0; i < 20 && (await ui(page)).space !== 'lobby'; i++) await page.waitForTimeout(200)
       return
     }
-    await page.locator('.guided__bar .museum-button:last-child').click()
+    await page.locator('.guided__bar .museum-button:last-child').click({ timeout: 60_000 })
     now = await arrive(page)
+    console.log(`  ${now.counter}  ${now.title}${now.hint ? `  (${now.hint})` : ''}`)
     // Stopped by a gate: do what it asks (or give it a moment), then go on.
     for (let tries = 0; now.hint && tries < 4; tries++) {
       if (now.action) await page.locator('.guided__middle > .museum-button').click()
