@@ -21,7 +21,7 @@ const ROOMS: { number: string; title: string; idea: string; entries: Entry[] }[]
   {
     number: '02',
     title: 'Things We Somehow Accepted',
-    idea: 'Interface behaviour as architecture. A cookie banner across the room, modals that dim it, badges on every surface, a CAPTCHA gate, skeleton panels in the way and a feed with no end.',
+    idea: 'Interface behavior as architecture. A cookie banner across the room, modals that dim it, badges on every surface, a CAPTCHA gate, skeleton panels in the way and a feed with no end.',
     entries: [
       ACCEPTED_THESIS,
       ...[ACCEPTED.banner, ACCEPTED.modal].map((card) => ({ kicker: `${ACCEPTED_CHAPTERS.interrupt.name} / ${card.year}`, title: card.title, body: card.description })),

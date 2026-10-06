@@ -9,6 +9,7 @@ import { MuseumWorld } from './scene/MuseumWorld'
 import { Precompile } from './scene/Precompile'
 import { Announcer } from './ui/Announcer'
 import { ColophonScreen } from './ui/ColophonScreen'
+import { ContextLost } from './ui/ContextLost'
 import { Entry } from './ui/Entry'
 import { ExhibitCard } from './ui/ExhibitCard'
 import { GuidedControls } from './ui/GuidedControls'
@@ -41,12 +42,21 @@ function App() {
   const [entered, setEntered] = useState(false)
   const [locked, setLocked] = useState(false)
   const [visit, setVisit] = useState(0)
+  const [contextLost, setContextLost] = useState(false)
+  const [lockRefused, setLockRefused] = useState(false)
   const ended = useMuseumStore((state) => state.ended)
   const guided = mode === 'guided'
   // Walking needs the cursor; the guided tour never asks for it.
-  const active = entered && !ended && !reading && (guided || locked)
+  const active = entered && !ended && !reading && !contextLost && (guided || locked)
 
   const markReady = useCallback(() => setReady(true), [])
+
+  // Some browsers, extensions and kiosk modes refuse pointer lock: the pause screen then offers the tour.
+  useEffect(() => {
+    const refused = () => setLockRefused(true)
+    document.addEventListener('pointerlockerror', refused)
+    return () => document.removeEventListener('pointerlockerror', refused)
+  }, [])
 
   // Leaving through the exit hands the cursor back for the colophon.
   useEffect(() => {
@@ -75,7 +85,18 @@ function App() {
     <main className="app-shell">
       {webgl && (
         <SceneBoundary onError={sceneFailed}>
-          <Canvas camera={{ position: SPAWN.position, fov: 60, near: 0.1, far: 100 }} dpr={[1, sharpest]} gl={{ antialias: true }} aria-hidden>
+          <Canvas
+            camera={{ position: SPAWN.position, fov: 60, near: 0.1, far: 100 }}
+            dpr={[1, sharpest]}
+            gl={{ antialias: true }}
+            aria-hidden
+            onCreated={({ gl }) =>
+              gl.domElement.addEventListener('webglcontextlost', (event) => {
+                event.preventDefault()
+                setContextLost(true)
+              })
+            }
+          >
             <color attach="background" args={[INK.void]} />
             <fog attach="fog" args={[INK.void, 18, 40]} />
             <Suspense fallback={null}>
@@ -102,11 +123,18 @@ function App() {
       />
       <HUD visible={active} guided={guided} />
       <GuidedControls visible={active && guided} />
-      <Pause visible={entered && !guided && !locked && !ended && !reading} onResume={sound.unlock} onRead={() => setReading(true)} />
+      <Pause
+        visible={entered && !guided && !locked && !ended && !reading && !contextLost}
+        lockRefused={lockRefused}
+        onResume={sound.unlock}
+        onGuided={() => setMode('guided')}
+        onRead={() => setReading(true)}
+      />
       <ColophonScreen visible={ended && !reading} onRestart={restart} onRead={() => setReading(true)} />
       <ExhibitCard visible={active} />
       <Announcer active={active} />
-      <TextExhibition visible={reading} canVisit={webgl} onVisit={() => setReading(false)} />
+      <ContextLost visible={contextLost && !reading} onRead={() => setReading(true)} />
+      <TextExhibition visible={reading} canVisit={webgl && !contextLost} onVisit={() => setReading(false)} />
     </main>
   )
 }

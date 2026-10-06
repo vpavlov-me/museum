@@ -34,6 +34,7 @@ let ambienceBus: GainNode | null = null
 let muted = readMuted()
 let presence: Presence = 'paused'
 let voices = 0
+let unavailable = typeof window === 'undefined' || typeof window.AudioContext === 'undefined'
 const subscribers = new Set<() => void>()
 const unlockedCallbacks = new Set<(context: AudioContext) => void>()
 
@@ -48,15 +49,22 @@ function applyLevel(seconds = 0.4) {
 
 function onVisibility() {
   if (!context) return
-  if (document.hidden) void context.suspend()
-  else void context.resume()
+  const change = document.hidden ? context.suspend() : context.resume()
+  change.catch(() => undefined)
 }
 
 export const sound = {
   /** Creates (once) and resumes the audio context. Call only from a user gesture. */
   unlock() {
+    // Sound is optional: a browser without Web Audio (or one that refuses it) gets a silent museum.
+    if (unavailable) return
     if (!context) {
-      context = new AudioContext({ latencyHint: 'interactive' })
+      try {
+        context = new AudioContext({ latencyHint: 'interactive' })
+      } catch {
+        unavailable = true
+        return
+      }
       master = context.createGain()
       master.gain.value = 0
       master.connect(context.destination)
@@ -68,7 +76,7 @@ export const sound = {
       const created = context
       unlockedCallbacks.forEach((callback) => callback(created))
     }
-    void context.resume()
+    context.resume().catch(() => undefined)
     applyLevel(1.5)
   },
 
