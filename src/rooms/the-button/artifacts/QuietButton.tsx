@@ -1,6 +1,7 @@
 import { useRef } from 'react'
-import { Text } from '@react-three/drei'
 import * as THREE from 'three'
+import { Text } from '../../../components/Text'
+import { INK } from '../../../identity'
 import { useRoomFrame } from '../../../museum/RoomContext'
 import { BUTTON, sincePress, type ArtifactProps } from './shared'
 
@@ -40,10 +41,10 @@ export function QuietButton({ label, pressedAt }: ArtifactProps) {
         <boxGeometry args={[width, height, d]} />
         <meshStandardMaterial ref={surface} color={SURFACE} roughness={0.9} />
       </mesh>
-      <Text position={[0.26, 0.02, d / 2 + 0.002]} fontSize={0.17} letterSpacing={-0.01} color="#efede6" anchorX="right" anchorY="middle">
+      <Text position={[0.26, 0.02, d / 2 + 0.002]} fontSize={0.17} letterSpacing={-0.01} color={INK.text} anchorX="right" anchorY="middle">
         {label}
       </Text>
-      <Text ref={arrow} position={[0.36, 0.02, d / 2 + 0.002]} fontSize={0.17} color="#efede6" anchorX="left" anchorY="middle">
+      <Text ref={arrow} position={[0.36, 0.02, d / 2 + 0.002]} fontSize={0.17} color={INK.text} anchorX="left" anchorY="middle">
         →
       </Text>
       <mesh ref={line} position={[0, -0.12, d / 2 + 0.002]}>

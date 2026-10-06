@@ -1,4 +1,4 @@
-import { Text } from '@react-three/drei'
+import { Text } from '../../components/Text'
 import { Wall } from '../../components/Wall'
 import { DOORS, localDoor, TRANSITION_03, WALL_THICKNESS } from '../../museum/roomRegistry'
 import { RoomContents, useRoom } from '../../museum/RoomContext'

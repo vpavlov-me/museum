@@ -1,4 +1,4 @@
-import { Text } from '@react-three/drei'
+import { Text } from '../../../components/Text'
 import { WallText } from '../../../components/WallText'
 import { LightPool, Luminaire } from '../../../scene/Light'
 import { PALETTES } from '../../../scene/materials'

@@ -3,8 +3,10 @@ import { contains, offsetRect, overlaps, rect, type DoorDefinition, type Rect, t
 /*
  * Museum plan, in metres. North is -z, the general direction of travel.
  *
- *                    ┌──────────────┐
- *                    │  V SUCCESS   │  → closed passage (Room 04)
+ *                      ┌────────┐
+ *                      │colophon│  → EXIT: the end of the visit
+ *                    ┌─┴────────┴───┐
+ *                    │  V SUCCESS   │
  *                    └───┬──────┬───┘
  *                        │IV OFF│
  *                     ┌──┴──────┴┐
@@ -99,6 +101,9 @@ export const STATES_CELLS = {
   success: cell(-9, 4, -93, -77.2, 8.5),
 }
 
+/** After the last room: a low, warm room with the credits and the way out. Local to Room 03. */
+export const COLOPHON = cell(-6, 1, -101, -93.2, 3.2)
+
 const inAccepted = (x: number, z: number) => ({ x: ACCEPTED_ORIGIN[0] + x, z: ACCEPTED_ORIGIN[1] + z })
 const inStates = (x: number, z: number) => ({ x: STATES_ORIGIN[0] + x, z: STATES_ORIGIN[1] + z })
 
@@ -120,6 +125,7 @@ export const DOORS = {
   errorExit: { ...inStates(0.5, -63.1), width: 1.8, height: 2.6 },
   /** Closed by a sliding panel until the connection is restored. */
   offlineExit: { ...inStates(-2.5, -77.1), width: 1.8, height: 2.6 },
+  successExit: { ...inStates(-2.5, -93.1), width: 1.6, height: 2.5 },
 } satisfies Record<string, DoorDefinition>
 
 export const SPACES: SpaceDefinition[] = [
@@ -179,6 +185,14 @@ export const SPACES: SpaceDefinition[] = [
         ['success', 'V / SUCCESS'],
       ] as const
     ).map(([id, label]) => ({ id, label, bounds: [offsetRect(STATES_CELLS[id], STATES_ORIGIN)] })),
+  },
+  {
+    id: 'colophon',
+    number: null,
+    title: 'Colophon',
+    hudLabel: 'END OF EXHIBITION',
+    origin: STATES_ORIGIN,
+    bounds: [offsetRect(COLOPHON, STATES_ORIGIN)],
   },
 ]
 

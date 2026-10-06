@@ -30,12 +30,12 @@ export function ExhibitCard({ visible }: { visible: boolean }) {
       <aside className={`exhibit-card ${shown ? 'exhibit-card--visible' : ''}`} aria-hidden>
         {overlay && (
           <>
-            <div className="exhibit-card__meta">
+            <div className="meta">
               {overlay.year} / {overlay.category}
             </div>
             <h2>{overlay.title}</h2>
             <p>{overlay.description}</p>
-            <div className="exhibit-card__index">OBJECT {overlay.index}</div>
+            <div className="exhibit-card__index meta">OBJECT {overlay.index}</div>
           </>
         )}
       </aside>

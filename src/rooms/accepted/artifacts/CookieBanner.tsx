@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Text } from '@react-three/drei'
 import * as THREE from 'three'
+import { Text } from '../../../components/Text'
+import { INK } from '../../../identity'
 import { useRoomFrame } from '../../../museum/RoomContext'
 import { rect } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
@@ -92,7 +93,7 @@ export function CookieBanner() {
         </Text>
 
         <mesh position={[ACCEPT.x, ACCEPT.y, 0]} geometry={roundedRect(ACCEPT.width, ACCEPT.height, 0.25)} material={basicMaterial('#141414')} />
-        <Text position={[ACCEPT.x, ACCEPT.y, 0.002]} fontSize={0.15} color="#efede6" anchorX="center" anchorY="middle">
+        <Text position={[ACCEPT.x, ACCEPT.y, 0.002]} fontSize={0.15} color={INK.text} anchorX="center" anchorY="middle">
           Accept all
         </Text>
 

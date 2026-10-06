@@ -1,6 +1,7 @@
 import { useRef } from 'react'
-import { Text } from '@react-three/drei'
 import type { FadingText } from '../../../components/ChapterMark'
+import { Text } from '../../../components/Text'
+import { INK } from '../../../identity'
 import { DOORS } from '../../../museum/roomRegistry'
 import { useRoom, useRoomFrame } from '../../../museum/RoomContext'
 import { Downlight } from '../../../scene/Light'
@@ -33,10 +34,10 @@ export function FeedEnd() {
   return (
     <>
       <group position={[0, 0, wall]}>
-        <Text ref={keep(0)} position={[0, lintel + 0.42, 0]} fontSize={0.045} letterSpacing={0.16} color="#8f8c85" anchorX="center" anchorY="middle">
+        <Text ref={keep(0)} position={[0, lintel + 0.42, 0]} fontSize={0.045} letterSpacing={0.16} color={INK.muted} anchorX="center" anchorY="middle">
           END OF FEED
         </Text>
-        <Text ref={keep(1)} position={[0, lintel + 0.24, 0]} fontSize={0.12} color="#efede6" anchorX="center" anchorY="middle">
+        <Text ref={keep(1)} position={[0, lintel + 0.24, 0]} fontSize={0.12} color={INK.text} anchorX="center" anchorY="middle">
           You're all caught up.
         </Text>
       </group>

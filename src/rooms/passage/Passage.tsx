@@ -1,5 +1,6 @@
-import { Text } from '@react-three/drei'
+import { Text } from '../../components/Text'
 import { Wall } from '../../components/Wall'
+import { INK } from '../../identity'
 import { DOORS, THRESHOLD, WALL_THICKNESS } from '../../museum/roomRegistry'
 import { RoomContents } from '../../museum/RoomContext'
 import { LightPool, Luminaire } from '../../scene/Light'
@@ -49,13 +50,13 @@ export function Passage() {
       <RoomContents>
         {/* The wall that ends the first leg, and turns the visitor. */}
         <group position={[midA, 0, b.minZ + 0.012]}>
-          <Text position={[-0.78, 2.02, 0]} fontSize={0.075} letterSpacing={0.16} color="#8f8c85" anchorX="left" anchorY="top">
+          <Text position={[-0.78, 2.02, 0]} fontSize={0.075} letterSpacing={0.16} color={INK.muted} anchorX="left" anchorY="top">
             NEXT
           </Text>
-          <Text position={[-0.8, 1.86, 0]} fontSize={0.42} letterSpacing={-0.03} color="#efede6" anchorX="left" anchorY="top">
+          <Text position={[-0.8, 1.86, 0]} fontSize={0.42} letterSpacing={-0.03} color={INK.text} anchorX="left" anchorY="top">
             ← 02
           </Text>
-          <Text position={[-0.78, 1.36, 0]} fontSize={0.075} letterSpacing={0.14} lineHeight={1.5} color="#bdbab2" anchorX="left" anchorY="top">
+          <Text position={[-0.78, 1.36, 0]} fontSize={0.075} letterSpacing={0.14} lineHeight={1.5} color={INK.body} anchorX="left" anchorY="top">
             {'THINGS WE\nSOMEHOW ACCEPTED'}
           </Text>
         </group>

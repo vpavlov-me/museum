@@ -1,6 +1,7 @@
 import type { MutableRefObject } from 'react'
-import { Text } from '@react-three/drei'
 import type * as THREE from 'three'
+import { INK } from '../identity'
+import { Text } from './Text'
 import { facingRotation, type Facing } from './WallText'
 
 export type Chapter = { numeral: string; name: string; line: string }
@@ -39,10 +40,10 @@ export function ChapterMark({
 
   return (
     <group position={position} rotation={facingRotation(facing)} scale={scale}>
-      <Text ref={keep(0)} fontSize={0.1} letterSpacing={0.16} color="#8f8c85" anchorX="left" anchorY="top">
+      <Text ref={keep(0)} fontSize={0.1} letterSpacing={0.16} color={INK.muted} anchorX="left" anchorY="top">
         {`${room} / CHAPTER ${chapter.numeral}`}
       </Text>
-      <Text ref={keep(1)} position={[0, -0.2, 0]} fontSize={0.5} lineHeight={0.98} letterSpacing={-0.03} color="#efede6" anchorX="left" anchorY="top">
+      <Text ref={keep(1)} position={[0, -0.2, 0]} fontSize={0.5} lineHeight={0.98} letterSpacing={-0.03} color={INK.text} anchorX="left" anchorY="top">
         {chapter.name}
       </Text>
       <Text
@@ -52,7 +53,7 @@ export function ChapterMark({
         fontSize={0.13}
         lineHeight={1.45}
         maxWidth={width}
-        color="#bdbab2"
+        color={INK.body}
         anchorX="left"
         anchorY="top"
       >

@@ -1,10 +1,9 @@
-import { Text } from '@react-three/drei'
-import { ClosedDoor } from '../../../components/ClosedDoor'
+import { Text } from '../../../components/Text'
 import { useFocusTarget } from '../../../scene/Interaction'
 import { Luminaire } from '../../../scene/Light'
 import { PALETTES } from '../../../scene/materials'
 import { StaticMerge } from '../../../scene/StaticMerge'
-import { CARDS, CELLS, CHAPTERS, INK, NEXT } from '../content'
+import { CARDS, CELLS, CHAPTERS, INK } from '../content'
 
 const cell = CELLS.success
 const palette = PALETTES.success
@@ -14,12 +13,11 @@ const WALL = cell.minZ + 0.02
 /**
  * V — SUCCESS. After the dark, low OFFLINE room: the tallest, brightest space in the
  * museum, with almost nothing in it. Completion is communicated by height, light
- * and quiet, not by celebration. At the far end, under the one word, the passage
- * to Room 04 is still closed.
+ * and quiet, not by celebration. Under the one word, a low doorway leads on to
+ * the colophon and the way out.
  */
 export function SuccessState() {
   useFocusTarget({ id: 'success', position: [CENTER_X, 3, WALL], distance: 10, facing: 0.8, card: CARDS.success, labelled: true })
-  useFocusTarget({ id: 'next-room', position: [CENTER_X, 1.4, WALL + 0.5], distance: 3.4, facing: 0.6, card: CARDS.next, labelled: true })
 
   return (
     <>
@@ -43,8 +41,6 @@ export function SuccessState() {
           {CHAPTERS.success.line}
         </Text>
       </group>
-
-      <ClosedDoor position={[CENTER_X, 0, WALL - 0.01]} lines={NEXT} />
     </>
   )
 }

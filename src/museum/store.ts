@@ -17,9 +17,12 @@ type MuseumState = {
   /** Named part of that space (a state, a chapter), or null. */
   zoneId: string | null
   focus: FocusInfo | null
+  /** The visitor has left through the exit: the visit is over until they start another. */
+  ended: boolean
 }
 
-let state: MuseumState = { spaceId: SPAWN.spaceId, zoneId: null, focus: null }
+const initial: MuseumState = { spaceId: SPAWN.spaceId, zoneId: null, focus: null, ended: false }
+let state: MuseumState = initial
 const listeners = new Set<() => void>()
 
 /**
@@ -28,6 +31,10 @@ const listeners = new Set<() => void>()
  */
 export const museumStore = {
   get: () => state,
+  /** Back to the state of a fresh visit. */
+  reset() {
+    museumStore.set(initial)
+  },
   set(patch: Partial<MuseumState>) {
     state = { ...state, ...patch }
     listeners.forEach((listener) => listener())

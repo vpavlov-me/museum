@@ -35,7 +35,7 @@ export function StatesRoom() {
         <RoomShell {...error} palette={PALETTES.states} south={null} north={{ door: door('errorExit'), split: true }} east={null} />
         {/* OFFLINE builds its own half of both shared walls, so its light can fail alone. */}
         <RoomShell {...offline} palette={OFFLINE_PALETTE} south={{ door: door('errorExit'), split: true }} north={{ door: door('offlineExit'), split: true }} />
-        <RoomShell {...success} palette={PALETTES.success} south={{ door: door('offlineExit'), split: true }} north={{}} />
+        <RoomShell {...success} palette={PALETTES.success} south={{ door: door('offlineExit'), split: true }} north={{ door: door('successExit') }} />
       </StaticMerge>
 
       <RoomContents>
