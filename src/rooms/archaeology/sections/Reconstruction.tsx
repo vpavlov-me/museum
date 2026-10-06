@@ -1,7 +1,10 @@
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import { useSound } from '../../../audio/useSound'
+import { DoorLeaf } from '../../../components/DoorLeaf'
 import { WallText } from '../../../components/WallText'
 import { motion } from '../../../museum/capabilities'
+import { navigation } from '../../../museum/navigation'
 import { useRoomFrame } from '../../../museum/RoomContext'
 import { rect } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
@@ -10,7 +13,7 @@ import { Downlight, LightPool } from '../../../scene/Light'
 import { createPoolMaterial, PALETTES, PLINTH_MATERIAL } from '../../../scene/materials'
 import { StaticMerge } from '../../../scene/StaticMerge'
 import { CatalogueCard } from '../CatalogueCard'
-import { AFTERWORD, AFTERWORD_LAYOUT, cardOf, CELLS, FINDS } from '../content'
+import { AFTERWORD, AFTERWORD_LAYOUT, cardOf, CARDS, CELLS, FINDS } from '../content'
 
 const cell = CELLS.reconstruction
 const palette = PALETTES.diorama
@@ -19,7 +22,7 @@ const palette = PALETTES.diorama
  * IV — RECONSTRUCTION. A dark room. On a low platform, the archive's diorama of a
  * dwelling: a seat turned towards a large lit rectangle, a small one on its arm. Seen
  * from behind the seat, over its shoulder; nobody is in it. The only light in the
- * room is the rectangles' own. Then the museum's afterword, and the way out.
+ * room is the rectangles' own. Then the museum's afterword, and the door back to the lobby.
  */
 const STAGE = rect(-1.6, 3.4, -54.6, -48.6)
 const STAGE_HEIGHT = 0.22
@@ -120,7 +123,11 @@ function Diorama() {
   )
 }
 
+/** The far door: back to the lobby. */
+const RETURN_X = 5.5
+
 export function Reconstruction() {
+  const play = useSound()
   const card = useMemo(() => cardOf(FINDS.shrine), [])
   useObstacle('diorama', rect(cell.minX, BARRIER_X + 0.1, STAGE.minZ - 0.2, STAGE.maxZ + 0.2))
   useFocusTarget({ id: 'shrine', position: [SEAT.x, 1, SEAT.z], distance: 4.5, facing: 0.6, card, labelled: true })
@@ -133,6 +140,19 @@ export function Reconstruction() {
       </group>
 
       <WallText position={[cell.minX + 0.4, cell.minZ + 0.02]} facing="south" layout={AFTERWORD_LAYOUT} {...AFTERWORD} />
+      <DoorLeaf
+        id="archaeology-return"
+        x={RETURN_X}
+        wall={cell.minZ + 0.02}
+        palette={palette}
+        sign="LOBBY"
+        prompt="RETURN TO THE LOBBY"
+        card={CARDS.exit}
+        onUse={() => {
+          play('exit-door', [RETURN_X, 1.2, cell.minZ])
+          navigation.returnToLobby('archaeology')
+        }}
+      />
       <Downlight at={[cell.minX + 2.9, cell.minZ + 1.6]} aim={[cell.minX + 2.9, 2, cell.minZ]} ceiling={cell.height} palette={palette} angle={0.55} penumbra={0.8} intensity={16} distance={6} />
     </>
   )

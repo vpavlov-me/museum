@@ -60,15 +60,16 @@ Do not introduce this folder structure prematurely if a change is still small, b
 - Prefer proximity, gaze or clear interaction prompts.
 - Always preserve an obvious way to release pointer lock.
 
-## Current state: v2, growing the gallery
+## Current state: v2, a small museum
 
-v1 shipped as **Rooms 01–03** (#12). v2 (#21) grows the gallery one room at a time, each from an
-approved issue: **Room 04 — Interface Archaeology** (#22) sits between Room 03 and the colophon.
+v1 shipped as one exhibition of three rooms (#12). v2 (#20, #21) makes it a small museum: a
+**lobby** where every visit starts and ends, the **Permanent Exhibition** (Rooms 01–03, unchanged),
+**Interface Archaeology** in its own wing (#22), and a temporary exhibition in preparation.
 
-- **Do not start a room or new exhibit without an approved issue.** Ideas go into the v2 roadmap
-  (#21) as backlog first.
+- Design for three to five exhibitions, not more. Do not start an exhibition, room or new exhibit
+  without an approved issue; ideas go into the v2 roadmap (#21) as backlog first.
 - Every merge to `main` deploys: each change must leave walking, the guided tour and the text
-  version complete, with entry, colophon, metadata and the OG image matching the room count.
+  version complete, with entry, colophon, metadata and the OG image matching the exhibitions.
 - Otherwise, only fix bugs, regressions, accessibility and performance problems, small copy errors
   and deployment issues.
 
@@ -76,6 +77,15 @@ approved issue: **Room 04 — Interface Archaeology** (#22) sits between Room 03
 
 - **Plan:** `museum/roomRegistry.ts` defines every space, its cells, doors, zones and spawn point.
   Walkable floor, which rooms open into which, and cell-to-cell sight lines are all derived from it.
+- **Exhibitions:** `museum/exhibitions.ts` lists them (number, title, status, URL slug, spaces,
+  lobby door, start point, chunk). Each exhibition's rooms are one dynamic import
+  (`rooms/permanent.ts`, `rooms/archaeology/index.ts`) loaded by `museum/exhibitionLoader.ts`; its
+  lobby door stays shut until they are mounted and compiled. Never import an exhibition's rooms
+  statically from shared code. Each exhibition ends at a `DoorLeaf` that calls
+  `navigation.returnToLobby`; the lobby's front door calls `navigation.leave`.
+- **Navigation:** `/exhibitions/<slug>` starts a visit in that exhibition (`vercel.json` rewrites
+  it); the address bar follows the exhibition the visitor is in. `P` opens the plan (`ui/Plan`).
+  `museum/events.ts` is the analytics surface: add an event there, never instrument per frame.
 - **Visibility and activation:** put everything except merged architecture in
   `<RoomContents cells={[…]}>`. Animate with `useRoomFrame`. Light exhibits with `Downlight`
   fixtures; the shared `LightRig` has a budget of 6 spotlights. Contents more than two doors away
@@ -83,9 +93,10 @@ approved issue: **Room 04 — Interface Archaeology** (#22) sits between Room 03
 - **Interaction:** `useObstacle` blocks the way, and `useFocusTarget` makes things focusable and
   usable with `E`; the guided tour's action button does the same. Things that block the way must
   never close on the visitor.
-- **Three ways to visit:** walk (desktop), guided tour (`museum/tour.ts`; every stop must stay
-  reachable, and may set a `pitch` to look down) and the text version (built from each room's
-  `content.ts`). Whatever changes in a room must still work in all three.
+- **Three ways to visit:** walk (desktop), guided tour (`museum/tour.ts`: one route per exhibition,
+  chosen in the lobby, each ending at its door back to the lobby; every stop must stay reachable,
+  and may set a `pitch` to look down) and the text version (one section per exhibition, built from
+  each room's `content.ts`). Whatever changes in a room must still work in all three.
 - **Passages:** the low, dark turn between rooms is `components/TurnPassage`; a new room gets one.
 - **Identity:** `identity.ts` and `styles.css` hold the ink, the type and the name; use them, not
   new hex values. Every 3D text uses `components/Text` (Inter, self-hosted).

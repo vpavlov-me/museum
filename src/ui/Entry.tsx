@@ -1,4 +1,5 @@
-import { MUSEUM, ROOM_COUNT } from '../identity'
+import { MUSEUM } from '../identity'
+import { EXHIBITIONS, OPEN_EXHIBITIONS } from '../museum/exhibitions'
 import { SoundToggle } from './SoundToggle'
 
 /**
@@ -6,14 +7,19 @@ import { SoundToggle } from './SoundToggle'
  * the door is closed and says so, without a percentage it could not honestly give.
  * Everything a visitor needs to know before entering is here as real text.
  */
+const COUNT = ['One', 'Two', 'Three', 'Four', 'Five'][OPEN_EXHIBITIONS.length - 1]
+
 export function Entry({
   ready,
+  startAt,
   hidden,
   recommended,
   onEnter,
   onRead,
 }: {
   ready: boolean
+  /** The exhibition a direct link starts in, or null for the lobby. */
+  startAt: string | null
   hidden: boolean
   /** Walk on a desktop with a mouse; the guided tour on touch screens. */
   recommended: 'walk' | 'guided'
@@ -27,7 +33,7 @@ export function Entry({
       <header className="entry__top meta">
         <span className="brand">{MUSEUM.name}</span>
         <span>
-          An exhibition in {ROOM_COUNT} rooms · {MUSEUM.year}
+          {COUNT} exhibitions · {MUSEUM.year}
         </span>
       </header>
 
@@ -44,13 +50,14 @@ export function Entry({
             disabled={!ready}
             onClick={() => onEnter(recommended)}
           >
-            {!ready ? 'Opening the rooms' : walk ? 'Enter exhibition' : 'Begin the guided tour'}
+            {!ready ? 'Opening the rooms' : walk ? (startAt ? `Enter ${startAt}` : 'Enter the museum') : 'Begin the guided tour'}
             {!ready && <span className="loading-line" aria-hidden />}
           </button>
           <p className="entry__controls meta">
-            {walk ? 'W A S D walk · Mouse look · E interact · Esc pause · M sound' : 'Drag to look · Next to walk on · Tap the action to use it'}
+            {walk ? 'W A S D walk · Mouse look · E interact · P plan · Esc pause · M sound' : 'Drag to look · Next to walk on · Tap the action to use it'}
           </p>
         </div>
+        {startAt && <p className="entry__start meta">This visit starts in {startAt}. The lobby and the other exhibitions are a walk away.</p>}
         <span className="sr-only" role="status">
           {ready ? 'The exhibition is ready.' : 'The exhibition is loading.'}
         </span>
@@ -61,7 +68,7 @@ export function Entry({
             </button>
           )}
           <button className="text-button meta" type="button" onClick={onRead}>
-            Read the exhibition as text
+            Read the museum as text
           </button>
         </div>
         <div className="entry__requirement">
@@ -75,11 +82,11 @@ export function Entry({
       </div>
 
       <footer className="entry__foot meta">
-        <ol className="entry__rooms" aria-label="Rooms">
-          {MUSEUM.rooms.map(([number, title]) => (
-            <li key={number}>
-              <span>{number}</span>
-              {title}
+        <ol className="entry__rooms" aria-label="Exhibitions">
+          {EXHIBITIONS.map((exhibition) => (
+            <li key={exhibition.id}>
+              <span>{exhibition.number}</span>
+              {exhibition.status === 'open' ? exhibition.title : `${exhibition.title} (in preparation)`}
             </li>
           ))}
         </ol>

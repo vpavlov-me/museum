@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { EYE_HEIGHT, SPAWN } from '../museum/roomRegistry'
+import { navigation } from '../museum/navigation'
+import { EYE_HEIGHT } from '../museum/roomRegistry'
 import { trackVisitor } from '../museum/store'
 import { moveWithCollision } from './Collision'
 
@@ -38,11 +39,12 @@ export function Player({ active }: { active: boolean }) {
     }
   }, [])
 
-  // Every visit starts at the door, looking into the entrance hall.
+  // Every visit starts in the lobby by the front door (or where a direct link points).
   useEffect(() => {
-    camera.position.set(...SPAWN.position)
-    camera.rotation.set(0, 0, 0, 'YXZ')
-    trackVisitor(camera.position.x, camera.position.z)
+    const { x, z, yaw } = navigation.start()
+    camera.position.set(x, EYE_HEIGHT, z)
+    camera.rotation.set(0, yaw, 0, 'YXZ')
+    trackVisitor(x, z)
   }, [camera])
 
   useEffect(() => {
@@ -53,6 +55,14 @@ export function Player({ active }: { active: boolean }) {
   }, [active])
 
   useFrame(({ camera }, rawDelta) => {
+    // Back to the lobby from an exhibition's last door: placed, not walked.
+    const move = navigation.takeMove()
+    if (move) {
+      camera.position.set(move.x, EYE_HEIGHT, move.z)
+      camera.rotation.set(0, move.yaw, 0, 'YXZ')
+      velocity.current.set(0, 0, 0)
+      trackVisitor(move.x, move.z)
+    }
     if (!active) return
     const delta = Math.min(rawDelta, 0.1)
 

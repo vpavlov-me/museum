@@ -77,7 +77,7 @@ export const SOUNDS = {
     return tone(c, out, t, { freq: 55, to: 110, duration: 1.8, gain: 0.05, attack: 0.4 })
   },
 
-  // Room 04: the archive. Dry, close, unhurried.
+  // Interface Archaeology: the archive. Dry, close, unhurried.
   // Three strokes of a soft brush, and a little soil settling.
   brush: (c, out, t) => {
     for (let i = 0; i < 3; i++) noise(c, out, t, { duration: 0.32, gain: 0.035, filter: 'bandpass', freq: 3000, to: 1800, q: 0.8, attack: 0.08, delay: i * 0.38 })

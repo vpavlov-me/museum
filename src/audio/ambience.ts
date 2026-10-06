@@ -23,6 +23,8 @@ type Profile = {
 const profile = (noise: number, lowpass: number, hum: number, air: number, beat = 0): Profile => ({ noise, lowpass, hum, beat, air })
 
 const PROFILES: Record<string, Profile> = {
+  // The lobby: open, bright and slightly busier, a public space.
+  lobby: profile(0.055, 360, 0.002, 0.005),
   entrance: profile(0.05, 320, 0.002, 0.004),
   'the-button': profile(0.045, 260, 0.003, 0.003),
   passage: profile(0.03, 170, 0.001, 0),
@@ -39,7 +41,7 @@ const PROFILES: Record<string, Profile> = {
   'states:offline-dark': profile(0.014, 110, 0, 0),
   // Release: quieter, but brighter and cleaner, without hum.
   'states:success': profile(0.028, 900, 0, 0.006),
-  'transition-04': profile(0.025, 150, 0, 0),
+  'archaeology-passage': profile(0.025, 150, 0, 0),
   // The archive: dry and still, the air handling of a building kept for storage.
   archaeology: profile(0.035, 230, 0.001, 0.002),
   // The hall over the excavation: taller, so a little more air and less hum.

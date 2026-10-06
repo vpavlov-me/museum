@@ -1,0 +1,3 @@
+{
+  "rewrites": [{ "source": "/exhibitions/:slug", "destination": "/index.html" }]
+}

@@ -14,7 +14,7 @@ const WALL = cell.minZ + 0.02
  * V — SUCCESS. After the dark, low OFFLINE room: the tallest, brightest space in the
  * museum, with almost nothing in it. Completion is communicated by height, light
  * and quiet, not by celebration. Under the one word, a low doorway leads on to
- * the passage to Room 04.
+ * the colophon, which closes the exhibition.
  */
 export function SuccessState() {
   useFocusTarget({ id: 'success', position: [CENTER_X, 3, WALL], distance: 10, facing: 0.8, card: CARDS.success, labelled: true })

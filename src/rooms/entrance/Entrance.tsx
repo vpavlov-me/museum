@@ -15,14 +15,10 @@ const HALL = { minX: -4.5, maxX: 4.5, minZ: -6, maxZ: 6, height: 4.4 }
 
 const STATEMENT_LAYOUT: WallTextLayout = { top: 2.55, titleWidth: 3, gap: 0.45, bodyWidth: 3.6 }
 
-const VISIT = [
-  ['W A S D', 'Walk'],
-  ['Mouse', 'Look'],
-  ['E', 'Interact, when an object invites it'],
-  ['Esc', 'Pause and release the cursor'],
-]
-
-/** A short vestibule that names the museum, sets the scale and points the visitor into Room 01. */
+/**
+ * The permanent exhibition's vestibule, off the lobby: it names the exhibition, sets
+ * the scale and points the visitor into Room 01.
+ */
 export function Entrance() {
   const { origin } = useRoom()
   const door = localDoor(DOORS.entrance, origin)
@@ -31,8 +27,8 @@ export function Entrance() {
   return (
     <>
       <StaticMerge>
-        {/* The north wall is Room 01's south wall, built by that room. */}
-        <RoomShell {...HALL} palette={palette} north={null} south={{}} />
+        {/* The north wall is Room 01's south wall, the south wall the lobby's: both built by them. */}
+        <RoomShell {...HALL} palette={palette} north={null} south={null} />
 
         {/* A soft laylight: even, slightly brighter than the galleries ahead. */}
         {[-1.6, 1.6].map((x) =>
@@ -46,8 +42,11 @@ export function Entrance() {
       </StaticMerge>
 
       <RoomContents>
-        <Text position={[0, 3.72, wall]} fontSize={0.56} letterSpacing={-0.03} color={INK.text} anchorX="center" anchorY="middle">
-          INTERFACE MUSEUM
+        <Text position={[0, 3.98, wall]} fontSize={0.075} letterSpacing={0.14} color={INK.muted} anchorX="center" anchorY="middle">
+          EXHIBITION 01
+        </Text>
+        <Text position={[0, 3.6, wall]} fontSize={0.5} letterSpacing={-0.03} color={INK.text} anchorX="center" anchorY="middle">
+          PERMANENT EXHIBITION
         </Text>
 
         {/* Directional sign beside the door. */}
@@ -67,27 +66,11 @@ export function Entrance() {
           position={[HALL.minX + 0.02, 4.4]}
           facing="east"
           layout={STATEMENT_LAYOUT}
-          kicker="INTERFACE MUSEUM / AN EXHIBITION IN THREE ROOMS"
-          title="Interfaces, given physical form."
-          body="An exhibition about the controls, conventions and habits we use every day without noticing them. Each room holds one idea. Walk slowly and read the walls. Some objects respond when you approach them and press E."
+          kicker="EXHIBITION 01 / THREE ROOMS"
+          title="Objects, conventions, states."
+          body="Three rooms about the interface as an object, as architecture, and as the state of the world. Each room holds one idea. Walk slowly and read the walls. Some objects respond when you approach them and press E."
         />
 
-        {/* How to visit: a quiet gallery label, not a menu. */}
-        <group position={[HALL.maxX - 0.02, 0, -1.6]} rotation={[0, -Math.PI / 2, 0]}>
-          <Text position={[0, 2.5, 0]} fontSize={0.09} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
-            HOW TO VISIT
-          </Text>
-          {VISIT.map(([key, action], i) => (
-            <group key={key} position={[0, 2.18 - i * 0.3, 0]}>
-              <Text fontSize={0.13} color={INK.text} anchorX="left" anchorY="top">
-                {key}
-              </Text>
-              <Text position={[1.05, 0, 0]} fontSize={0.13} color={INK.body} anchorX="left" anchorY="top">
-                {action}
-              </Text>
-            </group>
-          ))}
-        </group>
       </RoomContents>
     </>
   )

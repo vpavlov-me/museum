@@ -4,18 +4,8 @@ import { contains, offsetRect, overlaps, rect, type DoorDefinition, type Rect, t
  * Museum plan, in metres. North is -z, the general direction of travel.
  *
  *                    ┌────────┐
- *                    │colophon│  → EXIT: the end of the visit
- *                 ┌──┴─────┬──┘
- *                 │IV RECON│
- *                 ├────────┴─┐
- *                 │ III STORE│
- *                ┌┴──────────┴──────┐
- *                │ II TRENCH  [pit] │      04 INTERFACE ARCHAEOLOGY
- *                └──────┬───────────┘
- *                       │I ACCESSION│
- *                     ┌─┴──┬────────┘
- *                     │  ┌─┘ passage: low, dark, one turn
- *                    ┌┴────┴────────┐
+ *                    │colophon│  → back to the LOBBY
+ *                    ┌┴────────┴────┐
  *                    │  V SUCCESS   │
  *                    └───┬──────┬───┘
  *                        │IV OFF│
@@ -42,10 +32,20 @@ import { contains, offsetRect, overlaps, rect, type DoorDefinition, type Rect, t
  *                       └─┬────────────────┘
  *                         └─ B ───────────┐   threshold: low, narrow, two 90° turns
  *                                       A │
- *                                ┌────────┴──────────┐
- *                                │  01 THE BUTTON    │
- *                                └────────┬──────────┘
- *                                     ENTRANCE
+ *                                ┌────────┴──────────┐   ┌─────────────────┐
+ *                                │  01 THE BUTTON    │   │ INTERFACE       │
+ *                                └────────┬──────────┘   │ ARCHAEOLOGY     │
+ *                                     ENTRANCE           │ (02), its own   │
+ *                                         │              │ wing: a turn,   │
+ *                                         │              │ then four cells │
+ *                                         │              └──────┬──────────┘
+ *                         ┌───────────────┴─────────────────────┴──┐
+ *                         │ [closed]        LOBBY                   │
+ *                         └────────────────── EXIT ────────────────┘
+ *
+ * The LOBBY is where every visit starts and ends. Three entrances in its north wall:
+ * a temporary exhibition (closed), the permanent exhibition (ENTRANCE, Rooms 01–03,
+ * the colophon) and Interface Archaeology. See museum/exhibitions.ts.
  *
  * Walls are 0.2 m thick and sit outside each space's bounds, so neighbouring
  * spaces are separated by exactly one wall thickness. Every door sits in a wall
@@ -59,8 +59,11 @@ export const WALL_THICKNESS = 0.2
 const ACCEPTED_ORIGIN: Vec2 = [-12.9, -20.3]
 /** Room 03 and the transition before it are authored from the door at the end of the feed. */
 const STATES_ORIGIN: Vec2 = [-12.9, -86.6]
-/** Room 04, the passage before it and the colophon after it are authored from the door out of SUCCESS. */
-export const ARCHAEOLOGY_ORIGIN: Vec2 = [STATES_ORIGIN[0] - 2.5, STATES_ORIGIN[1] - 93.1]
+/** Interface Archaeology and the passage into it are authored from its door in the lobby's north wall. */
+export const ARCHAEOLOGY_ORIGIN: Vec2 = [12, 26.1]
+
+/** The lobby, in world coordinates: south of the permanent exhibition's entrance hall, across all three entrances. */
+export const LOBBY = { minX: -14, maxX: 16, minZ: 26.2, maxZ: 36, height: 5 }
 
 /** A rectangular cell with its own ceiling height, room-local. */
 export type Cell = Rect & { height: number }
@@ -113,12 +116,13 @@ export const STATES_CELLS = {
   success: cell(-9, 4, -93, -77.2, 8.5),
 }
 
-/** The passage between Room 03 and Room 04, local to Room 04: the same low turn as before Room 03. */
-export const TRANSITION_04 = TRANSITION_03
+/** The passage from the lobby into Interface Archaeology, local to it: the same low turn as before Room 03. */
+export const ARCHAEOLOGY_PASSAGE = TRANSITION_03
 
 /**
- * Room 04 as a sequence of cells, room-local: the lobby of a future archive, a hall
- * around an excavation, a low store, and a small dark room with a reconstruction.
+ * Interface Archaeology as a sequence of cells, room-local: the lobby of a future
+ * archive, a hall around an excavation, a low store, and a small dark room with a
+ * reconstruction, whose far door leads back to the lobby.
  */
 export const ARCHAEOLOGY_CELLS = {
   accession: cell(2, 12, -15, -7.9, 4.2),
@@ -127,15 +131,17 @@ export const ARCHAEOLOGY_CELLS = {
   reconstruction: cell(-2, 7, -57, -47.2, 3.4),
 }
 
-/** After the last room: a low, warm room with the credits and the way out. Local to Room 04. */
-export const COLOPHON = cell(0, 7, -65, -57.2, 3.2)
+/** After Room 03: a low, warm room that closes the permanent exhibition, with the way back to the lobby. Local to Room 03. */
+export const COLOPHON = cell(-6, 1, -101, -93.2, 3.2)
 
 const inAccepted = (x: number, z: number) => ({ x: ACCEPTED_ORIGIN[0] + x, z: ACCEPTED_ORIGIN[1] + z })
 const inStates = (x: number, z: number) => ({ x: STATES_ORIGIN[0] + x, z: STATES_ORIGIN[1] + z })
-/** A point local to Room 04, in world metres. */
+/** A point local to Interface Archaeology, in world metres. */
 export const inArchaeology = (x: number, z: number) => ({ x: ARCHAEOLOGY_ORIGIN[0] + x, z: ARCHAEOLOGY_ORIGIN[1] + z })
 
 export const DOORS = {
+  /** From the lobby into the permanent exhibition's entrance hall. */
+  lobbyPermanent: { x: 0, z: 26.1, width: 2.4, height: 3.2 },
   entrance: { x: 0, z: 13.9, width: 2.4, height: 3 },
   buttonExit: { x: -6, z: -13.9, width: 1.8, height: 2.5 },
   acceptedEntry: { ...inAccepted(0, 0), width: 2, height: 2.4 },
@@ -154,14 +160,23 @@ export const DOORS = {
   /** Closed by a sliding panel until the connection is restored. */
   offlineExit: { ...inStates(-2.5, -77.1), width: 1.8, height: 2.6 },
   successExit: { ...inStates(-2.5, -93.1), width: 1.6, height: 2.5 },
+  /** From the lobby into the passage to Interface Archaeology. */
+  lobbyArchaeology: { ...inArchaeology(0, 0), width: 1.8, height: 2.6 },
   archaeologyEntry: { ...inArchaeology(7, -7.8), width: 1.8, height: 2.4 },
   trenchEntry: { ...inArchaeology(10.5, -15.1), width: 1.8, height: 2.6 },
   storeEntry: { ...inArchaeology(0, -33.1), width: 1.8, height: 2.4 },
   reconstructionEntry: { ...inArchaeology(5, -47.1), width: 1.6, height: 2.3 },
-  archaeologyExit: { ...inArchaeology(5.5, -57.1), width: 1.6, height: 2.4 },
 } satisfies Record<string, DoorDefinition>
 
 export const SPACES: SpaceDefinition[] = [
+  {
+    id: 'lobby',
+    number: null,
+    title: 'Lobby',
+    hudLabel: 'LOBBY',
+    origin: [0, 0],
+    bounds: [rect(LOBBY.minX, LOBBY.maxX, LOBBY.minZ, LOBBY.maxZ)],
+  },
   {
     id: 'entrance',
     number: null,
@@ -220,18 +235,26 @@ export const SPACES: SpaceDefinition[] = [
     ).map(([id, label]) => ({ id, label, bounds: [offsetRect(STATES_CELLS[id], STATES_ORIGIN)] })),
   },
   {
-    id: 'transition-04',
+    id: 'colophon',
+    number: null,
+    title: 'Colophon',
+    hudLabel: 'END OF THE PERMANENT EXHIBITION',
+    origin: STATES_ORIGIN,
+    bounds: [offsetRect(COLOPHON, STATES_ORIGIN)],
+  },
+  {
+    id: 'archaeology-passage',
     number: null,
     title: 'Passage',
-    hudLabel: 'PASSAGE / 03 → 04',
+    hudLabel: 'PASSAGE / INTERFACE ARCHAEOLOGY',
     origin: ARCHAEOLOGY_ORIGIN,
-    bounds: [TRANSITION_04.a, TRANSITION_04.b].map((r) => offsetRect(r, ARCHAEOLOGY_ORIGIN)),
+    bounds: [ARCHAEOLOGY_PASSAGE.a, ARCHAEOLOGY_PASSAGE.b].map((r) => offsetRect(r, ARCHAEOLOGY_ORIGIN)),
   },
   {
     id: 'archaeology',
-    number: '04',
+    number: null,
     title: 'Interface Archaeology',
-    hudLabel: '04 / INTERFACE ARCHAEOLOGY',
+    hudLabel: '02 / INTERFACE ARCHAEOLOGY',
     origin: ARCHAEOLOGY_ORIGIN,
     bounds: Object.values(ARCHAEOLOGY_CELLS).map((c) => offsetRect(c, ARCHAEOLOGY_ORIGIN)),
     zones: (
@@ -243,19 +266,12 @@ export const SPACES: SpaceDefinition[] = [
       ] as const
     ).map(([id, label]) => ({ id, label, bounds: [offsetRect(ARCHAEOLOGY_CELLS[id], ARCHAEOLOGY_ORIGIN)] })),
   },
-  {
-    id: 'colophon',
-    number: null,
-    title: 'Colophon',
-    hudLabel: 'END OF EXHIBITION',
-    origin: ARCHAEOLOGY_ORIGIN,
-    bounds: [offsetRect(COLOPHON, ARCHAEOLOGY_ORIGIN)],
-  },
 ]
 
+/** Every visit starts in the lobby, by the front door, facing the three entrances. */
 export const SPAWN = {
-  position: [0, EYE_HEIGHT, 24.6] as [number, number, number],
-  spaceId: 'entrance',
+  position: [1, EYE_HEIGHT, 34.4] as [number, number, number],
+  spaceId: 'lobby',
 }
 
 const doorRect = (door: DoorDefinition): Rect => {

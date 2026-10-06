@@ -1,9 +1,11 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { motion } from '../museum/capabilities'
+import { exhibitions } from '../museum/exhibitionLoader'
+import { navigation } from '../museum/navigation'
 import { trackVisitor } from '../museum/store'
-import { TOUR } from '../museum/tour'
+import { TOURS, type Route } from '../museum/tour'
 import { tour } from '../museum/tourState'
 import { canOccupy } from './Collision'
 
@@ -41,21 +43,32 @@ export function GuidedTour() {
   const element = useThree((state) => state.gl.domElement)
   const path = useRef<Path | null>(null)
   const travelled = useRef(0)
-  const baseYaw = useRef(TOUR[0].yaw)
-  const basePitch = useRef(TOUR[0].pitch ?? 0)
+  const baseYaw = useRef(0)
+  const basePitch = useRef(0)
   const look = useRef({ yaw: 0, pitch: 0 })
 
-  // Every guided visit begins at the first stop.
+  /** Stands at a stop at once: the start of a visit, and the return to the lobby. */
+  const place = useCallback(
+    (route: Route) => {
+      tour.reset(route)
+      const stop = TOURS[route][0]
+      const [x, z] = stop.at
+      path.current = null
+      camera.position.x = x
+      camera.position.z = z
+      baseYaw.current = stop.yaw
+      basePitch.current = stop.pitch ?? 0
+      look.current = { yaw: 0, pitch: 0 }
+      trackVisitor(x, z)
+    },
+    [camera],
+  )
+
+  // Every guided visit begins in the lobby, or at the first stop of the exhibition a link names.
   useEffect(() => {
-    tour.reset()
-    const [x, z] = TOUR[0].at
-    camera.position.x = x
-    camera.position.z = z
-    baseYaw.current = TOUR[0].yaw
-    basePitch.current = TOUR[0].pitch ?? 0
-    look.current = { yaw: 0, pitch: 0 }
-    trackVisitor(x, z)
-  }, [camera])
+    const target = navigation.target
+    place(target === 'permanent' || target === 'archaeology' ? target : 'lobby')
+  }, [place])
 
   // Drag to look around, within limits: the stop chooses the view, the visitor adjusts it.
   useEffect(() => {
@@ -94,16 +107,24 @@ export function GuidedTour() {
 
   useFrame((_, rawDelta) => {
     const delta = Math.min(rawDelta, 0.1)
-    const { index, request } = tour.get()
+    // Back to the lobby from an exhibition's last door.
+    if (navigation.takeMove()?.lobby) place('lobby')
+    const { route, index, request } = tour.get()
 
     if (request !== null && !path.current) {
-      const forward = request > index
-      const stop = TOUR[request]
+      // Into an exhibition whose rooms are still on their way: wait at its shut door.
+      if (request.route !== 'lobby' && exhibitions.status(request.route) !== 'open') {
+        exhibitions.request(request.route)
+        if (!tour.get().waiting) tour.set({ waiting: true })
+        return
+      }
+      const forward = request.route === route ? request.index > index : route === 'lobby'
+      const stop = TOURS[request.route][request.index]
       // Forward: through the next stop's waypoints. Back: the same way, reversed.
-      const via = forward ? (stop.via ?? []) : [...(TOUR[index].via ?? [])].reverse()
+      const via = forward ? (stop.via ?? []) : [...(TOURS[route][index].via ?? [])].reverse()
       const points = [new THREE.Vector2(camera.position.x, camera.position.z), ...[...via, stop.at].map(([x, z]) => new THREE.Vector2(x, z))]
       if (!walkable(points)) {
-        tour.set({ request: null, blocked: true })
+        tour.set({ request: null, blocked: true, waiting: false })
       } else {
         const lengths = points.slice(1).map((p, i) => p.distanceTo(points[i]))
         const fromYaw = baseYaw.current + look.current.yaw
@@ -111,7 +132,7 @@ export function GuidedTour() {
         path.current = { points, lengths, total: lengths.reduce((a, b) => a + b, 0), fromYaw, toYaw: shortestTurn(fromYaw, stop.yaw), fromPitch, toPitch: stop.pitch ?? 0 }
         travelled.current = motion.reduced ? Number.POSITIVE_INFINITY : 0
         look.current = { yaw: 0, pitch: 0 }
-        tour.set({ request: null, index: request, moving: true, blocked: false })
+        tour.set({ request: null, route: request.route, index: request.index, moving: true, blocked: false, waiting: false })
       }
     }
 
