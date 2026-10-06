@@ -66,7 +66,7 @@ export const EXHIBITIONS: ExhibitionDefinition[] = [
     spaces: ['archaeology-passage', 'archaeology'],
     door: ax,
     start: { at: [ax + 7, az - 9.2], yaw: 0 },
-    load: () => import('../rooms/archaeology'),
+    load: () => import('../rooms/archaeology/archaeology'),
   },
   {
     id: 'dark-patterns',
@@ -80,7 +80,7 @@ export const EXHIBITIONS: ExhibitionDefinition[] = [
     spaces: ['dark-passage', 'dark-patterns'],
     door: dx,
     start: { at: [dx - 7, dz - 9.2], yaw: 0 },
-    load: () => import('../rooms/dark-patterns'),
+    load: () => import('../rooms/dark-patterns/dark-patterns'),
   },
 ]
 

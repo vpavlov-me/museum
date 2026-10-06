@@ -60,7 +60,7 @@ const PERMANENT: TourStop[] = [
   { id: 'accepted', title: 'Things We Somehow Accepted', at: [-12.9, -21.7], yaw: -0.45, via: [[-6, -19.1], [-12.9, -19.1]] },
   { id: 'banner', title: 'The cookie banner', at: [-7.6, -24.4], yaw: -0.2 },
   { id: 'modals', title: 'The modal', at: [-4.4, -30], yaw: 0.85, via: [[-4.4, -24.4], [-4.05, -26.9]] },
-  { id: 'pause', title: 'Prove / attend', at: [-11.4, -38.6], yaw: N, via: [[-4.4, -35.8], [-12.1, -35.8]] },
+  { id: 'pause', title: 'Prove / attend', at: [-11.4, -38.6], yaw: N, via: [[-4.4, -35.8], [-12.1, -35.8], [-12.1, -38.2]] },
   { id: 'badge', title: 'The notification badge', at: [-10.5, -42.6], yaw: N, via: [[-10.5, -40.6]] },
   { id: 'captcha', title: 'The CAPTCHA', at: [-12.9, -52.6], yaw: N, via: [[-13, -43]] },
   { id: 'skeleton', title: 'The skeleton screen', at: [-11.4, -57.8], yaw: -0.9, via: [[-12.9, -56]] },
