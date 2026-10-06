@@ -255,8 +255,43 @@ a:hover {
 }
 
 .entry__requirement {
-  margin: var(--space-3) 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-3);
   color: var(--ink-quiet);
+}
+
+.entry__requirement p {
+  margin: 0;
+}
+
+/* Sound on / off: a quiet text control with a small mark, not a speaker icon. */
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.sound-toggle:hover {
+  color: var(--ink-text);
+}
+
+.sound-toggle__mark {
+  width: 7px;
+  height: 7px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.sound-toggle__mark--on {
+  background: currentColor;
 }
 
 .entry__rooms {
@@ -405,7 +440,7 @@ a:hover {
 }
 
 .pause__hint {
-  margin: 0;
+  margin: 0 0 var(--space-2);
   color: var(--ink-quiet);
 }
 

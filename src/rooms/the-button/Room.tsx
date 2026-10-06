@@ -1,5 +1,7 @@
 import { useCallback, useRef, type ComponentType } from 'react'
 import { useThree } from '@react-three/fiber'
+import type { SoundName } from '../../audio/sounds'
+import { useSound } from '../../audio/useSound'
 import { ExhibitLabel } from '../../components/ExhibitLabel'
 import { Plinth } from '../../components/Plinth'
 import { RoomShell } from '../../components/RoomShell'
@@ -24,6 +26,14 @@ import { EXHIBITS, ROOM, THRESHOLDS, WALL_TEXTS, type ArtifactStyle, type Button
 const PLINTH = { width: 2.6, height: 0.95, depth: 0.9 }
 const palette = PALETTES.gallery
 
+/** Each era answers a press in its own material: a hard clack, a soft gel, a dry tick, almost nothing. */
+const PRESS_SOUNDS: Record<ArtifactStyle, SoundName> = {
+  bevel: 'button-bevel',
+  gloss: 'button-gloss',
+  flat: 'button-flat',
+  quiet: 'button-quiet',
+}
+
 const ARTIFACTS: Record<ArtifactStyle, ComponentType<ArtifactProps>> = {
   bevel: RaisedButton,
   gloss: TactileButton,
@@ -35,9 +45,11 @@ function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
   const [x, z] = exhibit.position
   const clock = useThree((state) => state.clock)
   const pressedAt = useRef(-Infinity)
+  const play = useSound()
   const press = useCallback(() => {
     pressedAt.current = clock.elapsedTime
-  }, [clock])
+    play(PRESS_SOUNDS[exhibit.artifact.style], [x, PLINTH.height + 0.1, z])
+  }, [clock, play, exhibit.artifact.style, x, z])
 
   // Plinths are rotated to face the aisle, so their long side runs along z.
   useObstacle(exhibit.id, box(x, z, PLINTH.depth, PLINTH.width))

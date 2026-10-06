@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { useSound } from '../../../audio/useSound'
 import { ExhibitLabel } from '../../../components/ExhibitLabel'
 import { Text } from '../../../components/Text'
 import { Wall } from '../../../components/Wall'
@@ -96,6 +97,7 @@ export function Captcha() {
   const openedAt = useRef(Infinity)
   const timers = useRef<number[]>([])
   const tiles = useRef<(THREE.Group | null)[]>([])
+  const play = useSound()
 
   const clearTimers = () => {
     timers.current.forEach((timer) => window.clearTimeout(timer))
@@ -119,14 +121,17 @@ export function Captcha() {
     const passed = attempts.current >= 2
     flippedAt.current = clock.elapsedTime
     setStage('checking')
+    const at: [number, number, number] = [0, 2, CAPTCHA_Z]
+    play('captcha-check', at)
     timers.current.push(
       window.setTimeout(() => {
+        play(passed ? 'captcha-pass' : 'captcha-retry', at)
         setStage(passed ? 'open' : 'retry')
         if (passed) openedAt.current = clock.elapsedTime
       }, CHECK_MS),
     )
     if (passed) timers.current.push(window.setTimeout(() => setPassable(true), CHECK_MS + 700))
-  }, [clock])
+  }, [clock, play])
 
   useRoomFrame(() => {
     const now = clock.elapsedTime

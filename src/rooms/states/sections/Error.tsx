@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
+import { useSound } from '../../../audio/useSound'
 import { ChapterMark } from '../../../components/ChapterMark'
 import { Text } from '../../../components/Text'
 import { Wall } from '../../../components/Wall'
@@ -69,6 +70,8 @@ const STRAY_SLOT: Record<Layout, Pose> = {
 const SIGN: Record<Layout, string> = { broken: 'EXIT  →', still: 'EXIT  →', resolved: 'EXIT  ↓' }
 const LINE_CLIP: [number, number, number, number] = [-0.1, -0.37, 2.35, 0.1]
 
+const MESSAGE_AT: [number, number, number] = [-4.6, 2.2, cell.minZ + 0.3]
+
 const UNIT_BOX = new THREE.BoxGeometry(1, 1, 1)
 const SLOT_SIZE: [number, number] = [0.12, 1.5]
 
@@ -92,6 +95,7 @@ export function ErrorState() {
   const [layout, setLayout] = useState<Layout>('broken')
   const attempts = useRef(0)
   const timer = useRef<number | undefined>(undefined)
+  const play = useSound()
   const exit = localDoor(DOORS.errorExit, origin)
   const entry = localDoor(DOORS.errorEntry, origin)
 
@@ -101,11 +105,15 @@ export function ErrorState() {
     attempts.current += 1
     const next: Layout = attempts.current >= 2 ? 'resolved' : 'still'
     setStage('retrying')
+    play('error-retrying', MESSAGE_AT)
     timer.current = window.setTimeout(() => {
+      // A failure felt rather than announced; a fix heard where it happens, as the slab slides home.
+      if (next === 'still') play('error-fail', MESSAGE_AT)
+      else play('error-resolve', [SLAB_POSES.broken.x, 1.6, SLAB_POSES.broken.z])
       setLayout(next)
       setStage(next)
     }, RETRY_MS)
-  }, [])
+  }, [play])
 
   // Everything that moves eases towards the current layout's pose.
   const slab = useRef<THREE.Group>(null)

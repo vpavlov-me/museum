@@ -21,7 +21,7 @@ export function HUD({ visible }: { visible: boolean }) {
         <span className="hud__key">E</span>
         <span>{prompt ?? ''}</span>
       </div>
-      <div className="hud__hint meta">Esc to pause</div>
+      <div className="hud__hint meta">Esc to pause · M sound</div>
     </div>
   )
 }
