@@ -60,10 +60,33 @@ Do not introduce this folder structure prematurely if a change is still small, b
 - Prefer proximity, gaze or clear interaction prompts.
 - Always preserve an obvious way to release pointer lock.
 
-## Current prototype
+## Current state: v1 is frozen
 
-Room 01: **The Button**
+The first public version is **Rooms 01–03** (The Button · Things We Somehow Accepted · Interface
+States), with the entrance, the colophon and the exit. Its scope is frozen.
 
-Goal: validate scale, navigation, wall-reading distance and the idea of presenting UI components as physical museum artifacts.
+- **Room 04 and any further rooms are post-launch work.** Do not start them, or other new
+  exhibits, without an approved issue. Candidate directions are listed in the v1 roadmap issue (#12).
+- Between releases, only fix bugs, regressions, accessibility and performance problems, small copy
+  errors and deployment issues. Record anything else as a post-launch issue instead of building it.
 
-Do not over-polish this room before testing it in the browser. The next useful step should be driven by what feels wrong during actual exploration.
+## How the museum is built (read before changing it)
+
+- **Plan:** `museum/roomRegistry.ts` defines every space, its cells, doors, zones and spawn point.
+  Walkable floor, which rooms open into which, and cell-to-cell sight lines are all derived from it.
+- **Visibility and activation:** put everything except merged architecture in
+  `<RoomContents cells={[…]}>`. Animate with `useRoomFrame`. Light exhibits with `Downlight`
+  fixtures; the shared `LightRig` has a budget of 6 spotlights. Contents more than two doors away
+  are neither drawn, animated nor lit.
+- **Interaction:** `useObstacle` blocks the way, and `useFocusTarget` makes things focusable and
+  usable with `E`; the guided tour's action button does the same. Things that block the way must
+  never close on the visitor.
+- **Three ways to visit:** walk (desktop), guided tour (`museum/tour.ts`; every stop must stay
+  reachable) and the text version (built from each room's `content.ts`). Whatever changes in a room
+  must still work in all three.
+- **Identity:** `identity.ts` and `styles.css` hold the ink, the type and the name; use them, not
+  new hex values. Every 3D text uses `components/Text` (Inter, self-hosted).
+- **Sound:** synthesised in `audio/`. It is optional, never carries information, and only starts
+  after a click.
+- **Measuring:** `npm run build:profile` is a production build with the debug bridge and the
+  `` ` `` readout. Never ship either in production.

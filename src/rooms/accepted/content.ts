@@ -82,7 +82,7 @@ export const CARDS = {
     year: '2013',
     category: 'PERCEIVED PERFORMANCE',
     title: 'The Skeleton Screen',
-    description: 'Grey shapes standing in for content that has not arrived. Introduced to make waiting feel shorter, they now promise a layout before there is anything to put in it.',
+    description: 'Gray shapes standing in for content that has not arrived. Introduced to make waiting feel shorter, they now promise a layout before there is anything to put in it.',
   },
   feed: {
     index: '06',
