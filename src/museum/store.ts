@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import { SPAWN, spaceAt, zoneAt } from './roomRegistry'
+import { cellAt, SPAWN, spaceAt, zoneAt } from './roomRegistry'
 import type { ExhibitCardData } from './types'
 
 export type FocusInfo = {
@@ -16,12 +16,14 @@ type MuseumState = {
   spaceId: string
   /** Named part of that space (a state, a chapter), or null. */
   zoneId: string | null
+  /** Which of the space's cells (bounds rectangles) the visitor is in: what can be seen depends on it. */
+  cell: number
   focus: FocusInfo | null
   /** The visitor has left through the exit: the visit is over until they start another. */
   ended: boolean
 }
 
-const initial: MuseumState = { spaceId: SPAWN.spaceId, zoneId: null, focus: null, ended: false }
+const initial: MuseumState = { spaceId: SPAWN.spaceId, zoneId: null, cell: 0, focus: null, ended: false }
 let state: MuseumState = initial
 const listeners = new Set<() => void>()
 
@@ -59,5 +61,6 @@ export function trackVisitor(x: number, z: number) {
   const space = spaceAt(x, z)
   if (!space) return
   const zoneId = zoneAt(space, x, z)?.id ?? null
-  if (space.id !== state.spaceId || zoneId !== state.zoneId) museumStore.set({ spaceId: space.id, zoneId })
+  const cell = Math.max(0, cellAt(space, x, z))
+  if (space.id !== state.spaceId || zoneId !== state.zoneId || cell !== state.cell) museumStore.set({ spaceId: space.id, zoneId, cell })
 }

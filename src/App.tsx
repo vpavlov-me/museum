@@ -1,4 +1,5 @@
 import { Component, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { PerformanceMonitor } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { sound } from './audio/engine'
 import { INK } from './identity'
@@ -6,6 +7,7 @@ import { detectCapabilities, type VisitMode } from './museum/capabilities'
 import { SPAWN } from './museum/roomRegistry'
 import { museumStore, useMuseumStore } from './museum/store'
 import { MuseumWorld } from './scene/MuseumWorld'
+import { Precompile } from './scene/Precompile'
 import { Announcer } from './ui/Announcer'
 import { ColophonScreen } from './ui/ColophonScreen'
 import { Entry } from './ui/Entry'
@@ -14,18 +16,6 @@ import { GuidedControls } from './ui/GuidedControls'
 import { HUD } from './ui/HUD'
 import { Pause } from './ui/Pause'
 import { TextExhibition } from './ui/TextExhibition'
-
-/** Rendered inside the scene's Suspense boundary, so it mounts only once every room (and its text) is ready. */
-function Ready({ onReady }: { onReady: () => void }) {
-  useEffect(() => {
-    // Give the first frames a moment to lay out their text before the door opens.
-    let frame = requestAnimationFrame(() => {
-      frame = requestAnimationFrame(onReady)
-    })
-    return () => cancelAnimationFrame(frame)
-  }, [onReady])
-  return null
-}
 
 /** If the 3D scene cannot start (a WebGL context that fails late), the visitor gets the text, not a blank page. */
 class SceneBoundary extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {
@@ -43,6 +33,10 @@ class SceneBoundary extends Component<{ onError: () => void; children: ReactNode
 
 function App() {
   const capabilities = useMemo(detectCapabilities, [])
+  // Resolution adapts to how the device copes: full sharpness while frames keep up, 1:1 pixels when they
+  // do not. Touch devices start a little lower: smaller screens, hotter hardware.
+  const sharpest = capabilities.finePointer ? 1.75 : 1.5
+  const [dpr, setDpr] = useState(sharpest)
   const [webgl, setWebgl] = useState(capabilities.webgl)
   const [mode, setMode] = useState<VisitMode>(capabilities.recommended)
   const [reading, setReading] = useState(!capabilities.webgl)
@@ -84,7 +78,8 @@ function App() {
     <main className="app-shell">
       {webgl && (
         <SceneBoundary onError={sceneFailed}>
-          <Canvas camera={{ position: SPAWN.position, fov: 60, near: 0.1, far: 100 }} dpr={[1, 1.75]} gl={{ antialias: true }} aria-hidden>
+          <Canvas camera={{ position: SPAWN.position, fov: 60, near: 0.1, far: 100 }} dpr={[1, dpr]} gl={{ antialias: true }} aria-hidden>
+            <PerformanceMonitor flipflops={3} onDecline={() => setDpr(1)} onIncline={() => setDpr(sharpest)} onFallback={() => setDpr(1)} />
             <color attach="background" args={[INK.void]} />
             <fog attach="fog" args={[INK.void, 18, 40]} />
             <Suspense fallback={null}>
@@ -95,7 +90,8 @@ function App() {
                 presence={ended || reading ? 'away' : active ? 'visiting' : 'paused'}
                 onLockChange={setLocked}
               />
-              <Ready onReady={markReady} />
+              {/* Mounts once every room and its text are ready; the door opens when their shaders are compiled. */}
+              <Precompile onDone={markReady} />
             </Suspense>
           </Canvas>
         </SceneBoundary>

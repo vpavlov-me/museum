@@ -38,12 +38,23 @@ export function StatesRoom() {
         <RoomShell {...success} palette={PALETTES.success} south={{ door: door('offlineExit'), split: true }} north={{ door: door('successExit') }} />
       </StaticMerge>
 
-      <RoomContents>
+      {/* One section per cell (prologue 0 … success 5): each is drawn only while it can be seen. */}
+      <RoomContents cells={[0]}>
         <Prologue />
+      </RoomContents>
+      <RoomContents cells={[1]}>
         <LoadingState />
+      </RoomContents>
+      <RoomContents cells={[2]}>
         <EmptyState />
+      </RoomContents>
+      <RoomContents cells={[3]}>
         <ErrorState />
+      </RoomContents>
+      <RoomContents cells={[4]}>
         <OfflineState />
+      </RoomContents>
+      <RoomContents cells={[5]}>
         <SuccessState />
       </RoomContents>
     </>

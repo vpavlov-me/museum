@@ -14,7 +14,7 @@ import { useFocusTarget } from '../../../scene/Interaction'
 import { Downlight } from '../../../scene/Light'
 import { basicMaterial, PALETTES } from '../../../scene/materials'
 import { CARDS, CELLS } from '../content'
-import { CIRCLE, hash, roundedRect } from '../shared'
+import { CIRCLE, hash, roundedRect, useVisitorAway } from '../shared'
 
 const RED = '#e5483b'
 const ROOM = CELLS.attend
@@ -233,17 +233,22 @@ export function NotificationBadges() {
     if (next !== count) setCount(next)
   })
 
+  // Start with every badge collapsed, and collapse them again once the visitor has left
+  // the room: the room is not animated while out of sight, so it resets here instead.
+  const away = useVisitorAway()
   useLayoutEffect(() => {
-    // Start with every badge collapsed.
     const mesh = instances.current
     if (!mesh) return
+    deepest.current = Infinity
+    shownAt.current.fill(-1)
+    scales.current.fill(0)
     placements.forEach((placement, i) => {
       placement.scale.setScalar(1e-4)
       placement.updateMatrix()
       mesh.setMatrixAt(i, placement.matrix)
     })
     mesh.instanceMatrix.needsUpdate = true
-  }, [placements])
+  }, [placements, away])
 
   const label = count > 99 ? '99+' : String(Math.max(count, 1))
 

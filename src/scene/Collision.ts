@@ -12,19 +12,29 @@ import { contains, type Rect } from '../museum/types'
  */
 
 const obstacles = new Map<string, Rect>()
+/** The same obstacles as a plain array, rebuilt only when one changes: collision reads it every sub-step. */
+let obstacleList: Rect[] = []
+const refreshObstacles = () => {
+  obstacleList = [...obstacles.values()]
+}
 
 const SAMPLES: [number, number][] = [
   [-1, -1], [1, -1], [-1, 1], [1, 1],
   [0, -1], [0, 1], [-1, 0], [1, 0],
 ]
 
+const onFloor = (x: number, z: number) => {
+  for (let i = 0; i < WALKABLE.length; i++) if (contains(WALKABLE[i], x, z)) return true
+  return false
+}
+
+// Called hundreds of times a frame while walking (sub-steps × samples): plain loops, no allocation.
 export function canOccupy(x: number, z: number, radius: number) {
-  for (const [sx, sz] of SAMPLES) {
-    const px = x + sx * radius
-    const pz = z + sz * radius
-    if (!WALKABLE.some((area) => contains(area, px, pz))) return false
+  for (let i = 0; i < SAMPLES.length; i++) {
+    if (!onFloor(x + SAMPLES[i][0] * radius, z + SAMPLES[i][1] * radius)) return false
   }
-  for (const o of obstacles.values()) {
+  for (let i = 0; i < obstacleList.length; i++) {
+    const o = obstacleList[i]
     if (x + radius > o.minX && x - radius < o.maxX && z + radius > o.minZ && z - radius < o.maxZ) return false
   }
   return true
@@ -69,8 +79,10 @@ export function useObstacle(id: string, local: Rect | null) {
   useEffect(() => {
     if (!enabled) return
     obstacles.set(key, { minX, maxX, minZ, maxZ })
+    refreshObstacles()
     return () => {
       obstacles.delete(key)
+      refreshObstacles()
     }
   }, [key, enabled, minX, maxX, minZ, maxZ])
 }

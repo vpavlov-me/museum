@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { activityOf, useRoom } from '../museum/RoomContext'
-import { museumStore } from '../museum/store'
+import { sectionVisible, useRoom, useSectionCells } from '../museum/RoomContext'
 import { CIRCLE } from './geometry'
 import { poolMaterial, type Palette } from './materials'
 
@@ -23,7 +22,7 @@ type DownlightSpec = {
   color?: string
 }
 
-type Fixture = { roomId: string; origin: [number, number]; spec: { current: DownlightSpec } }
+type Fixture = { roomId: string; origin: [number, number]; cells: readonly number[] | undefined; spec: { current: DownlightSpec } }
 
 const fixtures = new Set<Fixture>()
 
@@ -35,16 +34,17 @@ const fixtures = new Set<Fixture>()
  */
 export function Downlight(spec: DownlightSpec) {
   const { id: roomId, origin } = useRoom()
+  const cells = useSectionCells()
   const specRef = useRef(spec)
   specRef.current = spec
 
   useEffect(() => {
-    const fixture: Fixture = { roomId, origin, spec: specRef }
+    const fixture: Fixture = { roomId, origin, cells, spec: specRef }
     fixtures.add(fixture)
     return () => {
       fixtures.delete(fixture)
     }
-  }, [roomId, origin])
+  }, [roomId, origin, cells])
 
   const { at, ceiling, palette } = spec
   return <mesh position={[at[0], ceiling - 0.004, at[1]]} rotation={UP} geometry={CIRCLE} scale={0.09} material={palette.glow} />
@@ -54,7 +54,7 @@ export function Downlight(spec: DownlightSpec) {
  * Realtime light budget: this many spotlights exist, ever. Changing the number of
  * lights in a scene recompiles every lit shader (a visible hitch at a doorway), so
  * instead the rig keeps a fixed pool and hands it to the fixtures of the rooms that
- * can be seen: the visitor's room first, then the rooms that open into it, nearest first.
+ * can be seen (the cells within sight of the visitor), nearest first.
  */
 export const LIGHT_BUDGET = 6
 // Seconds between re-ranking fixtures; lights cross-fade over roughly this long.
@@ -80,16 +80,14 @@ export function LightRig() {
   useFrame(({ camera, clock }, delta) => {
     if (clock.elapsedTime - rankedAt.current > RANK_EVERY) {
       rankedAt.current = clock.elapsedTime
-      const { spaceId } = museumStore.get()
+      // Light what can be seen (the same cell visibility as the contents), nearest first.
       const ranked = [...fixtures]
+        .filter((fixture) => sectionVisible(fixture.roomId, fixture.cells))
         .map((fixture) => {
-          const activity = activityOf(fixture.roomId, spaceId)
           const [x, z] = fixture.spec.current.at
-          const distance = Math.hypot(x + fixture.origin[0] - camera.position.x, z + fixture.origin[1] - camera.position.z)
-          return { fixture, activity, distance }
+          return { fixture, distance: Math.hypot(x + fixture.origin[0] - camera.position.x, z + fixture.origin[1] - camera.position.z) }
         })
-        .filter(({ activity }) => activity !== 'inactive')
-        .sort((a, b) => (a.activity === b.activity ? a.distance - b.distance : a.activity === 'active' ? -1 : 1))
+        .sort((a, b) => a.distance - b.distance)
       wanted.current = new Set(ranked.slice(0, LIGHT_BUDGET).map(({ fixture }) => fixture))
     }
 
