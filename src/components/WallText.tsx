@@ -1,4 +1,4 @@
-import { INK } from '../identity'
+import { INK, type Ink } from '../identity'
 import { Text } from './Text'
 
 /** Direction the text faces, i.e. the wall's inward normal. North is -z, the direction of travel. */
@@ -30,6 +30,7 @@ export function WallText({
   title,
   body,
   layout = WALL_LAYOUT,
+  ink = INK,
 }: {
   /** Where the block begins on the wall: [x, z], room-local. Reading runs to the visitor's right. */
   position: [number, number]
@@ -38,12 +39,14 @@ export function WallText({
   title: string
   body: string
   layout?: WallTextLayout
+  /** Light walls take INK_ON_LIGHT. */
+  ink?: Ink
 }) {
   const { top, titleWidth, gap, bodyWidth } = layout
 
   return (
     <group position={[position[0], 0, position[1]]} rotation={facingRotation(facing)}>
-      <Text position={[0, top + 0.32, 0]} fontSize={0.11} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
+      <Text position={[0, top + 0.32, 0]} fontSize={0.11} letterSpacing={0.14} color={ink.muted} anchorX="left" anchorY="top">
         {kicker}
       </Text>
       <Text
@@ -52,7 +55,7 @@ export function WallText({
         lineHeight={1.05}
         letterSpacing={-0.02}
         maxWidth={titleWidth}
-        color={INK.text}
+        color={ink.text}
         anchorX="left"
         anchorY="top"
       >
@@ -63,7 +66,7 @@ export function WallText({
         fontSize={0.155}
         lineHeight={1.55}
         maxWidth={bodyWidth}
-        color={INK.body}
+        color={ink.body}
         anchorX="left"
         anchorY="top"
       >

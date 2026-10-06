@@ -3,8 +3,8 @@ import * as THREE from 'three'
 /*
  * Shared materials. Every architectural surface in a space uses one of a handful
  * of instances, so static architecture can be merged per material (StaticMerge)
- * and the renderer compiles only a few programs. No external textures: the only
- * maps are a small procedural noise, generated once.
+ * and the renderer compiles only a few programs. No external textures: stone, marble
+ * and plaster are generated once from a small procedural noise.
  */
 
 const mulberry32 = (seed: number) => () => {
@@ -49,41 +49,189 @@ function tileableNoise(size: number) {
   return values
 }
 
-function noiseTexture(values: Float32Array, size: number, low: number, high: number) {
-  const data = new Uint8Array(size * size * 4)
-  values.forEach((v, i) => {
-    const c = Math.round((low + (high - low) * v) * 255)
-    data.set([c, c, c, 255], i * 4)
-  })
+const NOISE_SIZE = 128
+const noise = tileableNoise(NOISE_SIZE)
+
+/** A tiling, mipmapped texture from RGBA bytes. */
+function toTexture(data: Uint8Array, size: number) {
   const texture = new THREE.DataTexture(data, size, size)
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping
   texture.magFilter = THREE.LinearFilter
   texture.minFilter = THREE.LinearMipmapLinearFilter
   texture.generateMipmaps = true
-  texture.anisotropy = 4
+  texture.anisotropy = 8
   texture.needsUpdate = true
   return texture
 }
 
-const NOISE_SIZE = 128
-const noise = tileableNoise(NOISE_SIZE)
-// Floors: a faint mottle in colour and a wider swing in roughness, like sealed concrete.
-const floorTint = noiseTexture(noise, NOISE_SIZE, 0.86, 1)
-const floorRoughness = noiseTexture(noise, NOISE_SIZE, 0.7, 1)
+/** A greyscale texture from per-pixel values in [0, 1]. */
+function dataTexture(size: number, value: (x: number, y: number) => number) {
+  const data = new Uint8Array(size * size * 4)
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const c = Math.round(Math.min(1, Math.max(0, value(x, y))) * 255)
+      const i = (y * size + x) * 4
+      data[i] = data[i + 1] = data[i + 2] = c
+      data[i + 3] = 255
+    }
+  }
+  return toTexture(data, size)
+}
 
-/** Metres covered by one repeat of the floor texture. */
-const FLOOR_TILE = 3
+/** The tileable noise, sampled at any resolution (bilinear), in [0, 1]. */
+function sampleNoise(x: number, y: number, size: number) {
+  const gx = ((x / size) * NOISE_SIZE + NOISE_SIZE) % NOISE_SIZE
+  const gy = ((y / size) * NOISE_SIZE + NOISE_SIZE) % NOISE_SIZE
+  const x0 = Math.floor(gx)
+  const y0 = Math.floor(gy)
+  const fx = gx - x0
+  const fy = gy - y0
+  const at = (i: number, j: number) => noise[(j % NOISE_SIZE) * NOISE_SIZE + (i % NOISE_SIZE)]
+  const top = at(x0, y0) + (at(x0 + 1, y0) - at(x0, y0)) * fx
+  const bottom = at(x0, y0 + 1) + (at(x0 + 1, y0 + 1) - at(x0, y0 + 1)) * fx
+  return top + (bottom - top) * fy
+}
 
+/*
+ * Stone, generated once. One repeat covers STONE_REPEAT metres of floor: tiles laid in a
+ * running bond (or square slabs, for marble), each with its own tone, a fine mottle and
+ * thin joints. The colour map multiplies the palette's floor colour, so every room keeps
+ * its temperature; the roughness map keeps joints matte and tiles polished.
+ */
+const STONE_SIZE = 512
+/** Metres covered by one repeat of a floor texture. */
+const STONE_REPEAT = 4
+const JOINT = 1.6 / STONE_SIZE
+
+type Tiling = { columns: number; rows: number; bond: boolean }
+
+/** Where a texel falls: its tile, its position in the tile, and how close it is to a joint (0 on the joint). */
+function tileAt(u: number, v: number, { columns, rows, bond }: Tiling) {
+  const row = Math.floor(v * rows)
+  const shifted = bond && row % 2 === 1 ? u + 0.5 / columns : u
+  const column = Math.floor((((shifted % 1) + 1) % 1) * columns)
+  const lu = ((((shifted % 1) + 1) % 1) * columns) % 1
+  const lv = (v * rows) % 1
+  const edge = Math.min(lu / columns, (1 - lu) / columns, lv / rows, (1 - lv) / rows)
+  return { id: row * 97 + column * 13 + 7, lu, lv, edge }
+}
+
+const tileTone = (id: number) => mulberry32(id)()
+
+/**
+ * Stone maps: colour (a multiplier of the palette's floor colour) and roughness, filled
+ * in one pass. They start as a plain, even stone and are drawn in small slices while the
+ * page is idle (the entrance screen is up for far longer), so generating them never
+ * holds up the first frame. Their size never changes, so nothing recompiles.
+ */
+function stoneMaps(tiling: Tiling, veined: boolean) {
+  const color = new Uint8Array(STONE_SIZE * STONE_SIZE * 4).fill(Math.round(0.94 * 255))
+  const roughness = new Uint8Array(STONE_SIZE * STONE_SIZE * 4).fill(Math.round(0.75 * 255))
+  const maps = { color: toTexture(color, STONE_SIZE), roughness: toTexture(roughness, STONE_SIZE) }
+  const veins = new Map<number, { cos: number; sin: number; phase: number }>()
+
+  const rows = (from: number, to: number) => {
+    for (let y = from; y < to; y++) {
+      for (let x = 0; x < STONE_SIZE; x++) {
+        const tile = tileAt(x / STONE_SIZE, y / STONE_SIZE, tiling)
+        const joint = tile.edge < JOINT ? 1 : tile.edge < JOINT * 2 ? 0.4 : 0
+        const mottle = sampleNoise(x * 2, y * 2, STONE_SIZE)
+        const tone = tileTone(tile.id)
+        let vein = 0
+        if (veined) {
+          // Marble: veins along a direction of their own on each slab, bent by the noise.
+          let v = veins.get(tile.id)
+          if (!v) {
+            const random = mulberry32(tile.id)
+            const angle = random() * Math.PI
+            v = { cos: Math.cos(angle), sin: Math.sin(angle), phase: random() * 10 }
+            veins.set(tile.id, v)
+          }
+          const along = tile.lu * v.cos + tile.lv * v.sin
+          const bend = sampleNoise(x, y, STONE_SIZE) * 5 + mottle * 1.4
+          const wave = Math.abs(Math.sin((along * 3.2 + bend + v.phase) * Math.PI))
+          vein = Math.pow(1 - wave, 18) * 0.55 + Math.pow(1 - wave, 5) * 0.12
+        }
+        const base = veined ? 0.94 + tone * 0.06 : 0.9 + tone * 0.1
+        const c = (base + (mottle - 0.5) * (veined ? 0.05 : 0.08) - vein) * (1 - joint * (veined ? 0.3 : 0.18))
+        const r = 0.6 + mottle * 0.3 + joint * 0.4
+        const i = (y * STONE_SIZE + x) * 4
+        const cb = Math.round(Math.min(1, Math.max(0, c)) * 255)
+        const rb = Math.round(Math.min(1, Math.max(0, r)) * 255)
+        color[i] = color[i + 1] = color[i + 2] = cb
+        roughness[i] = roughness[i + 1] = roughness[i + 2] = rb
+        color[i + 3] = roughness[i + 3] = 255
+      }
+    }
+  }
+
+  let next = 0
+  const slice = () => {
+    const end = Math.min(STONE_SIZE, next + 32)
+    rows(next, end)
+    next = end
+    if (next < STONE_SIZE) return later(slice)
+    maps.color.needsUpdate = true
+    maps.roughness.needsUpdate = true
+  }
+  later(slice)
+  return maps
+}
+
+/** Runs `task` when the page is idle (or soon, where idle callbacks are missing). */
+const later = (task: () => void) => {
+  if (typeof window === 'undefined') return task()
+  if ('requestIdleCallback' in window) window.requestIdleCallback(task, { timeout: 500 })
+  else setTimeout(task, 0)
+}
+
+/** Large tiles in a running bond: the exhibition rooms' dark stone. */
+const STONE = stoneMaps({ columns: 2, rows: 4, bond: true }, false)
+/** Square slabs with veins: the lobby's marble. */
+const MARBLE = stoneMaps({ columns: 2, rows: 2, bond: false }, true)
+
+/** Metres covered by one repeat of the plaster texture. */
+const PLASTER_REPEAT = 2.5
+/** Plaster: a faint, broad unevenness in tone and sheen, never a pattern. */
+const PLASTER = dataTexture(128, (x, y) => 0.94 + (sampleNoise(x, y, 128) - 0.5) * 0.08 + (sampleNoise(x * 4, y * 4, 128) - 0.5) * 0.03)
+
+/**
+ * Maps a material's textures by world position, not by each mesh's own UVs: floors
+ * by x and z, walls by their run and height. Neighbouring floors and walls then
+ * continue one another's tiles and plaster without seams, at one texel density, and
+ * geometry needs no UVs of its own. All such materials share one program.
+ */
+function worldMapped<T extends THREE.MeshStandardMaterial>(material: T, repeat: number) {
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.worldRepeat = { value: repeat }
+    shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nuniform float worldRepeat;').replace(
+      '#include <uv_vertex>',
+      `#include <uv_vertex>
+      #ifdef USE_MAP
+      {
+        vec4 worldAt = modelMatrix * vec4( position, 1.0 );
+        vec3 worldNormal = normalize( mat3( modelMatrix ) * normal );
+        vec2 worldUv = abs( worldNormal.y ) > 0.5 ? worldAt.xz : ( abs( worldNormal.x ) > abs( worldNormal.z ) ? worldAt.zy : worldAt.xy );
+        vMapUv = worldUv / worldRepeat;
+        #ifdef USE_ROUGHNESSMAP
+        vRoughnessMapUv = vMapUv;
+        #endif
+      }
+      #endif`,
+    )
+  }
+  material.customProgramCacheKey = () => 'world-mapped'
+  return material
+}
+
+/** Kept for floors laid outside RoomShell: plain planes, mapped by world position like every floor. */
 const floors = new Map<string, THREE.PlaneGeometry>()
 
-/** Horizontal floor plane with UVs in world scale, so every floor shares one material at one texel density. */
 export function floorGeometry(width: number, length: number) {
   const key = `${width}:${length}`
   const cached = floors.get(key)
   if (cached) return cached
   const geometry = new THREE.PlaneGeometry(width, length)
-  const uv = geometry.attributes.uv
-  for (let i = 0; i < uv.count; i++) uv.setXY(i, (uv.getX(i) * width) / FLOOR_TILE, (uv.getY(i) * length) / FLOOR_TILE)
   geometry.rotateX(-Math.PI / 2)
   floors.set(key, geometry)
   return geometry
@@ -93,31 +241,53 @@ export type Palette = {
   wall: THREE.MeshStandardMaterial
   floor: THREE.MeshStandardMaterial
   ceiling: THREE.MeshStandardMaterial
-  /** Recessed skirting at the foot of walls: reads as a shadow line. */
+  /** The skirting board at the foot of walls, and the shadow gap under the ceiling. */
   skirting: THREE.MeshStandardMaterial
   /** Door jambs and heads. */
   reveal: THREE.MeshStandardMaterial
+  /** Architraves around openings: the room's trim. */
+  trim: THREE.MeshStandardMaterial
   threshold: THREE.MeshBasicMaterial
   /** Luminous ceiling slots and panels. */
   glow: THREE.MeshBasicMaterial
 }
 
-export type PaletteColors = { wall: string; floor: string; ceiling: string; glow: string; floorRoughness?: number }
+export type PaletteColors = {
+  wall: string
+  floor: string
+  ceiling: string
+  glow: string
+  floorRoughness?: number
+  /** Architraves and skirting; by default a dark stone. */
+  trim?: string
+  /** `marble` for light, veined slabs (the lobby); `stone` (default) for dark tiles. */
+  floorKind?: 'stone' | 'marble'
+}
 
 /** A new set of palette materials. Use the shared PALETTES unless a space needs to animate its own. */
 export function createPalette(colors: PaletteColors): Palette {
+  const stone = colors.floorKind === 'marble' ? MARBLE : STONE
+  const trim = colors.trim ?? '#1f1d1b'
+  // Light stone trim keeps a trace of its own light, like the ceilings, so the undersides of beams and cornices stay stone, not shadow.
+  const trimGlow = colors.floorKind === 'marble' ? 0.32 : 0
   return {
-    wall: new THREE.MeshStandardMaterial({ color: colors.wall, roughness: 0.94 }),
-    floor: new THREE.MeshStandardMaterial({
-      color: colors.floor,
-      roughness: colors.floorRoughness ?? 0.62,
-      map: floorTint,
-      roughnessMap: floorRoughness,
-    }),
+    wall: worldMapped(new THREE.MeshStandardMaterial({ color: colors.wall, roughness: 0.92, map: PLASTER, envMapIntensity: 0.25 }), PLASTER_REPEAT),
+    floor: worldMapped(
+      new THREE.MeshStandardMaterial({
+        color: colors.floor,
+        roughness: colors.floorRoughness ?? 0.5,
+        map: stone.color,
+        roughnessMap: stone.roughness,
+        // Dark stone shows the room's light, not a grey sky; light marble takes more of it.
+        envMapIntensity: colors.floorKind === 'marble' ? 0.8 : 0.6,
+      }),
+      STONE_REPEAT,
+    ),
     // Ceilings face away from the sky light; a trace of self-illumination keeps them a surface, not a void.
-    ceiling: new THREE.MeshStandardMaterial({ color: colors.ceiling, roughness: 1, emissive: colors.ceiling, emissiveIntensity: 0.9 }),
-    skirting: new THREE.MeshStandardMaterial({ color: '#151514', roughness: 0.7 }),
+    ceiling: new THREE.MeshStandardMaterial({ color: colors.ceiling, roughness: 1, emissive: colors.ceiling, emissiveIntensity: 0.9, envMapIntensity: 0 }),
+    skirting: new THREE.MeshStandardMaterial({ color: trim, roughness: 0.42, envMapIntensity: 1.2 }),
     reveal: new THREE.MeshStandardMaterial({ color: '#1c1b1a', roughness: 0.8 }),
+    trim: new THREE.MeshStandardMaterial({ color: trim, roughness: 0.42, envMapIntensity: 1.2, emissive: trim, emissiveIntensity: trimGlow }),
     threshold: new THREE.MeshBasicMaterial({ color: '#141413' }),
     glow: new THREE.MeshBasicMaterial({ color: colors.glow }),
   }
@@ -128,6 +298,8 @@ export const STATES_COLORS: PaletteColors = { wall: '#53514d', floor: '#292826',
 
 /** One palette per kind of space: the same museum, different temperatures. */
 export const PALETTES = {
+  // The lobby: a classical hall in light, veined marble, pale walls and light stone trim.
+  lobby: createPalette({ wall: '#d6d0c4', floor: '#b3ac9f', ceiling: '#d8d1c4', glow: '#fbf6ec', floorRoughness: 0.42, floorKind: 'marble', trim: '#e9e4da' }),
   // Lightest: warm, welcoming, establishes scale.
   entrance: createPalette({ wall: '#77736c', floor: '#45423e', ceiling: '#47443f', glow: '#bdb6a8' }),
   // Neutral gallery: calm grey walls, a satin floor that catches the downlights.

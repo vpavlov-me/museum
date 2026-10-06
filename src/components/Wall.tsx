@@ -9,9 +9,14 @@ export type DoorOpening = {
 }
 
 const REVEAL = 0.06
-const SKIRTING = { height: 0.09, proud: 0.012 }
+/** A skirting board, proud of both faces. */
+const SKIRTING = { height: 0.15, proud: 0.018 }
+/** A dark band under the ceiling: the wall stops just short of it. */
+const SHADOW_GAP = 0.045
+/** Architrave: a flat frame around an opening, proud of both faces. */
+const ARCHITRAVE = { width: 0.13, proud: 0.022 }
 
-/** A solid stretch of wall with a skirting line at its foot, built along local x. */
+/** A solid stretch of wall with a skirting board at its foot and a shadow gap at its head, built along local x. */
 function Segment({ from, to, height, thickness, palette }: { from: number; to: number; height: number; thickness: number; palette: Palette }) {
   if (to - from <= 0.001) return null
   const x = (from + to) / 2
@@ -22,6 +27,9 @@ function Segment({ from, to, height, thickness, palette }: { from: number; to: n
       </mesh>
       <mesh position={[x, SKIRTING.height / 2, 0]} material={palette.skirting}>
         <boxGeometry args={[to - from, SKIRTING.height, thickness + SKIRTING.proud * 2]} />
+      </mesh>
+      <mesh position={[x, height - SHADOW_GAP / 2, 0]} material={palette.reveal}>
+        <boxGeometry args={[to - from, SHADOW_GAP, thickness + 0.004]} />
       </mesh>
     </>
   )
@@ -89,6 +97,18 @@ export function Wall({
       {lintel > 0 && (
         <mesh position={[door.center, door.height - REVEAL / 2, 0]} material={palette.reveal}>
           <boxGeometry args={[door.width, REVEAL, thickness + 0.03]} />
+        </mesh>
+      )}
+
+      {/* Architrave: jambs and head on both faces, stopping on the skirting. */}
+      {[left - ARCHITRAVE.width / 2, right + ARCHITRAVE.width / 2].map((x) => (
+        <mesh key={`a${x}`} position={[x, door.height / 2, 0]} material={palette.trim}>
+          <boxGeometry args={[ARCHITRAVE.width, door.height, thickness + ARCHITRAVE.proud * 2]} />
+        </mesh>
+      ))}
+      {lintel > ARCHITRAVE.width && (
+        <mesh position={[door.center, door.height + ARCHITRAVE.width / 2, 0]} material={palette.trim}>
+          <boxGeometry args={[door.width + ARCHITRAVE.width * 2, ARCHITRAVE.width, thickness + ARCHITRAVE.proud * 2]} />
         </mesh>
       )}
 

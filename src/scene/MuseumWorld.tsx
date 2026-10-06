@@ -6,7 +6,7 @@ import type { Presence } from '../audio/engine'
 import { exhibitions, useExhibitionStatuses } from '../museum/exhibitionLoader'
 import { OPEN_EXHIBITIONS, type ExhibitionDefinition } from '../museum/exhibitions'
 import { getSpace } from '../museum/roomRegistry'
-import { RoomGroup } from '../museum/RoomContext'
+import { restoreHidden, RoomGroup } from '../museum/RoomContext'
 import { Lobby } from '../rooms/lobby/Lobby'
 import { Controls } from './Controls'
 import { DebugBridge } from './DebugBridge'
@@ -42,7 +42,7 @@ function CompileWing({ id, wing }: { id: ExhibitionDefinition['id']; wing: React
     compiled
       .catch(() => undefined)
       .finally(() => {
-        hidden.forEach((object) => (object.visible = false))
+        restoreHidden(hidden)
         if (!cancelled) exhibitions.opened(id)
       })
     return () => {

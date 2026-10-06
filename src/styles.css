@@ -328,6 +328,8 @@ a:hover {
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--fade) 350ms;
+  /* A soft shade behind the light ink, so the HUD still reads against the lobby's pale stone. */
+  text-shadow: 0 1px 2px rgba(10, 10, 10, 0.5);
 }
 
 .hud--visible {
@@ -373,6 +375,7 @@ a:hover {
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: rgba(239, 237, 230, 0.72);
+  box-shadow: 0 0 0 1px rgba(10, 10, 10, 0.35);
 }
 
 .hud__prompt {

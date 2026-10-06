@@ -7,7 +7,7 @@ import { RoomShell } from '../../components/RoomShell'
 import { Text } from '../../components/Text'
 import { Wall } from '../../components/Wall'
 import { WallText, type WallTextLayout } from '../../components/WallText'
-import { INK, MUSEUM, TYPE } from '../../identity'
+import { INK_ON_LIGHT as INK, MUSEUM, TYPE } from '../../identity'
 import { motion } from '../../museum/capabilities'
 import { exhibitions, useExhibitionStatus } from '../../museum/exhibitionLoader'
 import { EXHIBITIONS, type ExhibitionDefinition } from '../../museum/exhibitions'
@@ -33,7 +33,7 @@ import { StaticMerge } from '../../scene/StaticMerge'
  * what starts loading them. World coordinates (the lobby's origin is the world origin).
  */
 
-const palette = PALETTES.entrance
+const palette = PALETTES.lobby
 const t = WALL_THICKNESS
 const NORTH = LOBBY.minZ + 0.02
 const SOUTH = LOBBY.maxZ - 0.02
@@ -49,6 +49,72 @@ const DOOR_OF: Partial<Record<ExhibitionDefinition['id'], keyof typeof DOORS>> =
   permanent: 'lobbyPermanent',
   archaeology: 'lobbyArchaeology',
   'dark-patterns': 'lobbyDark',
+}
+
+/*
+ * The classical order of the hall, in light stone: engaged columns (pilasters) on the
+ * walls, a cornice all round, and a coffered ceiling whose coffers are the laylights.
+ * All of it stays within a pilaster's depth of the walls: nothing stands in the way.
+ */
+const PILASTER = { width: 0.52, depth: 0.2, base: 0.3, capital: 0.26 }
+const CORNICE = { height: 0.32, depth: 0.16 }
+const BEAM = { width: 0.32, depth: 0.34 }
+/** Between the entrances and their signs on the north wall; clear of the front door and credits on the south. */
+const PILASTERS_NORTH = [-12.2, -3.6, 7.6]
+const PILASTERS_SOUTH = [-9.4, 1.2, 6.4, 11.6]
+
+/** A pilaster against a wall face at `wall` (z), standing into the room towards `into` (+1 south, -1 north). */
+function Pilaster({ x, wall, into }: { x: number; wall: number; into: 1 | -1 }) {
+  const z = (depth: number) => wall + (into * depth) / 2
+  const shaft = LOBBY.height - CORNICE.height - PILASTER.base - PILASTER.capital
+  return (
+    <>
+      <mesh position={[x, PILASTER.base / 2, z(PILASTER.depth + 0.08)]} material={palette.trim}>
+        <boxGeometry args={[PILASTER.width + 0.12, PILASTER.base, PILASTER.depth + 0.08]} />
+      </mesh>
+      <mesh position={[x, PILASTER.base + shaft / 2, z(PILASTER.depth)]} material={palette.trim}>
+        <boxGeometry args={[PILASTER.width, shaft, PILASTER.depth]} />
+      </mesh>
+      <mesh position={[x, PILASTER.base + shaft + PILASTER.capital / 2, z(PILASTER.depth + 0.07)]} material={palette.trim}>
+        <boxGeometry args={[PILASTER.width + 0.14, PILASTER.capital, PILASTER.depth + 0.07]} />
+      </mesh>
+    </>
+  )
+}
+
+/** Cornice, pilasters and coffers: the lobby's order. */
+function Order() {
+  const top = LOBBY.height - CORNICE.height / 2
+  const width = LOBBY.maxX - LOBBY.minX
+  const length = LOBBY.maxZ - LOBBY.minZ
+  return (
+    <>
+      {/* Cornice: a band of stone under the ceiling, all the way round. */}
+      {[LOBBY.minZ + CORNICE.depth / 2, LOBBY.maxZ - CORNICE.depth / 2].map((z) => (
+        <mesh key={`cz${z}`} position={[(LOBBY.minX + LOBBY.maxX) / 2, top, z]} material={palette.trim}>
+          <boxGeometry args={[width, CORNICE.height, CORNICE.depth]} />
+        </mesh>
+      ))}
+      {[LOBBY.minX + CORNICE.depth / 2, LOBBY.maxX - CORNICE.depth / 2].map((x) => (
+        <mesh key={`cx${x}`} position={[x, top, (LOBBY.minZ + LOBBY.maxZ) / 2]} material={palette.trim}>
+          <boxGeometry args={[CORNICE.depth, CORNICE.height, length]} />
+        </mesh>
+      ))}
+
+      {PILASTERS_NORTH.map((x) => <Pilaster key={`n${x}`} x={x} wall={LOBBY.minZ} into={1} />)}
+      {PILASTERS_SOUTH.map((x) => <Pilaster key={`s${x}`} x={x} wall={LOBBY.maxZ} into={-1} />)}
+
+      {/* Coffers: beams between the laylights, across and along the hall. */}
+      {[-12, -5, 1, 7, 13].map((x) => (
+        <mesh key={`bx${x}`} position={[x, LOBBY.height - BEAM.depth / 2, (LOBBY.minZ + LOBBY.maxZ) / 2]} material={palette.trim}>
+          <boxGeometry args={[BEAM.width, BEAM.depth, length]} />
+        </mesh>
+      ))}
+      <mesh position={[(LOBBY.minX + LOBBY.maxX) / 2, LOBBY.height - BEAM.depth / 2, 31]} material={palette.trim}>
+        <boxGeometry args={[width, BEAM.depth, BEAM.width]} />
+      </mesh>
+    </>
+  )
 }
 
 const STATEMENT_LAYOUT: WallTextLayout = { top: 2.55, titleWidth: 3, gap: 0.45, bodyWidth: 3.6 }
@@ -189,6 +255,8 @@ export function Lobby() {
         <Wall axis="x" at={LOBBY.minZ - t / 2} from={west} to={east} height={LOBBY.height} palette={palette} door={opening(permanent)} />
         <Wall axis="x" at={LOBBY.minZ - t / 2} from={east} to={LOBBY.maxX + t} height={LOBBY.height} palette={palette} door={opening(archaeology)} />
 
+        <Order />
+
         {/* A laylight over the whole lobby: the brightest, most even light before the galleries. */}
         {[-9, -3, 3, 9].map((x) =>
           [28.6, 33.4].map((z) => <Luminaire key={`${x}:${z}`} position={[x + 1, LOBBY.height - 0.004, z]} size={[3.6, 2.8]} palette={palette} />),
@@ -201,7 +269,7 @@ export function Lobby() {
       </StaticMerge>
 
       <RoomContents>
-        <LightPool position={[1, 0.004, CENTER_Z]} size={[26, 9]} color="#efe6d6" strength={0.05} />
+        <LightPool position={[1, 0.004, CENTER_Z]} size={[26, 9]} color="#efe6d6" strength={0.02} />
 
         <Text position={[permanent.x, 4.25, NORTH]} fontSize={0.56} letterSpacing={-0.03} color={INK.text} anchorX="center" anchorY="middle">
           {MUSEUM.name.toUpperCase()}
@@ -221,6 +289,7 @@ export function Lobby() {
           position={[LOBBY.maxX - 0.02, 33.8]}
           facing="west"
           layout={STATEMENT_LAYOUT}
+          ink={INK}
           kicker="INTERFACE MUSEUM"
           title="Interfaces, given physical form."
           body="A small museum about the controls, conventions and habits we use every day without noticing them. The permanent exhibition starts straight ahead; Interface Archaeology is on the right, and the temporary exhibition on the left. Each exhibition ends at a door back to this lobby."

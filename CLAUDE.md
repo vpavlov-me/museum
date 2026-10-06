@@ -43,7 +43,8 @@ Do not introduce this folder structure prematurely if a change is still small, b
 
 ## Visual language
 
-- dark, neutral architectural shell;
+- dark, intimate exhibition rooms (dark stone floors, warm plaster, light on the exhibits) and one
+  light, classical hall: the lobby, in marble with pilasters and coffers;
 - warm off-white typography;
 - sparse accent colors reserved for exhibits;
 - large editorial typography;
@@ -66,6 +67,8 @@ v1 shipped as one exhibition of three rooms (#12). v2 (#20, #21) makes it a smal
 **lobby** where every visit starts and ends, the **Permanent Exhibition** (Rooms 01–03, unchanged),
 **Interface Archaeology** in its own wing (#22), and the temporary exhibition, **Dark Patterns** (#25).
 
+- The quality roadmap (#31) comes first: the museum standard (materials and light, display kit, wall
+  typography), then re-planning the exhibitions as clear enfilades.
 - Design for three to five exhibitions, not more. Do not start an exhibition, room or new exhibit
   without an approved issue; ideas go into the v2 roadmap (#21) as backlog first.
 - Every merge to `main` deploys: each change must leave walking, the guided tour and the text
@@ -99,7 +102,11 @@ v1 shipped as one exhibition of three rooms (#12). v2 (#20, #21) makes it a smal
   each room's `content.ts`). Whatever changes in a room must still work in all three.
 - **Passages:** the low, dark turn between rooms is `components/TurnPassage` (`turn="west"` mirrors it); a new exhibition gets one.
 - **Identity:** `identity.ts` and `styles.css` hold the ink, the type and the name; use them, not
-  new hex values. Every 3D text uses `components/Text` (Inter, self-hosted).
+  new hex values (`INK_ON_LIGHT` on light stone). Every 3D text uses `components/Text` (Inter, self-hosted).
+- **Materials:** `scene/materials.ts` palettes give every space its stone floor, plaster walls and
+  trim, mapped by world position (no UVs needed) from textures generated at idle time; `Wall` adds
+  skirting, shadow gap and architraves. Reflections come from one generated environment
+  (`scene/Lighting`). No image textures.
 - **Sound:** synthesised in `audio/`. It is optional, never carries information, and only starts
   after a click.
 - **Measuring:** `npm run build:profile` is a production build with the debug bridge and the

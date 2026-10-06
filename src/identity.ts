@@ -34,6 +34,11 @@ export const INK = {
   void: '#0a0a0a',
 }
 
+/** The same roles, for walls of light stone (the lobby): dark ink in place of off-white. */
+export const INK_ON_LIGHT = { text: INK.dark, body: INK.darkMuted, muted: INK.darkMuted }
+
+export type Ink = { text: string; body: string; muted: string }
+
 /** One typeface for walls, labels and the 2D shell (Inter, OFL, subset and self-hosted in /public/fonts). */
 export const FONT = {
   regular: '/fonts/inter-regular.woff',
