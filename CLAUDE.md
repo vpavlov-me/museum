@@ -64,7 +64,7 @@ Do not introduce this folder structure prematurely if a change is still small, b
 
 v1 shipped as one exhibition of three rooms (#12). v2 (#20, #21) makes it a small museum: a
 **lobby** where every visit starts and ends, the **Permanent Exhibition** (Rooms 01–03, unchanged),
-**Interface Archaeology** in its own wing (#22), and a temporary exhibition in preparation.
+**Interface Archaeology** in its own wing (#22), and the temporary exhibition, **Dark Patterns** (#25).
 
 - Design for three to five exhibitions, not more. Do not start an exhibition, room or new exhibit
   without an approved issue; ideas go into the v2 roadmap (#21) as backlog first.
@@ -79,7 +79,7 @@ v1 shipped as one exhibition of three rooms (#12). v2 (#20, #21) makes it a smal
   Walkable floor, which rooms open into which, and cell-to-cell sight lines are all derived from it.
 - **Exhibitions:** `museum/exhibitions.ts` lists them (number, title, status, URL slug, spaces,
   lobby door, start point, chunk). Each exhibition's rooms are one dynamic import
-  (`rooms/permanent.ts`, `rooms/archaeology/index.ts`) loaded by `museum/exhibitionLoader.ts`; its
+  (`rooms/permanent.ts`, `rooms/archaeology/index.ts`, `rooms/dark-patterns/index.ts`) loaded by `museum/exhibitionLoader.ts`; its
   lobby door stays shut until they are mounted and compiled. Never import an exhibition's rooms
   statically from shared code. Each exhibition ends at a `DoorLeaf` that calls
   `navigation.returnToLobby`; the lobby's front door calls `navigation.leave`.
@@ -97,7 +97,7 @@ v1 shipped as one exhibition of three rooms (#12). v2 (#20, #21) makes it a smal
   chosen in the lobby, each ending at its door back to the lobby; every stop must stay reachable,
   and may set a `pitch` to look down) and the text version (one section per exhibition, built from
   each room's `content.ts`). Whatever changes in a room must still work in all three.
-- **Passages:** the low, dark turn between rooms is `components/TurnPassage`; a new room gets one.
+- **Passages:** the low, dark turn between rooms is `components/TurnPassage` (`turn="west"` mirrors it); a new exhibition gets one.
 - **Identity:** `identity.ts` and `styles.css` hold the ink, the type and the name; use them, not
   new hex values. Every 3D text uses `components/Text` (Inter, self-hosted).
 - **Sound:** synthesised in `audio/`. It is optional, never carries information, and only starts

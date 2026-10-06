@@ -73,7 +73,7 @@ export function GuidedControls({ visible, onPlan }: { visible: boolean; onPlan: 
           <div className="guided__choices" role="group" aria-label="Exhibitions">
             {EXHIBITIONS.map((exhibition) =>
               exhibition.status === 'open' ? (
-                <button key={exhibition.id} className="museum-button" type="button" onClick={() => tour.choose(exhibition.id as 'permanent' | 'archaeology')}>
+                <button key={exhibition.id} className="museum-button" type="button" onClick={() => tour.choose(exhibition.id)}>
                   <span className="meta">
                     {exhibition.number}
                     {visited.includes(exhibition.id) ? ' · visited' : ''}

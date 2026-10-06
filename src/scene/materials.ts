@@ -144,6 +144,10 @@ export const PALETTES = {
   success: createPalette({ wall: '#a9a59c', floor: '#68655f', ceiling: '#bfbaaf', glow: '#fbf8f0', floorRoughness: 0.5 }),
   // Interface Archaeology, an archive: the gallery grey, a little warmer and drier, like a store kept for a long time.
   archive: createPalette({ wall: '#514b44', floor: '#2b2825', ceiling: '#2e2b27', glow: '#e9dfcd', floorRoughness: 0.64 }),
+  // Dark Patterns: a cool, shop-bright grey, under fluorescent light.
+  sales: createPalette({ wall: '#5c5e62', floor: '#2b2c2f', ceiling: '#2f3033', glow: '#eef2f5', floorRoughness: 0.5 }),
+  // The cancellation flow: the same shop, with the lights turned down.
+  flow: createPalette({ wall: '#3c3d40', floor: '#202123', ceiling: '#242527', glow: '#b9bec4' }),
   // The reconstruction: a dark room, so that the only light in it is the diorama's.
   diorama: createPalette({ wall: '#2b2927', floor: '#1c1b19', ceiling: '#201f1d', glow: '#8f887c' }),
 } satisfies Record<string, Palette>

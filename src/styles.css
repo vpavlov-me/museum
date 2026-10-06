@@ -1009,6 +1009,16 @@ a:hover {
   stroke: #b09676;
 }
 
+.plan__dark {
+  fill: rgba(200, 71, 59, 0.1);
+  stroke: #c8473b;
+}
+
+.plan__swatch.plan__dark {
+  border-color: #c8473b;
+  background: rgba(200, 71, 59, 0.3);
+}
+
 .plan__closed {
   stroke: var(--ink-quiet);
   stroke-width: 0.8;

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { MUSEUM } from '../identity'
 import { EXHIBITIONS, OPEN_EXHIBITIONS } from '../museum/exhibitions'
 import { AFTERWORD, FINDS, INSTITUTE, THESIS as ARCHAEOLOGY_THESIS } from '../rooms/archaeology/content'
+import { AFTERWORD as DARK_AFTERWORD, CONFIRMSHAMING, FLOW, PATTERNS, RECEIPT, THESIS as DARK_THESIS, TOTAL } from '../rooms/dark-patterns/content'
 import { CARDS as ACCEPTED, CHAPTERS as ACCEPTED_CHAPTERS, OBSERVATIONS, THESIS as ACCEPTED_THESIS } from '../rooms/accepted/content'
 import { CHAPTERS as STATES, THESIS as STATES_THESIS } from '../rooms/states/content'
 import { EXHIBITS, WALL_TEXTS } from '../rooms/the-button/content'
@@ -60,6 +61,31 @@ const ARCHAEOLOGY = {
       body: `${find.reading} [${find.was}]`,
     })),
     AFTERWORD,
+  ],
+}
+
+const pattern = (p: { name: string; text: string; also?: string }) => ({ kicker: p.also ? `PATTERN / ${p.also.toUpperCase()}` : 'PATTERN', title: p.name, body: p.text })
+
+/** Dark Patterns: the shop's signs, in the order a visitor meets them, each followed by the museum's label. */
+const DARK_PATTERNS = {
+  idea: 'The temporary exhibition: interfaces designed against the people using them, walked as a purchase and a cancellation. The shop’s signs use the patterns on the visitor; small labels, in the museum’s voice, name them.',
+  entries: [
+    DARK_THESIS,
+    { kicker: 'I / WELCOME', title: 'This exhibition closes in 00:59', body: 'A countdown that starts again every time it runs out, over a line that says how many people are looking at this room right now: a number that drifts up and down.' },
+    pattern(PATTERNS.urgency),
+    pattern(PATTERNS.social),
+    {
+      kicker: 'II / CHECKOUT',
+      title: 'A free ticket',
+      body: `Along the counter the fees appear one at a time as you walk: ${RECEIPT.map((line) => `${line.item} ${line.price === 0 ? 'free' : `€${line.price.toFixed(2)}`}${line.note && line.price > 0 ? ' (pre-selected)' : ''}`).join(', ')}. Total: €${TOTAL.toFixed(2)}. On a stand, a box ticked for you, “Add booking protection”: untick it and it ticks itself again.`,
+    },
+    pattern(PATTERNS.drip),
+    pattern(PATTERNS.basket),
+    { kicker: 'III / LEAVING', title: 'Two doors', body: `A large door, framed in light, under a button: “${CONFIRMSHAMING.stay}”. It leads to a small bright room: “${CONFIRMSHAMING.thanks}” At the far end of the counter, a small door, and in small grey type: “${CONFIRMSHAMING.leave}”.` },
+    pattern(PATTERNS.shaming),
+    { kicker: 'III / LEAVING', title: 'The cancellation flow', body: `Behind the small door, a corridor folded four times, with a screen at each turn. ${FLOW.map((screen) => `“${screen.title}” ${screen.body} [${screen.yes} / ${screen.no}]`).join(' ')}` },
+    pattern(PATTERNS.motel),
+    DARK_AFTERWORD,
   ],
 }
 
@@ -148,10 +174,11 @@ export function TextExhibition({ visible, canVisit, onVisit }: { visible: boolea
         <Entries entries={ARCHAEOLOGY.entries} level={3} />
       </section>
 
-      <section className="text-exhibition__room" aria-labelledby="exhibition-temporary-title">
-        <div className="meta">Exhibition 03</div>
-        <h2 id="exhibition-temporary-title">Temporary Exhibition</h2>
-        <p className="text-exhibition__idea">In preparation.</p>
+      <section id="exhibition-dark-patterns" className="text-exhibition__room" aria-labelledby="exhibition-dark-patterns-title">
+        <div className="meta">Temporary exhibition 03</div>
+        <h2 id="exhibition-dark-patterns-title">Dark Patterns</h2>
+        <p className="text-exhibition__idea">{DARK_PATTERNS.idea}</p>
+        <Entries entries={DARK_PATTERNS.entries} level={3} />
       </section>
 
       <footer className="text-exhibition__foot">
