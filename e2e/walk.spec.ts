@@ -14,12 +14,23 @@ const REACHED = 0.15
 test.use({ viewport: { width: 640, height: 400 } })
 test.setTimeout(15 * 60_000)
 
-/** Walks to a point; if something closed is in the way, does what it asks (or waits), and tries again. */
-async function reach(page: Page, x: number, z: number, label: string) {
+type Stop = (typeof TOURS)[keyof typeof TOURS][number]
+
+/**
+ * Walks to a point. If something closed is in the way, does what it asks; if it asks
+ * nothing, goes back to the last stop and uses what is there again (a retry that fails
+ * once), or simply waits; then tries again.
+ */
+async function reach(page: Page, x: number, z: number, label: string, previous?: Stop) {
   for (let attempt = 0; attempt < 6; attempt++) {
     const at = await walkTo(page, x, z)
     if (Math.hypot(at.x - x, at.z - z) < REACHED) return
-    const here = await state(page)
+    let here = await state(page)
+    if (!here.prompt && previous && attempt % 2 === 1) {
+      await walkTo(page, ...previous.at)
+      await look(page, previous.yaw, previous.pitch ?? 0)
+      here = await state(page)
+    }
     console.log(`  ${label}: stopped at [${at.x}, ${at.z}] short of [${x}, ${z}]${here.prompt ? `, pressing ${here.prompt}` : ', waiting'}`)
     if (here.prompt) await press(page)
     await settle(page, 3000)
@@ -37,7 +48,7 @@ for (const id of ['permanent', 'archaeology', 'dark-patterns'] as const) {
 
     for (const [i, stop] of stops.entries()) {
       for (const [x, z] of [...(stop.via ?? []), stop.at]) {
-        await reach(page, x, z, stop.title)
+        await reach(page, x, z, stop.title, stops[i - 1])
         // The first stop walks through the exhibition's lobby door: wait for it to open.
         if (i === 0 && (await state(page)).space === 'lobby') await waitOpen(page, id)
       }
