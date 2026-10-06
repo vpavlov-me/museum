@@ -2,6 +2,7 @@ import { useCallback, useRef, type ComponentType } from 'react'
 import { useThree } from '@react-three/fiber'
 import type { SoundName } from '../../audio/sounds'
 import { useSound } from '../../audio/useSound'
+import { Cradle, CRADLE_SEAT } from '../../components/Cradle'
 import { ExhibitLabel } from '../../components/ExhibitLabel'
 import { Plinth } from '../../components/Plinth'
 import { RoomShell } from '../../components/RoomShell'
@@ -24,6 +25,7 @@ import { TactileButton } from './artifacts/TactileButton'
 import { EXHIBITS, ROOM, THRESHOLDS, WALL_TEXTS, type ArtifactStyle, type ButtonExhibit } from './content'
 
 const PLINTH = { width: 2.6, height: 0.95, depth: 0.9 }
+const CRADLE = { height: 0.06 }
 const palette = PALETTES.gallery
 
 /** Each era answers a press in its own material: a hard clack, a soft gel, a dry tick, almost nothing. */
@@ -72,7 +74,11 @@ function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
       <group position={[x, 0, z]} rotation={[0, exhibit.side === 'left' ? Math.PI / 2 : -Math.PI / 2, 0]}>
         <Plinth width={PLINTH.width} height={PLINTH.height} depth={PLINTH.depth} />
 
-        <group position={[0, PLINTH.height + BUTTON.height / 2 + 0.02, 0]}>
+        {/* Each button stands in a cradle on its plinth, as an object, not an image. */}
+        <group position={[0, PLINTH.height, 0]}>
+          <Cradle width={BUTTON.width + 0.16} height={CRADLE.height} />
+        </group>
+        <group position={[0, PLINTH.height + CRADLE.height - CRADLE_SEAT + BUTTON.height / 2, 0]}>
           <Artifact label={exhibit.artifact.label} pressedAt={pressedAt} />
         </group>
 

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { Text } from '../../components/Text'
+import { WallMount } from '../../components/WallMount'
 import { facingRotation, type Facing } from '../../components/WallText'
 import { INK, TYPE } from '../../identity'
 import { useFocusTarget } from '../../scene/Interaction'
@@ -9,8 +10,8 @@ import { cardOf, SALES, type Pattern } from './content'
 
 /**
  * A screen on a wall, in the shop's voice: a title, a line, a large friendly button
- * and a small grey way out. Self-lit, like a screen. `position` is its centre,
- * room-local; it faces `facing`.
+ * and a small grey way out. Self-lit, like a screen, in a bronze wall mount. `position`
+ * is its centre on the wall, room-local; it faces `facing`.
  */
 export function Screen({
   position,
@@ -38,35 +39,37 @@ export function Screen({
   const inner = width - 0.32
   return (
     <group position={position} rotation={facingRotation(facing)}>
-      <mesh material={basicMaterial(SALES.surface)}>
-        <planeGeometry args={[width, height]} />
-      </mesh>
-      <Text position={[left, height / 2 - 0.16, 0.003]} fontSize={0.12} lineHeight={1.15} maxWidth={inner} color={SALES.ink} anchorX="left" anchorY="top">
-        {title}
-      </Text>
-      {urgent && (
-        <Text position={[left, height / 2 - 0.5, 0.003]} fontSize={0.2} letterSpacing={0.02} color={SALES.urgent} anchorX="left" anchorY="top">
-          {urgent}
+      <WallMount width={width} height={height}>
+        <mesh material={basicMaterial(SALES.surface)}>
+          <planeGeometry args={[width, height]} />
+        </mesh>
+        <Text position={[left, height / 2 - 0.16, 0.003]} fontSize={0.12} lineHeight={1.15} maxWidth={inner} color={SALES.ink} anchorX="left" anchorY="top">
+          {title}
         </Text>
-      )}
-      {body && (
-        <Text position={[left, urgent ? -0.05 : height / 2 - 0.5, 0.003]} fontSize={0.06} lineHeight={1.45} maxWidth={inner} color={SALES.ink} anchorX="left" anchorY="top">
-          {body}
-        </Text>
-      )}
-      {primary && (
-        <group position={[left + 0.6, -height / 2 + 0.24, 0.003]}>
-          <mesh geometry={roundedRect(1.2, 0.2, 0.1)} material={basicMaterial(SALES.button)} />
-          <Text position={[0, 0, 0.002]} fontSize={0.055} letterSpacing={0.04} color="#ffffff" anchorX="center" anchorY="middle">
-            {primary}
+        {urgent && (
+          <Text position={[left, height / 2 - 0.5, 0.003]} fontSize={0.2} letterSpacing={0.02} color={SALES.urgent} anchorX="left" anchorY="top">
+            {urgent}
           </Text>
-        </group>
-      )}
-      {secondary && (
-        <Text position={[left + 1.36, -height / 2 + 0.24, 0.003]} fontSize={0.032} color={SALES.quiet} anchorX="left" anchorY="middle">
-          {secondary}
-        </Text>
-      )}
+        )}
+        {body && (
+          <Text position={[left, urgent ? -0.05 : height / 2 - 0.5, 0.003]} fontSize={0.06} lineHeight={1.45} maxWidth={inner} color={SALES.ink} anchorX="left" anchorY="top">
+            {body}
+          </Text>
+        )}
+        {primary && (
+          <group position={[left + 0.6, -height / 2 + 0.24, 0.003]}>
+            <mesh geometry={roundedRect(1.2, 0.2, 0.1)} material={basicMaterial(SALES.button)} />
+            <Text position={[0, 0, 0.002]} fontSize={0.055} letterSpacing={0.04} color="#ffffff" anchorX="center" anchorY="middle">
+              {primary}
+            </Text>
+          </group>
+        )}
+        {secondary && (
+          <Text position={[left + 1.36, -height / 2 + 0.24, 0.003]} fontSize={0.032} color={SALES.quiet} anchorX="left" anchorY="middle">
+            {secondary}
+          </Text>
+        )}
+      </WallMount>
     </group>
   )
 }

@@ -3,6 +3,7 @@ import { useSound } from '../../audio/useSound'
 import { DoorLeaf } from '../../components/DoorLeaf'
 import { RoomShell } from '../../components/RoomShell'
 import { Text } from '../../components/Text'
+import { WallMount } from '../../components/WallMount'
 import { TurnPassage } from '../../components/TurnPassage'
 import { Wall } from '../../components/Wall'
 import { WallText } from '../../components/WallText'
@@ -95,23 +96,29 @@ function ReceiptLine({ index }: { index: number }) {
   useRoomFrame(({ camera }) => {
     if (!shown && camera.position.x - origin[0] < x + 1.6 && camera.position.z - origin[1] < checkout.maxZ) setShown(true)
   })
-  if (!shown) return null
+  // The mounts hang empty along the wall; each fee appears in its own as the visitor passes.
   return (
-    <group position={[x, 1.9, checkout.minZ + 0.03]}>
-      <mesh material={basicMaterial(SALES.surface)}>
-        <planeGeometry args={[1.7, 0.62]} />
-      </mesh>
-      <Text position={[-0.72, 0.19, 0.003]} fontSize={0.075} color={SALES.ink} anchorX="left" anchorY="top">
-        {line.item}
-      </Text>
-      <Text position={[-0.72, -0.02, 0.003]} fontSize={0.12} color={SALES.ink} anchorX="left" anchorY="top">
-        {line.price === 0 ? 'FREE' : `+ ${euros(line.price)}`}
-      </Text>
-      {line.note && line.price > 0 && (
-        <Text position={[0.72, 0.19, 0.003]} fontSize={0.032} letterSpacing={0.1} color={SALES.quiet} anchorX="right" anchorY="top">
-          {line.note}
-        </Text>
-      )}
+    <group position={[x, 1.9, checkout.minZ + 0.002]}>
+      <WallMount width={1.7} height={0.62}>
+        {shown && (
+          <>
+            <mesh material={basicMaterial(SALES.surface)}>
+              <planeGeometry args={[1.7, 0.62]} />
+            </mesh>
+            <Text position={[-0.72, 0.19, 0.003]} fontSize={0.075} color={SALES.ink} anchorX="left" anchorY="top">
+              {line.item}
+            </Text>
+            <Text position={[-0.72, -0.02, 0.003]} fontSize={0.12} color={SALES.ink} anchorX="left" anchorY="top">
+              {line.price === 0 ? 'FREE' : `+ ${euros(line.price)}`}
+            </Text>
+            {line.note && line.price > 0 && (
+              <Text position={[0.72, 0.19, 0.003]} fontSize={0.032} letterSpacing={0.1} color={SALES.quiet} anchorX="right" anchorY="top">
+                {line.note}
+              </Text>
+            )}
+          </>
+        )}
+      </WallMount>
     </group>
   )
 }

@@ -1,4 +1,5 @@
 import { Text } from '../../../components/Text'
+import { WallMount } from '../../../components/WallMount'
 import { WallText } from '../../../components/WallText'
 import { useFocusTarget } from '../../../scene/Interaction'
 import { LightPool, Luminaire } from '../../../scene/Light'
@@ -11,7 +12,7 @@ const WALL = cell.minZ + 0.02
 const LEFT = 2.4
 const WARM = '#efe6d6'
 /** The archive's sign hangs on the west wall, facing the visitor's left as they come in. */
-const SIGN = { x: cell.minX + 0.03, z: (cell.minZ + cell.maxZ) / 2, width: 4.4, height: 2.3, y: 2.05 }
+const SIGN = { x: cell.minX + 0.002, z: (cell.minZ + cell.maxZ) / 2, width: 4.4, height: 2.3, y: 2.05 }
 
 /**
  * I — ACCESSION. The lobby of a future institution: the museum's title and thesis on
@@ -42,25 +43,27 @@ export function Accession() {
       </group>
       <WallText position={[LEFT, WALL]} facing="south" layout={THESIS_LAYOUT} {...THESIS} />
 
-      {/* The archive's sign: its stock and its ink, at the scale of an institution. */}
+      {/* The archive's sign, in a wall mount: its stock and its ink, at the scale of an institution. */}
       <group position={[SIGN.x, SIGN.y, SIGN.z]} rotation={[0, Math.PI / 2, 0]}>
-        <mesh material={basicMaterial(ARCHIVE.card)}>
-          <planeGeometry args={[SIGN.width, SIGN.height]} />
-        </mesh>
-        <group position={[-SIGN.width / 2 + 0.3, SIGN.height / 2 - 0.3, 0.003]}>
-          <Text fontSize={0.075} letterSpacing={0.18} color={ARCHIVE.inkMuted} anchorX="left" anchorY="top">
-            {INSTITUTE.name}
-          </Text>
-          <Text position={[0, -0.2, 0]} fontSize={0.3} letterSpacing={-0.02} lineHeight={1.05} maxWidth={3.6} color={ARCHIVE.ink} anchorX="left" anchorY="top">
-            {INSTITUTE.gallery}
-          </Text>
-          <Text position={[0, -0.92, 0]} fontSize={0.1} letterSpacing={0.06} color={ARCHIVE.ink} anchorX="left" anchorY="top">
-            {INSTITUTE.dates}
-          </Text>
-          <Text position={[0, -1.18, 0]} fontSize={0.075} lineHeight={1.5} maxWidth={3.6} color={ARCHIVE.inkMuted} anchorX="left" anchorY="top">
-            {INSTITUTE.line}
-          </Text>
-        </group>
+        <WallMount width={SIGN.width} height={SIGN.height}>
+          <mesh material={basicMaterial(ARCHIVE.card)}>
+            <planeGeometry args={[SIGN.width, SIGN.height]} />
+          </mesh>
+          <group position={[-SIGN.width / 2 + 0.3, SIGN.height / 2 - 0.3, 0.003]}>
+            <Text fontSize={0.075} letterSpacing={0.18} color={ARCHIVE.inkMuted} anchorX="left" anchorY="top">
+              {INSTITUTE.name}
+            </Text>
+            <Text position={[0, -0.2, 0]} fontSize={0.3} letterSpacing={-0.02} lineHeight={1.05} maxWidth={3.6} color={ARCHIVE.ink} anchorX="left" anchorY="top">
+              {INSTITUTE.gallery}
+            </Text>
+            <Text position={[0, -0.92, 0]} fontSize={0.1} letterSpacing={0.06} color={ARCHIVE.ink} anchorX="left" anchorY="top">
+              {INSTITUTE.dates}
+            </Text>
+            <Text position={[0, -1.18, 0]} fontSize={0.075} lineHeight={1.5} maxWidth={3.6} color={ARCHIVE.inkMuted} anchorX="left" anchorY="top">
+              {INSTITUTE.line}
+            </Text>
+          </group>
+        </WallMount>
       </group>
     </>
   )
