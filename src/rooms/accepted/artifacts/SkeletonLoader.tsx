@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { motion } from '../../../museum/capabilities'
 import { useRoom, useRoomFrame } from '../../../museum/RoomContext'
 import { box } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
@@ -88,7 +89,8 @@ function SkeletonPanel({ panel }: { panel: Panel }) {
     // After a refresh the shapes blink out, then the same shimmer starts again.
     const presence = THREE.MathUtils.clamp((since - 0.25) / 0.35, 0, 1)
     panel.shapes.forEach((shape, i) => {
-      const wave = Math.pow(0.5 + 0.5 * Math.sin(now * 2.2 - (panel.x + shapeX(shape)) * 1.3), 3)
+      // With reduced motion the shapes hold still: the wait is still there, the sweep is not.
+      const wave = motion.reduced ? 0.15 : Math.pow(0.5 + 0.5 * Math.sin(now * 2.2 - (panel.x + shapeX(shape)) * 1.3), 3)
       materials[i].color.lerpColors(BASE, SHINE, wave).lerp(SLAB, 1 - presence)
     })
     // Crawls towards the end and never arrives.

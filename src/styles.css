@@ -25,7 +25,8 @@
   --ink-text: #efede6;
   --ink-body: #bdbab2;
   --ink-muted: #8f8c85;
-  --ink-quiet: #5f5d58;
+  /* Quietest ink still readable at 10px: about 4.6:1 on the void. */
+  --ink-quiet: #7f7c76;
   --ink-dark: #22211f;
   --void: #0a0a0a;
   --rule: rgba(239, 237, 230, 0.16);
@@ -79,6 +80,10 @@ select {
 }
 
 button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
   color: inherit;
 }
 
@@ -95,6 +100,11 @@ a:hover {
 :focus-visible {
   outline: 1px solid var(--ink-text);
   outline-offset: 4px;
+}
+
+/* Headings that receive focus from code (a new screen opening) are a reading position, not a control. */
+[tabindex='-1']:focus {
+  outline: none;
 }
 
 .app-shell {
@@ -187,6 +197,7 @@ a:hover {
   position: absolute;
   inset: 0;
   z-index: 10;
+  overflow-y: auto;
   display: grid;
   grid-template-rows: auto 1fr auto;
   padding: var(--edge);
@@ -336,7 +347,7 @@ a:hover {
 
 .hud__room {
   right: var(--hud-edge);
-  color: #72706a;
+  color: var(--ink-muted);
   text-align: right;
 }
 
@@ -453,6 +464,8 @@ a:hover {
 
 .colophon {
   align-items: stretch;
+  justify-content: safe center;
+  overflow-y: auto;
   background: rgba(10, 10, 10, 0.86);
 }
 
@@ -520,7 +533,243 @@ a:hover {
   margin-top: var(--space-4);
 }
 
+/* A quiet secondary action, set like signage. */
+.text-button {
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  text-decoration: underline;
+  text-decoration-color: var(--ink-quiet);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.text-button:hover:not(:disabled) {
+  color: var(--ink-text);
+}
+
+.text-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.entry__alternatives {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.pause__options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1) var(--space-4);
+}
+
+/* ——— Guided tour ——— */
+
+.guided {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  padding: var(--hud-edge);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--fade), visibility var(--fade);
+}
+
+.guided--visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.guided button,
+.guided a {
+  pointer-events: auto;
+}
+
+.guided__top {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-3);
+  /* Clear of the HUD's room label on the right. */
+  margin-top: 40px;
+}
+
+.guided__leave {
+  padding: 10px 16px;
+}
+
+.guided__middle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+}
+
+.guided__middle .museum-button {
+  align-self: center;
+}
+
+.guided__hint {
+  min-height: 1.4em;
+  margin: 0;
+  color: var(--ink-body);
+  text-align: center;
+}
+
+.guided__bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.guided__bar .museum-button {
+  align-self: center;
+  min-height: 44px;
+}
+
+.guided__stop {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  text-align: center;
+}
+
+.guided__stop .meta {
+  color: var(--ink-muted);
+}
+
+.guided__title {
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.guided__drag {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-quiet);
+  text-align: center;
+}
+
+/* ——— The exhibition as text ——— */
+
+.text-exhibition {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  overflow-y: auto;
+  padding: var(--edge);
+  background: var(--void);
+}
+
+.text-exhibition > * {
+  max-width: 680px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.text-exhibition .meta {
+  color: var(--ink-muted);
+}
+
+.text-exhibition h1 {
+  margin: var(--space-3) 0 0;
+  font-size: clamp(44px, 7vw, 88px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
+.text-exhibition__premise {
+  margin: var(--space-3) 0 0;
+  color: var(--ink-body);
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+.text-exhibition__note {
+  margin: var(--space-3) 0 var(--space-4);
+  color: var(--ink-muted);
+  font-size: var(--type-small);
+  line-height: 1.6;
+}
+
+.text-exhibition__room {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--rule);
+}
+
+.text-exhibition h2 {
+  margin: var(--space-2) 0 0;
+  font-size: var(--type-title);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: var(--tracking-title);
+}
+
+.text-exhibition__idea {
+  margin: var(--space-3) 0 var(--space-2);
+  color: var(--ink-body);
+  line-height: 1.55;
+}
+
+.text-exhibition__entry {
+  margin-top: var(--space-4);
+}
+
+.text-exhibition h3 {
+  margin: var(--space-1) 0 0;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.text-exhibition__entry p {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-body);
+  line-height: 1.6;
+}
+
+.text-exhibition__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  padding: var(--space-4) 0 var(--space-3);
+  border-top: 1px solid var(--rule);
+  color: var(--ink-muted);
+  font-size: var(--type-small);
+}
+
+.text-exhibition__foot p {
+  margin: 0;
+}
+
 /* ——— Exhibit card ——— */
+
+/* Above the tour's controls when the tour is on screen. */
+.guided--visible ~ .exhibit-card {
+  bottom: 150px;
+}
 
 .exhibit-card {
   position: absolute;
@@ -564,12 +813,37 @@ a:hover {
 }
 
 .exhibit-card__index {
-  color: #66645f;
+  color: var(--ink-quiet);
 }
 
 @media (max-width: 720px) {
-  .entry__controls {
+  /* On a small screen the hall behind the door competes with the text: veil it more. */
+  .entry--ready {
+    background: rgba(10, 10, 10, 0.86);
+  }
+
+  /* The room's name is the useful line on a phone; the brand stays on the front door. */
+  .hud__brand {
     display: none;
+  }
+
+  /* Stop name across the top, Back and Next side by side under it. */
+  .guided__bar {
+    grid-template-columns: 1fr 1fr;
+    border-radius: 22px;
+  }
+
+  .guided__stop {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+
+  .guided__bar .museum-button {
+    justify-content: center;
+  }
+
+  .guided__bar .museum-button {
+    padding: 12px 14px;
   }
 
   .exhibit-card {
@@ -577,6 +851,17 @@ a:hover {
     bottom: 14px;
     left: 14px;
     width: auto;
+  }
+}
+
+/* Short windows: let the front door scroll rather than overlap. */
+@media (max-height: 620px) {
+  .entry__main {
+    padding-bottom: var(--space-3);
+  }
+
+  .entry h1 {
+    font-size: clamp(44px, 12vh, 96px);
   }
 }
 

@@ -1,15 +1,19 @@
-import { Suspense, useCallback, useEffect, useState } from 'react'
+import { Component, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { sound } from './audio/engine'
 import { INK } from './identity'
+import { detectCapabilities, type VisitMode } from './museum/capabilities'
 import { SPAWN } from './museum/roomRegistry'
 import { museumStore, useMuseumStore } from './museum/store'
 import { MuseumWorld } from './scene/MuseumWorld'
+import { Announcer } from './ui/Announcer'
 import { ColophonScreen } from './ui/ColophonScreen'
 import { Entry } from './ui/Entry'
 import { ExhibitCard } from './ui/ExhibitCard'
+import { GuidedControls } from './ui/GuidedControls'
 import { HUD } from './ui/HUD'
 import { Pause } from './ui/Pause'
+import { TextExhibition } from './ui/TextExhibition'
 
 /** Rendered inside the scene's Suspense boundary, so it mounts only once every room (and its text) is ready. */
 function Ready({ onReady }: { onReady: () => void }) {
@@ -23,13 +27,33 @@ function Ready({ onReady }: { onReady: () => void }) {
   return null
 }
 
+/** If the 3D scene cannot start (a WebGL context that fails late), the visitor gets the text, not a blank page. */
+class SceneBoundary extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+  componentDidCatch() {
+    this.props.onError()
+  }
+  render() {
+    return this.state.failed ? null : this.props.children
+  }
+}
+
 function App() {
+  const capabilities = useMemo(detectCapabilities, [])
+  const [webgl, setWebgl] = useState(capabilities.webgl)
+  const [mode, setMode] = useState<VisitMode>(capabilities.recommended)
+  const [reading, setReading] = useState(!capabilities.webgl)
   const [ready, setReady] = useState(false)
   const [entered, setEntered] = useState(false)
   const [locked, setLocked] = useState(false)
   const [visit, setVisit] = useState(0)
   const ended = useMuseumStore((state) => state.ended)
-  const active = entered && locked && !ended
+  const guided = mode === 'guided'
+  // Walking needs the cursor; the guided tour never asks for it.
+  const active = entered && !ended && !reading && (guided || locked)
 
   const markReady = useCallback(() => setReady(true), [])
 
@@ -39,8 +63,9 @@ function App() {
   }, [ended])
 
   // Sound may only start from a click: entering, resuming and visiting again are all clicks.
-  const enter = useCallback(() => {
+  const enter = useCallback((chosen: 'walk' | 'guided') => {
     sound.unlock()
+    setMode(chosen)
     setEntered(true)
   }, [])
 
@@ -50,22 +75,46 @@ function App() {
     setVisit((n) => n + 1)
   }, [])
 
+  const sceneFailed = useCallback(() => {
+    setWebgl(false)
+    setReading(true)
+  }, [])
+
   return (
     <main className="app-shell">
-      <Canvas camera={{ position: SPAWN.position, fov: 60, near: 0.1, far: 100 }} dpr={[1, 1.75]} gl={{ antialias: true }} aria-hidden>
-        <color attach="background" args={[INK.void]} />
-        <fog attach="fog" args={[INK.void, 18, 40]} />
-        <Suspense fallback={null}>
-          <MuseumWorld visit={visit} active={active} presence={ended ? 'away' : active ? 'visiting' : 'paused'} onLockChange={setLocked} />
-          <Ready onReady={markReady} />
-        </Suspense>
-      </Canvas>
+      {webgl && (
+        <SceneBoundary onError={sceneFailed}>
+          <Canvas camera={{ position: SPAWN.position, fov: 60, near: 0.1, far: 100 }} dpr={[1, 1.75]} gl={{ antialias: true }} aria-hidden>
+            <color attach="background" args={[INK.void]} />
+            <fog attach="fog" args={[INK.void, 18, 40]} />
+            <Suspense fallback={null}>
+              <MuseumWorld
+                visit={visit}
+                mode={guided && entered ? 'guided' : 'walk'}
+                active={active}
+                presence={ended || reading ? 'away' : active ? 'visiting' : 'paused'}
+                onLockChange={setLocked}
+              />
+              <Ready onReady={markReady} />
+            </Suspense>
+          </Canvas>
+        </SceneBoundary>
+      )}
 
-      <Entry ready={ready} hidden={entered} onEnter={enter} />
-      <HUD visible={active} />
-      <Pause visible={entered && !locked && !ended} onResume={sound.unlock} />
-      <ColophonScreen visible={ended} onRestart={restart} />
+      <Entry
+        ready={ready}
+        hidden={entered || reading}
+        recommended={capabilities.recommended === 'walk' ? 'walk' : 'guided'}
+        onEnter={enter}
+        onRead={() => setReading(true)}
+      />
+      <HUD visible={active} guided={guided} />
+      <GuidedControls visible={active && guided} />
+      <Pause visible={entered && !guided && !locked && !ended && !reading} onResume={sound.unlock} onRead={() => setReading(true)} />
+      <ColophonScreen visible={ended && !reading} onRestart={restart} onRead={() => setReading(true)} />
       <ExhibitCard visible={active} />
+      <Announcer active={active} />
+      <TextExhibition visible={reading} canVisit={webgl} onVisit={() => setReading(false)} />
     </main>
   )
 }

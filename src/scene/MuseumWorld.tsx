@@ -12,6 +12,7 @@ import { StatesTransition } from '../rooms/states/Transition'
 import { TheButtonRoom } from '../rooms/the-button/Room'
 import { Controls } from './Controls'
 import { DebugBridge } from './DebugBridge'
+import { GuidedTour } from './GuidedTour'
 import { FocusSystem } from './Interaction'
 import { LightRig } from './Light'
 import { Lighting } from './Lighting'
@@ -35,11 +36,14 @@ const ROOMS: Record<string, ComponentType> = {
  */
 export function MuseumWorld({
   visit,
+  mode,
   active,
   presence,
   onLockChange,
 }: {
   visit: number
+  /** Walking (WASD, mouse look, pointer lock) or the guided tour (authored stops, drag to look). */
+  mode: 'walk' | 'guided'
   active: boolean
   presence: Presence
   onLockChange: (locked: boolean) => void
@@ -58,11 +62,11 @@ export function MuseumWorld({
             </RoomGroup>
           )
         })}
-        <Player active={active} />
+        {mode === 'walk' ? <Player active={active} /> : <GuidedTour />}
       </Fragment>
       <FocusSystem active={active} />
       <AudioDirector presence={presence} />
-      <Controls onLockChange={onLockChange} />
+      {mode === 'walk' && <Controls onLockChange={onLockChange} />}
       {import.meta.env.DEV && <DebugBridge setLocked={onLockChange} />}
       {import.meta.env.DEV && <PerfReadout />}
     </>

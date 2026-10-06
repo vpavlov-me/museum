@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { motion } from '../../../museum/capabilities'
 import { useRoom, useRoomFrame } from '../../../museum/RoomContext'
 import { museumStore } from '../../../museum/store'
 import { useFocusTarget } from '../../../scene/Interaction'
@@ -97,7 +98,8 @@ export function InfiniteFeed() {
   useRoomFrame(({ camera }) => {
     const inRoom = museumStore.get().spaceId === roomId
     const localZ = camera.position.z - origin[1]
-    const drift = inRoom ? Math.max(0, FEED.maxZ - localZ) * DRIFT : 0
+    // The drift moves the whole corridor with the visitor; with reduced motion the posts stay put.
+    const drift = inRoom && !motion.reduced ? Math.max(0, FEED.maxZ - localZ) * DRIFT : 0
     focusPoint.current[2] = THREE.MathUtils.clamp(localZ - 2, FEED.minZ + 5, FEED.maxZ - 2)
 
     const [panel, ink, line, image] = [panels.current, inks.current, lines.current, images.current]
