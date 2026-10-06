@@ -1,7 +1,8 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { useSound } from '../../audio/useSound'
 import { DoorLeaf } from '../../components/DoorLeaf'
+import { LobbyPlan } from './LobbyPlan'
 import { RoomShell } from '../../components/RoomShell'
 import { Text } from '../../components/Text'
 import { Wall } from '../../components/Wall'
@@ -109,6 +110,12 @@ function Entrance({ exhibition }: { exhibition: ExhibitionDefinition }) {
   const open = status === 'open'
   const leaf = useRef<THREE.Mesh>(null)
   const progress = useRef(0)
+  const play = useSound()
+
+  // The door is heard sliding open, once, where it is.
+  useEffect(() => {
+    if (open) play('lobby-door', [door.x, 1.4, door.z])
+  }, [open, play, door.x, door.z])
 
   useObstacle(`${exhibition.id}-door`, open ? null : rect(door.x - door.width / 2, door.x + door.width / 2, door.z - 0.2, door.z + 0.2))
   useFocusTarget({ id: `${exhibition.id}-entrance`, position: [door.x, 1.4, NORTH], distance: 4, facing: 0.6, card: cardOf(exhibition), labelled: true })
@@ -219,21 +226,21 @@ export function Lobby() {
           body="A small museum about the controls, conventions and habits we use every day without noticing them. The permanent exhibition starts straight ahead; Interface Archaeology is on the right, and the temporary exhibition on the left. Each exhibition ends at a door back to this lobby."
         />
 
+        {/* The plan on the wall, beside how to visit. */}
+        <LobbyPlan position={[LOBBY.minX + 0.03, 1.75, 29.4]} />
+
         {/* How to visit: a quiet gallery label, not a menu. */}
         <group position={[LOBBY.minX + 0.02, 0, 33.6]} rotation={[0, Math.PI / 2, 0]}>
           <Text position={[0, 2.5, 0]} fontSize={0.09} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
             HOW TO VISIT
           </Text>
-          {VISIT.map(([key, action], i) => (
-            <group key={key} position={[0, 2.18 - i * 0.3, 0]}>
-              <Text fontSize={0.13} color={INK.text} anchorX="left" anchorY="top">
-                {key}
-              </Text>
-              <Text position={[1.05, 0, 0]} fontSize={0.13} color={INK.body} anchorX="left" anchorY="top">
-                {action}
-              </Text>
-            </group>
-          ))}
+          {/* Two columns, one text each: keys, and what they do. */}
+          <Text position={[0, 2.18, 0]} fontSize={0.13} lineHeight={2.3} color={INK.text} anchorX="left" anchorY="top">
+            {VISIT.map(([key]) => key).join('\n')}
+          </Text>
+          <Text position={[1.05, 2.18, 0]} fontSize={0.13} lineHeight={2.3} color={INK.body} anchorX="left" anchorY="top">
+            {VISIT.map(([, action]) => action).join('\n')}
+          </Text>
         </group>
 
         {/* Behind the visitor: the front door, and the credits beside it. */}
