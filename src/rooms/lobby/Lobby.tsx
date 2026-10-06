@@ -7,6 +7,7 @@ import { Text } from '../../components/Text'
 import { Wall } from '../../components/Wall'
 import { WallText, type WallTextLayout } from '../../components/WallText'
 import { INK, MUSEUM, TYPE } from '../../identity'
+import { motion } from '../../museum/capabilities'
 import { exhibitions, useExhibitionStatus } from '../../museum/exhibitionLoader'
 import { EXHIBITIONS, type ExhibitionDefinition } from '../../museum/exhibitions'
 import { navigation } from '../../museum/navigation'
@@ -115,7 +116,9 @@ function Entrance({ exhibition }: { exhibition: ExhibitionDefinition }) {
     if (status === 'idle' && Math.hypot(camera.position.x - door.x, camera.position.z - door.z) < APPROACH) exhibitions.request(exhibition.id)
     const mesh = leaf.current
     if (!mesh || (open && progress.current >= 1) || (!open && progress.current <= 0)) return
-    progress.current = THREE.MathUtils.clamp(progress.current + (open ? delta : -delta) / OPEN_SECONDS, 0, 1)
+    // With less motion asked for, the door is simply open.
+    const step = motion.reduced ? 1 : delta / OPEN_SECONDS
+    progress.current = THREE.MathUtils.clamp(progress.current + (open ? step : -step), 0, 1)
     const eased = THREE.MathUtils.smoothstep(progress.current, 0, 1)
     mesh.position.x = door.x - eased * (door.width - 0.05)
   })
