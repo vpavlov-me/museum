@@ -58,7 +58,8 @@ export function GuidedControls({ visible }: { visible: boolean }) {
         </button>
         <div className="guided__stop" aria-live="polite">
           <span className="meta">
-            {getSpace(spaceId)?.hudLabel} · {index + 1} / {TOUR.length}
+            <span className="sr-only">{getSpace(spaceId)?.title}, stop </span>
+            {index + 1} / {TOUR.length}
           </span>
           <span className="guided__title">{stop.title}</span>
         </div>
