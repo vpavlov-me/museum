@@ -23,7 +23,11 @@ export function Precompile({ onDone }: { onDone: () => void }) {
       }
     })
     const restore = () => hidden.forEach((object) => (object.visible = false))
-    gl.compileAsync(scene, camera)
+    // In parallel where the browser can; otherwise at once (still behind the loading door).
+    const compiled = gl.extensions.has('KHR_parallel_shader_compile')
+      ? gl.compileAsync(scene, camera)
+      : Promise.resolve(gl.compile(scene, camera))
+    compiled
       .catch(() => undefined)
       .finally(() => {
         restore()
