@@ -122,12 +122,12 @@ export function TheButtonRoom() {
 
       <RoomContents>
         {/* The title wall is washed from below the ceiling, not by a lamp you can find. */}
-        <LightPool position={[0, 3, -halfLength + 0.012]} rotation={[0, 0, 0]} size={[11, 5]} strength={0.07} />
+        <LightPool position={[0, 3.4, -halfLength + 0.012]} rotation={[0, 0, 0]} size={[11, 5]} strength={0.07} />
 
-        <Text face="display" position={[0, 3.3, -halfLength + 0.02]} fontSize={1.2} letterSpacing={-0.01} color={INK.text} anchorX="center" anchorY="middle">
+        <Text face="display" position={[0, 4.3, -halfLength + 0.02]} fontSize={1.2} letterSpacing={-0.01} color={INK.text} anchorX="center" anchorY="middle">
           The Button
         </Text>
-        <Text position={[0, 2.45, -halfLength + 0.02]} fontSize={0.17} letterSpacing={0.12} color={INK.muted} anchorX="center" anchorY="middle">
+        <Text position={[0, 3.55, -halfLength + 0.02]} fontSize={0.17} letterSpacing={0.12} color={INK.muted} anchorX="center" anchorY="middle">
           ROOM 01 / A SMALL HISTORY OF DIGITAL AFFORDANCE
         </Text>
 

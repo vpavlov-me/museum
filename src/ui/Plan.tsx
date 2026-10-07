@@ -20,12 +20,22 @@ const MAX_Z = Math.max(...bounds.map((r) => r.maxZ)) + PAD
 
 const TONE: Record<string, string> = { lobby: 'plan__lobby', permanent: 'plan__permanent', archaeology: 'plan__archaeology', 'dark-patterns': 'plan__dark' }
 
+/** The middle of a space's outline, world [x, z]: room labels follow the plan when it changes. */
+function centre(id: string): [number, number] {
+  const rects = SPACES.find((space) => space.id === id)!.bounds
+  const minX = Math.min(...rects.map((r) => r.minX))
+  const maxX = Math.max(...rects.map((r) => r.maxX))
+  const minZ = Math.min(...rects.map((r) => r.minZ))
+  const maxZ = Math.max(...rects.map((r) => r.maxZ))
+  return [(minX + maxX) / 2, (minZ + maxZ) / 2]
+}
+
 /** Names written on the plan, world [x, z]: the permanent exhibition's rooms, and the archaeology wing. */
 const LABELS: { text: string; at: [number, number] }[] = [
   { text: 'LOBBY', at: [(LOBBY.minX + LOBBY.maxX) / 2, (LOBBY.minZ + LOBBY.maxZ) / 2] },
-  { text: 'ROOM 01', at: [0, 0] },
-  { text: 'ROOM 02', at: [-9, -48] },
-  { text: 'ROOM 03', at: [-11, -132] },
+  { text: 'ROOM 01', at: centre('the-button') },
+  { text: 'ROOM 02', at: centre('accepted') },
+  { text: 'ROOM 03', at: centre('states') },
   { text: 'ARCHAEOLOGY', at: [18, -4] },
   { text: 'DARK PATTERNS', at: [-24, 7] },
 ]
