@@ -38,7 +38,7 @@ export function ColophonScreen({ visible, onRestart, onRead }: { visible: boolea
           <dt>Museum</dt>
           <dd>Conceived, written, designed and built by {MUSEUM.author}, {MUSEUM.year}</dd>
           <dt>Typeface</dt>
-          <dd>Inter, by Rasmus Andersson (SIL Open Font License)</dd>
+          <dd>Inter, by Rasmus Andersson, and Instrument Serif, by the Instrument Serif Project Authors (SIL Open Font License)</dd>
           <dt>Built with</dt>
           <dd>Three.js and React Three Fiber</dd>
         </dl>

@@ -332,7 +332,7 @@ export function Lobby() {
             {MUSEUM.name.toUpperCase()}
           </Text>
           <Text position={[0, 2.1, 0]} fontSize={0.085} lineHeight={1.55} maxWidth={3.1} color={INK.body} anchorX="left" anchorY="top">
-            {`${MUSEUM.premise} Conceived, written, designed and built by ${MUSEUM.author}, ${MUSEUM.year}. Set in Inter by Rasmus Andersson.`}
+            {`${MUSEUM.premise} Conceived, written, designed and built by ${MUSEUM.author}, ${MUSEUM.year}. Set in Inter by Rasmus Andersson and Instrument Serif.`}
           </Text>
         </group>
       </RoomContents>
