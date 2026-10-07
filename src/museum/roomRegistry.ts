@@ -56,9 +56,9 @@ export const EYE_HEIGHT = 1.7
 export const WALL_THICKNESS = 0.2
 
 /** Room 02 is authored from the door it is entered through. */
-const ACCEPTED_ORIGIN: Vec2 = [-12.9, -20.3]
+const ACCEPTED_ORIGIN: Vec2 = [-6.9, -10.7]
 /** Room 03 and the transition before it are authored from the door at the end of the feed. */
-const STATES_ORIGIN: Vec2 = [-12.9, -86.6]
+const STATES_ORIGIN: Vec2 = [-6.9, -77]
 /** Interface Archaeology and the passage into it are authored from its door in the lobby's north wall. */
 export const ARCHAEOLOGY_ORIGIN: Vec2 = [12, 26.1]
 
@@ -88,10 +88,10 @@ export const ACCEPTED_CELLS = {
 /** The threshold between Room 01 and Room 02, in world coordinates (its origin is the world origin). */
 export const THRESHOLD = {
   height: 2.6,
-  /** Leaves Room 01 heading north. */
-  a: rect(-7, -5, -18, -14),
+  /** Leaves Room 01 heading north, on its axis. */
+  a: rect(-1, 1, -8.4, -4.4),
   /** Turns west, towards the door into Room 02. */
-  b: rect(-14.4, -5, -20.2, -18),
+  b: rect(-8.4, 1, -10.6, -8.4),
 }
 
 /**
@@ -171,7 +171,7 @@ export const DOORS = {
   /** From the lobby into the permanent exhibition's entrance hall. */
   lobbyPermanent: { x: 0, z: 26.1, width: 2.4, height: 3.2 },
   entrance: { x: 0, z: 13.9, width: 2.4, height: 3 },
-  buttonExit: { x: -6, z: -13.9, width: 1.8, height: 2.5 },
+  buttonExit: { x: 0, z: -4.3, width: 1.8, height: 2.5 },
   acceptedEntry: { ...inAccepted(0, 0), width: 2, height: 2.4 },
   interruptExit: { ...inAccepted(0.8, -17.1), width: 1.8, height: 2.5 },
   attendEntry: { ...inAccepted(2.4, -21.1), width: 1.8, height: 2.5 },
@@ -230,8 +230,8 @@ export const SPACES: SpaceDefinition[] = [
     number: '01',
     title: 'The Button',
     hudLabel: 'ROOM 01 / THE BUTTON',
-    origin: [0, 0],
-    bounds: [rect(-8.7, 8.7, -13.8, 13.8)],
+    origin: [0, 4.8],
+    bounds: [rect(-6, 6, -4.2, 13.8)],
   },
   {
     id: 'passage',
