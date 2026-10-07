@@ -3,6 +3,7 @@ import { useThree } from '@react-three/fiber'
 import type { SoundName } from '../../audio/sounds'
 import { useSound } from '../../audio/useSound'
 import { Cradle, CRADLE_SEAT } from '../../components/Cradle'
+import { DoorSign } from '../../components/DoorSign'
 import { ExhibitLabel } from '../../components/ExhibitLabel'
 import { Plinth } from '../../components/Plinth'
 import { RoomShell } from '../../components/RoomShell'
@@ -90,6 +91,7 @@ function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
 
 export function TheButtonRoom() {
   const { origin } = useRoom()
+  const exit = localDoor(DOORS.buttonExit, origin)
   const { halfWidth, halfLength, height } = ROOM
 
   return (
@@ -102,7 +104,7 @@ export function TheButtonRoom() {
           maxZ={halfLength}
           height={height}
           palette={palette}
-          north={{ door: localDoor(DOORS.buttonExit, origin) }}
+          north={{ door: exit }}
           south={{ door: localDoor(DOORS.entrance, origin) }}
         />
 
@@ -129,10 +131,8 @@ export function TheButtonRoom() {
           ROOM 01 / A SMALL HISTORY OF DIGITAL AFFORDANCE
         </Text>
 
-        {/* Directional sign beside the exit. */}
-        <Text position={[-4.45, 1.75, -halfLength + 0.02]} fontSize={0.075} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
-          {'←  NEXT\n02 / THINGS WE SOMEHOW ACCEPTED'}
-        </Text>
+        {/* Where the exit leads, over it. */}
+        <DoorSign position={[exit.center, exit.height, -halfLength + 0.02]} facing="south" kicker="NEXT · ROOM 02" title="Things We Somehow Accepted" />
 
         {WALL_TEXTS.map((text) => (
           <WallText key={text.id} position={text.position} facing={text.facing} kicker={text.kicker} title={text.title} body={text.body} />
