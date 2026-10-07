@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { DOORS } from '../src/museum/roomRegistry'
-import { enterWalking, exhibitionStatus, open, state, step, waitOpen, walkTo, watchChunks, watchConsole } from './museum'
+import { enterWalking, exhibitionStatus, open, settle, state, step, strayVisibility, waitOpen, walkTo, watchChunks, watchConsole } from './museum'
 
 const EXHIBITION_CHUNKS = ['permanent', 'archaeology', 'dark-patterns']
 
@@ -56,6 +56,10 @@ for (const [path, id, title, space] of [
     const here = await state(page)
     expect(here.space).toBe(space)
     expect(here.path).toBe(path)
+
+    // What is around the start is drawn: compiling the wing must not leave it hidden.
+    await settle(page, 400)
+    expect(await strayVisibility(page)).toEqual([])
     errors.expectClean()
   })
 }

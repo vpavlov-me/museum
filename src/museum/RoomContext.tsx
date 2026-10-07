@@ -7,6 +7,21 @@ import type { SpaceDefinition, Vec2 } from './types'
 
 type RoomContextValue = { id: string; origin: Vec2 }
 
+/**
+ * Shows or hides a room or a section, and records which it should be: a shader compile
+ * that shows everything for a moment (Precompile, CompileWing) puts each object back
+ * as it should be by then, not as it was when the compile began.
+ */
+function showWhen(object: THREE.Object3D, visible: boolean) {
+  object.visible = visible
+  object.userData.visibleWanted = visible
+}
+
+/** After a compile: hidden again, unless what hid it has since shown it. */
+export function restoreHidden(objects: THREE.Object3D[]) {
+  for (const object of objects) object.visible = object.userData.visibleWanted ?? false
+}
+
 const RoomContext = createContext<RoomContextValue>({ id: '', origin: [0, 0] })
 
 /**
@@ -21,7 +36,7 @@ export function RoomGroup({ space, children }: { space: SpaceDefinition; childre
   const near = useMuseumStore((state) => spaceWithin(space.id, state.spaceId, state.cell, ARCHITECTURE_DEPTH))
 
   useLayoutEffect(() => {
-    if (group.current) group.current.visible = near
+    if (group.current) showWhen(group.current, near)
   }, [near])
 
   return (
@@ -86,7 +101,7 @@ export function RoomContents({ cells, children }: { cells?: readonly number[]; c
   const visible = useMuseumStore((state) => cellsVisible(id, cells, state.spaceId, state.cell))
 
   useLayoutEffect(() => {
-    if (group.current) group.current.visible = visible
+    if (group.current) showWhen(group.current, visible)
   }, [visible])
 
   return (

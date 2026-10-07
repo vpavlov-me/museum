@@ -1,9 +1,13 @@
+import * as THREE from 'three'
 import type { ExhibitCardData } from '../museum/types'
 import { INK } from '../identity'
 import { useFocusTarget } from '../scene/Interaction'
-import { basicMaterial, PALETTES, type Palette } from '../scene/materials'
+import { basicMaterial, type Palette } from '../scene/materials'
 import { StaticMerge } from '../scene/StaticMerge'
 import { Text } from './Text'
+
+/** The leaf: a dark, satin panel. */
+const LEAF = new THREE.MeshStandardMaterial({ color: '#1d1c1b', roughness: 0.55 })
 
 /**
  * A plain door set into a wall, closed, with a lit sign over it: the way out of an
@@ -43,7 +47,7 @@ export function DoorLeaf({
     <>
       <StaticMerge>
         <group position={[x, 0, wall]} rotation={[0, facing === 'north' ? Math.PI : 0, 0]}>
-          <mesh position={[0, height / 2, 0]} material={PALETTES.passage.floor}>
+          <mesh position={[0, height / 2, 0]} material={LEAF}>
             <planeGeometry args={[width, height]} />
           </mesh>
           {[-1, 1].map((side) => (

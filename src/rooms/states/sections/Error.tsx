@@ -219,15 +219,15 @@ export function ErrorState() {
         <mesh position={[0, SLAB.height / 2, 0]} material={palette.wall}>
           <boxGeometry args={[SLAB.width, SLAB.height, SLAB.depth]} />
         </mesh>
-        <mesh position={[0, 0.045, 0]} material={palette.skirting}>
-          <boxGeometry args={[SLAB.width, 0.09, SLAB.depth + 0.024]} />
+        <mesh position={[0, 0.075, 0]} material={palette.skirting}>
+          <boxGeometry args={[SLAB.width, 0.15, SLAB.depth + 0.036]} />
         </mesh>
       </group>
 
       {/* A twin of the door you came in by, leading nowhere. */}
       {!resolved && (
         <group position={[entry.center + 3.4, 0, cell.maxZ - 0.012]} rotation={[0, Math.PI, 0]}>
-          <mesh position={[0, entry.height / 2, 0]} material={PALETTES.passage.floor}>
+          <mesh position={[0, entry.height / 2, 0]} material={palette.reveal}>
             <planeGeometry args={[entry.width, entry.height]} />
           </mesh>
           {[-1, 1].map((side) => (

@@ -48,8 +48,9 @@ async function runRoute(page: Page, title: string) {
       for (let i = 0; i < 20 && (await ui(page)).space !== 'lobby'; i++) await page.waitForTimeout(200)
       return
     }
-    await page.locator('.guided__bar .museum-button:last-child').click()
+    await page.locator('.guided__bar .museum-button:last-child').click({ timeout: 60_000 })
     now = await arrive(page)
+    console.log(`  ${now.counter}  ${now.title}${now.hint ? `  (${now.hint})` : ''}`)
     // Stopped by a gate: do what it asks (or give it a moment), then go on.
     for (let tries = 0; now.hint && tries < 4; tries++) {
       if (now.action) await page.locator('.guided__middle > .museum-button').click()
@@ -66,7 +67,8 @@ async function runRoute(page: Page, title: string) {
 }
 
 test('every guided route, from the lobby and back', async ({ page }) => {
-  test.setTimeout(20 * 60_000)
+  // Three routes on software WebGL: about 17 minutes on a CI runner, with room to spare.
+  test.setTimeout(30 * 60_000)
   const errors = watchConsole(page)
   await open(page, '/')
   await page.click('#enter-guided')

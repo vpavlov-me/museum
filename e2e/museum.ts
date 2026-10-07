@@ -75,6 +75,18 @@ export async function waitOpen(page: Page, id: ExhibitionId) {
   }, { timeout: 120_000, intervals: [250] }).toBe('open')
 }
 
+/** Rooms and sections whose visibility differs from what the museum last set for them (none, normally). */
+export async function strayVisibility(page: Page) {
+  return page.evaluate(() => {
+    const stray: string[] = []
+    ;(window as any).__museum.scene.traverse((object: any) => {
+      const wanted = object.userData.visibleWanted
+      if (wanted !== undefined && object.visible !== wanted) stray.push(`${object.uuid} wanted ${wanted}`)
+    })
+    return stray
+  })
+}
+
 /** The JavaScript chunks the page has fetched so far, by name. */
 export function watchChunks(page: Page) {
   const chunks: string[] = []
