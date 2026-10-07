@@ -1,5 +1,6 @@
 import { RoomShell } from '../../components/RoomShell'
 import { Text } from '../../components/Text'
+import { ExhibitionPlan } from '../../components/ExhibitionPlan'
 import { WallText, type WallTextLayout } from '../../components/WallText'
 import { INK, TYPE } from '../../identity'
 import { DOORS, localDoor } from '../../museum/roomRegistry'
@@ -54,13 +55,16 @@ export function Entrance() {
           <Text position={[0, 1.95, 0]} fontSize={0.075} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
             ← ROOM 01
           </Text>
-          <Text position={[0, 1.78, 0]} fontSize={0.22} letterSpacing={-0.02} color={INK.text} anchorX="left" anchorY="top">
+          <Text face="display" position={[0, 1.78, 0]} fontSize={0.26} color={INK.text} anchorX="left" anchorY="top">
             The Button
           </Text>
           <Text position={[0, 1.48, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
             A SMALL HISTORY OF DIGITAL AFFORDANCE
           </Text>
         </group>
+
+        {/* The plan of the exhibition, opposite its statement. */}
+        <ExhibitionPlan exhibition="permanent" position={[HALL.maxX - 0.02, 1.75, 1]} facing="west" here={[origin[0] + 3.4, origin[1] + 1]} />
 
         <WallText
           position={[HALL.minX + 0.02, 4.4]}

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useSound } from '../../audio/useSound'
 import { DoorLeaf } from '../../components/DoorLeaf'
 import { RoomShell } from '../../components/RoomShell'
+import { ExhibitionPlan } from '../../components/ExhibitionPlan'
 import { Text } from '../../components/Text'
 import { WallMount } from '../../components/WallMount'
 import { TurnPassage } from '../../components/TurnPassage'
@@ -37,6 +38,7 @@ export function DarkPassage() {
 const COUNTDOWN = 59
 
 function Welcome() {
+  const { origin } = useRoom()
   const [left, setLeft] = useState(COUNTDOWN)
   const [watching, setWatching] = useState(14)
   const elapsed = useRef(0)
@@ -75,6 +77,7 @@ function Welcome() {
         </Text>
       </group>
       <WallText position={[welcome.minX + 0.4, wall]} facing="south" layout={THESIS_LAYOUT} {...THESIS} />
+      <ExhibitionPlan exhibition="dark-patterns" position={[welcome.minX + 0.02, 1.75, (welcome.minZ + welcome.maxZ) / 2]} facing="east" here={[origin[0] + welcome.minX + 1.5, origin[1] + welcome.maxZ - 1.2]} />
 
       <Screen position={[east, 1.75, -10.6]} facing="west" width={2.6} height={1.6} title="This exhibition closes in" urgent={time} body={`${watching} people are looking at this room right now.`} primary="Continue" />
       <PatternLabel position={[east, 2.15, -14.5]} facing="west" pattern={PATTERNS.urgency} width={1.3} />

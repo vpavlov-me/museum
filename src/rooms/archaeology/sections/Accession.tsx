@@ -1,6 +1,8 @@
+import { ExhibitionPlan } from '../../../components/ExhibitionPlan'
 import { Text } from '../../../components/Text'
 import { WallMount } from '../../../components/WallMount'
 import { WallText } from '../../../components/WallText'
+import { useRoom } from '../../../museum/RoomContext'
 import { useFocusTarget } from '../../../scene/Interaction'
 import { LightPool, Luminaire } from '../../../scene/Light'
 import { basicMaterial, PALETTES } from '../../../scene/materials'
@@ -21,6 +23,7 @@ const SIGN = { x: cell.minX + 0.002, z: (cell.minZ + cell.maxZ) / 2, width: 4.4,
  * sign, in the archive's. From here on, every label is the archive's.
  */
 export function Accession() {
+  const { origin } = useRoom()
   useFocusTarget({ id: 'institute', position: [SIGN.x, SIGN.y, SIGN.z], distance: 6, facing: 0.6, card: CARDS.institute, labelled: true })
 
   return (
@@ -43,6 +46,7 @@ export function Accession() {
         </Text>
       </group>
       <WallText position={[LEFT, WALL]} facing="south" layout={THESIS_LAYOUT} {...THESIS} />
+      <ExhibitionPlan exhibition="archaeology" position={[cell.maxX - 0.02, 1.75, (cell.minZ + cell.maxZ) / 2]} facing="west" here={[origin[0] + cell.maxX - 1.5, origin[1] + cell.maxZ - 1.2]} />
 
       {/* The archive's sign, in a wall mount: its stock and its ink, at the scale of an institution. */}
       <group position={[SIGN.x, SIGN.y, SIGN.z]} rotation={[0, Math.PI / 2, 0]}>
