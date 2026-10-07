@@ -97,8 +97,8 @@ export function ExhibitionPlan({ exhibition, position, facing, here }: { exhibit
       </StaticMerge>
 
       <group position={[drawingX, 0, 0.004]}>
-        {plan.marks.map((mark) => (
-          <Text key={mark.label} face="display" position={[mark.at[0], mark.at[1], 0]} fontSize={0.09} color={INK.text} anchorX="center" anchorY="middle">
+        {plan.marks.map((mark, i) => (
+          <Text key={i} face="display" position={[mark.at[0], mark.at[1], 0]} fontSize={0.09} color={INK.text} anchorX="center" anchorY="middle">
             {mark.label}
           </Text>
         ))}
