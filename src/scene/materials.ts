@@ -357,6 +357,9 @@ export const PALETTES = {
 /** Dark satin lacquer: plinths answer the downlights with a soft highlight the walls do not have. */
 export const PLINTH_MATERIAL = reflects(new THREE.MeshStandardMaterial({ color: '#1c1b1a', roughness: 0.38 }))
 
+/** Dark bronze: the museum's fixtures (stands, holders, frames, cradles), satin, with a little of the room in it. */
+export const FIXTURE_MATERIAL = reflects(new THREE.MeshStandardMaterial({ color: '#2b2722', roughness: 0.38, metalness: 0.55 }))
+
 const basics = new Map<string, THREE.MeshBasicMaterial>()
 
 /** Shared unlit material by colour, for interface surfaces that should ignore the room's light. */

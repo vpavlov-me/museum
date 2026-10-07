@@ -10,6 +10,7 @@ import { useFocusTarget } from '../../../scene/Interaction'
 import { Downlight, LightPool, Luminaire } from '../../../scene/Light'
 import { basicMaterial, floorGeometry, PALETTES, PLINTH_MATERIAL } from '../../../scene/materials'
 import { StaticMerge } from '../../../scene/StaticMerge'
+import { Lectern } from '../../../components/Lectern'
 import { CatalogueCard } from '../CatalogueCard'
 import { cardOf, CELLS, FINDS, LAYERS, type Find } from '../content'
 import { CellSign } from './CellSign'
@@ -334,10 +335,10 @@ function Dig({ find, piece, step }: { find: Find; piece: keyof typeof FIND_PIECE
           <boxGeometry args={[COVER.width, COVER.height, COVER.depth]} />
         </mesh>
       </group>
-      {/* The card stands on the rail just before the find, so that it never hides it. */}
-      <group position={[CARD_X, RAIL.height + 0.04, z + 1.15]} rotation={[0, Math.PI / 2, 0]}>
-        <CatalogueCard position={[0, 0.16, 0]} rotation={[-0.75, 0, 0]} find={find} width={0.82} height={0.48} />
-      </group>
+      {/* The card stands on a lectern by the rail, just before the find, so that it never hides it. */}
+      <Lectern position={[CARD_X, 0, z + 1.15]} yaw={Math.PI / 2} height={RAIL.height + 0.2} tilt={-0.75} width={0.82} plate={0.48}>
+        <CatalogueCard position={[0, 0, 0]} find={find} width={0.82} height={0.48} />
+      </Lectern>
       <Downlight at={[FIND_X + 1.4, z]} aim={[FIND_X, -depth, z]} ceiling={cell.height} palette={palette} angle={0.26} penumbra={0.75} intensity={95} distance={11} />
     </>
   )

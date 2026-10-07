@@ -5,6 +5,7 @@ import { ambience } from '../../../audio/ambience'
 import { useSound } from '../../../audio/useSound'
 import { ChapterMark } from '../../../components/ChapterMark'
 import { Text } from '../../../components/Text'
+import { MOUNT, WallMount } from '../../../components/WallMount'
 import { DOORS, localDoor, WALL_THICKNESS } from '../../../museum/roomRegistry'
 import { useRoom, useRoomFrame } from '../../../museum/RoomContext'
 import { rect } from '../../../museum/types'
@@ -273,16 +274,18 @@ export function OfflineState() {
         <mesh position={[cell.maxX - 0.035, LINE.y, BREAK.z1 - 0.06]} material={OFFLINE_PALETTE.reveal}>
           <boxGeometry args={[0.07, 0.22, 0.13]} />
         </mesh>
-        {/* The interface on the west wall: a screen and three empty post frames. */}
-        <group position={[cell.minX + 0.02, PANEL.y, PANEL.z]} rotation={[0, Math.PI / 2, 0]}>
-          <mesh material={basicMaterial('#161615')}>
-            <planeGeometry args={[PANEL.width, PANEL.height]} />
-          </mesh>
-          {[-1, 0, 1].map((column) => (
-            <mesh key={column} position={[column * CARD.spacing, 0, 0.002]} material={basicMaterial('#242422')}>
-              <planeGeometry args={[CARD.width, CARD.height]} />
+        {/* The interface on the west wall, in a wall mount: a screen and three empty post frames. */}
+        <group position={[cell.minX + 0.002, PANEL.y, PANEL.z]} rotation={[0, Math.PI / 2, 0]}>
+          <WallMount width={PANEL.width} height={PANEL.height}>
+            <mesh material={basicMaterial('#161615')}>
+              <planeGeometry args={[PANEL.width, PANEL.height]} />
             </mesh>
-          ))}
+            {[-1, 0, 1].map((column) => (
+              <mesh key={column} position={[column * CARD.spacing, 0, 0.002]} material={basicMaterial('#242422')}>
+                <planeGeometry args={[CARD.width, CARD.height]} />
+              </mesh>
+            ))}
+          </WallMount>
         </group>
         {/* Emergency exit light over the door: on its own circuit. */}
         <mesh position={[exit.center, exit.height + 0.22, cell.minZ + 0.012]} material={GUIDE}>
@@ -321,7 +324,7 @@ export function OfflineState() {
         {online ? 'CONNECTED' : 'NO CONNECTION'}
       </Text>
 
-      <group position={[cell.minX + 0.022, PANEL.y, PANEL.z]} rotation={[0, Math.PI / 2, 0]}>
+      <group position={[cell.minX + 0.002 + MOUNT.depth + 0.003, PANEL.y, PANEL.z]} rotation={[0, Math.PI / 2, 0]}>
         <instancedMesh ref={pieces} args={[UNIT_PLANE, PIECE_MATERIAL, PIECES.length]} position={[0, 0, 0.003]} frustumCulled={false} />
       </group>
 

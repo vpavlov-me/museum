@@ -8,12 +8,12 @@ import { museumStore } from '../../../museum/store'
 import { box } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
 import { useFocusTarget } from '../../../scene/Interaction'
-import { basicMaterial, PALETTES } from '../../../scene/materials'
+import { basicMaterial, PALETTES, PLINTH_MATERIAL } from '../../../scene/materials'
 import { CARDS, CELLS, MODALS, type ModalLayer } from '../content'
 import { roundedRect, useVisitorAway } from '../shared'
 
 const SCRIM_OPACITY = 0.3
-// Dialogs float a little in front of their own scrim.
+// Dialogs stand a little in front of their own scrim.
 const DIALOG_OFFSET = 0.35
 // A dialog interrupts once the visitor comes this close to it (metres south of its scrim)...
 const TRIGGER = 4.2
@@ -23,6 +23,8 @@ const ROOM = CELLS.interrupt
 const ROOM_X = (ROOM.minX + ROOM.maxX) / 2
 const ROOM_WIDTH = ROOM.maxX - ROOM.minX
 const FRAME = PALETTES.accepted.reveal
+/** Each dialog stands on a pedestal of its own, as deep as this, and rises with it out of the floor. */
+const PEDESTAL_DEPTH = 0.3
 
 type State = { shown: boolean; closed: boolean }
 
@@ -49,13 +51,13 @@ function Modal({ layer, index, state, onShow, onClose }: { layer: ModalLayer; in
     if (scrimMaterial.current) scrimMaterial.current.opacity = SCRIM_OPACITY * k
     if (scrim.current) scrim.current.visible = k > 0.01
     if (dialog.current) {
-      const pop = state.closed ? k : Math.min(1, k * 1.08)
-      dialog.current.scale.setScalar(Math.max(0.001, pop))
+      // Dialog and pedestal rise out of the floor together, and sink back when closed.
+      dialog.current.position.y = layer.y - (layer.y + h / 2 + 0.05) * (1 - k)
       dialog.current.visible = k > 0.01
     }
   })
 
-  useObstacle(`modal-${index}`, open ? box(layer.x, z, w, 0.2) : null)
+  useObstacle(`modal-${index}`, open ? box(layer.x, z - PEDESTAL_DEPTH / 2 + 0.05, w, PEDESTAL_DEPTH + 0.1) : null)
   useFocusTarget({
     id: `modal-${index}`,
     position: [layer.x, layer.y, z],
@@ -65,7 +67,7 @@ function Modal({ layer, index, state, onShow, onClose }: { layer: ModalLayer; in
     onInteract: onClose,
   })
 
-  const stem = layer.y - h / 2
+  const pedestal = layer.y - h / 2
 
   return (
     <>
@@ -76,8 +78,8 @@ function Modal({ layer, index, state, onShow, onClose }: { layer: ModalLayer; in
       </mesh>
 
       <group ref={dialog} position={[layer.x, layer.y, z]} visible={false}>
-        <mesh position={[0, -h / 2 - stem / 2, -0.03]} material={FRAME}>
-          <boxGeometry args={[0.03, stem, 0.03]} />
+        <mesh position={[0, -h / 2 - pedestal / 2, -PEDESTAL_DEPTH / 2 + 0.025]} material={PLINTH_MATERIAL}>
+          <boxGeometry args={[w, pedestal, PEDESTAL_DEPTH]} />
         </mesh>
         <mesh material={FRAME}>
           <boxGeometry args={[w, h, 0.05]} />
@@ -134,9 +136,9 @@ function Modal({ layer, index, state, onShow, onClose }: { layer: ModalLayer; in
 
 /**
  * Exhibit 03. Three overlays stacked in depth, each dimming everything behind it.
- * Nobody opens them: each one appears as the visitor approaches, and the room beyond
- * grows darker with every layer. Each dialog can be closed with E. They all return
- * on the next visit.
+ * Nobody opens them: each one rises out of the floor on its pedestal as the visitor
+ * approaches, and the room beyond grows darker with every layer. Each dialog can be
+ * closed with E, and sinks back. They all return on the next visit.
  */
 export function ModalStack() {
   const away = useVisitorAway()

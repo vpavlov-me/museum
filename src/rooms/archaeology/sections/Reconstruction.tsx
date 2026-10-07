@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useSound } from '../../../audio/useSound'
 import { DoorLeaf } from '../../../components/DoorLeaf'
+import { Lectern } from '../../../components/Lectern'
 import { WallText } from '../../../components/WallText'
 import { motion } from '../../../museum/capabilities'
 import { navigation } from '../../../museum/navigation'
@@ -28,7 +29,11 @@ const STAGE = rect(-1.6, 3.4, -54.6, -48.6)
 const STAGE_HEIGHT = 0.22
 const BARRIER_X = STAGE.maxX + 0.25
 const SEAT = { x: 1.7, z: -51.6 }
-const SCREEN = { x: -1.15, z: -51.6, width: 1.3, height: 0.74, y: STAGE_HEIGHT + 1.02 }
+/** The cabinet the large rectangle stands on. */
+const CABINET_HEIGHT = 0.5
+const SCREEN_FRAME = 0.05
+/** The large rectangle, standing on the cabinet: `y` is its centre. */
+const SCREEN = { x: -1.15, z: -51.6, width: 1.3, height: 0.74, y: STAGE_HEIGHT + CABINET_HEIGHT + (0.74 + SCREEN_FRAME) / 2 }
 const LIGHT = '#c7d2dc'
 
 const FABRIC = new THREE.MeshStandardMaterial({ color: '#4a403a', roughness: 0.95 })
@@ -90,11 +95,11 @@ function Diorama() {
         </mesh>
         <Seat />
         {/* A low cabinet against the far side, and the rectangle on it. */}
-        <mesh position={[SCREEN.x - 0.05, STAGE_HEIGHT + 0.25, SCREEN.z]} material={WOOD}>
-          <boxGeometry args={[0.42, 0.5, 1.7]} />
+        <mesh position={[SCREEN.x - 0.05, STAGE_HEIGHT + CABINET_HEIGHT / 2, SCREEN.z]} material={WOOD}>
+          <boxGeometry args={[0.42, CABINET_HEIGHT, 1.7]} />
         </mesh>
         <mesh position={[SCREEN.x - 0.04, SCREEN.y, SCREEN.z]} material={WOOD}>
-          <boxGeometry args={[0.06, SCREEN.height + 0.05, SCREEN.width + 0.05]} />
+          <boxGeometry args={[0.06, SCREEN.height + SCREEN_FRAME, SCREEN.width + SCREEN_FRAME]} />
         </mesh>
         {/* The barrier: a low rail on two posts, at the edge of the platform. */}
         <mesh position={[BARRIER_X, 0.85, (STAGE.minZ + STAGE.maxZ) / 2]} material={WOOD}>
@@ -135,9 +140,9 @@ export function Reconstruction() {
   return (
     <>
       <Diorama />
-      <group position={[BARRIER_X + 0.07, 1.02, (STAGE.minZ + STAGE.maxZ) / 2 + 1.4]} rotation={[0, Math.PI / 2, 0]}>
-        <CatalogueCard position={[0, 0, 0]} rotation={[-0.62, 0, 0]} find={FINDS.shrine} width={0.86} height={0.5} />
-      </group>
+      <Lectern position={[BARRIER_X + 0.07, 0, (STAGE.minZ + STAGE.maxZ) / 2 + 1.4]} yaw={Math.PI / 2} height={1.02} tilt={-0.62} width={0.86} plate={0.5}>
+        <CatalogueCard position={[0, 0, 0]} find={FINDS.shrine} width={0.86} height={0.5} />
+      </Lectern>
 
       <WallText position={[cell.minX + 0.4, cell.minZ + 0.02]} facing="south" layout={AFTERWORD_LAYOUT} {...AFTERWORD} />
       <DoorLeaf

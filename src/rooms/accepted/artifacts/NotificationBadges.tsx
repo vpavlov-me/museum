@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useSound } from '../../../audio/useSound'
+import { Cradle, CRADLE_SEAT } from '../../../components/Cradle'
 import { ExhibitLabel } from '../../../components/ExhibitLabel'
 import { Plinth } from '../../../components/Plinth'
 import { Text } from '../../../components/Text'
@@ -19,6 +20,8 @@ import { CIRCLE, hash, roundedRect, useVisitorAway } from '../shared'
 const RED = '#e5483b'
 const ROOM = CELLS.attend
 const PLINTH = { x: 2.4, z: -24.6, width: 1.1, height: 1, depth: 0.7 }
+/** The app icon: a tile, its thickness, and the cradle it stands in. */
+const ICON = { size: 0.44, depth: 0.05, cradle: 0.05 }
 const COUNT = 42
 // After "mark all as read", the room stays quiet for a moment before it starts again.
 const QUIET_FOR = 2.5
@@ -256,9 +259,15 @@ export function NotificationBadges() {
     <>
       <group position={[PLINTH.x, 0, PLINTH.z]}>
         <Plinth width={PLINTH.width} height={PLINTH.height} depth={PLINTH.depth} />
-        {/* An app icon, and the first, polite badge. */}
-        <group position={[0, PLINTH.height + 0.3, 0]}>
-          <mesh geometry={roundedRect(0.44, 0.44, 0.1)} material={PALETTES.accepted.wall} />
+        {/* An app icon, a tile standing in a cradle, and the first, polite badge. */}
+        <group position={[0, PLINTH.height, 0]}>
+          <Cradle width={0.56} depth={0.2} height={ICON.cradle} />
+        </group>
+        <group position={[0, PLINTH.height + ICON.cradle - CRADLE_SEAT + ICON.size / 2, 0]}>
+          <mesh geometry={roundedRect(ICON.size, ICON.size, 0.1)} material={PALETTES.accepted.wall} />
+          <mesh position={[0, 0, -ICON.depth / 2 - 0.001]} material={PALETTES.accepted.reveal}>
+            <boxGeometry args={[ICON.size - 0.06, ICON.size - 0.06, ICON.depth]} />
+          </mesh>
           <group ref={first} position={[0.2, 0.2, 0.01]}>
             <mesh geometry={CIRCLE} material={basicMaterial(RED)} scale={0.075} />
             <Text position={[0, 0, 0.003]} fontSize={0.075 * (label.length > 2 ? 0.72 : label.length > 1 ? 0.95 : 1.15)} color="#ffffff" anchorX="center" anchorY="middle">
