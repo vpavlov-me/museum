@@ -50,10 +50,11 @@ export function WallText({
         {kicker}
       </Text>
       <Text
+        face="display"
         position={[0, top, 0]}
-        fontSize={0.4}
-        lineHeight={1.05}
-        letterSpacing={-0.02}
+        fontSize={0.46}
+        lineHeight={1}
+        letterSpacing={-0.005}
         maxWidth={titleWidth}
         color={ink.text}
         anchorX="left"

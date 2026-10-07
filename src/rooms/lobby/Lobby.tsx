@@ -155,7 +155,7 @@ function Sign({ exhibition, x }: { exhibition: ExhibitionDefinition; x: number }
       <Text position={[0, 2.62, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
         {`${exhibition.kind === 'temporary' ? 'TEMPORARY EXHIBITION' : 'EXHIBITION'} ${exhibition.number}  ↑`}
       </Text>
-      <Text position={[0, 2.44, 0]} fontSize={0.24} lineHeight={1.05} letterSpacing={-0.02} maxWidth={2.5} color={INK.text} anchorX="left" anchorY="top">
+      <Text face="display" position={[0, 2.44, 0]} fontSize={0.3} lineHeight={1} maxWidth={2.5} color={INK.text} anchorX="left" anchorY="top">
         {exhibition.title}
       </Text>
       <Text position={[0, 1.86, 0]} fontSize={0.075} lineHeight={1.5} maxWidth={2.4} color={INK.body} anchorX="left" anchorY="top">
@@ -271,13 +271,13 @@ export function Lobby() {
       <RoomContents>
         <LightPool position={[1, 0.004, CENTER_Z]} size={[26, 9]} color="#efe6d6" strength={0.02} />
 
-        <Text position={[permanent.x, 4.25, NORTH]} fontSize={0.56} letterSpacing={-0.03} color={INK.text} anchorX="center" anchorY="middle">
-          {MUSEUM.name.toUpperCase()}
+        <Text face="display" position={[permanent.x, 4.22, NORTH]} fontSize={0.66} letterSpacing={-0.005} color={INK.text} anchorX="center" anchorY="middle">
+          {MUSEUM.name}
         </Text>
         <Text position={[permanent.x, 3.72, NORTH]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="center" anchorY="middle">
           LOBBY
         </Text>
-        <Text position={[0.16, 0.006, 33.2]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.11} letterSpacing={0.16} color={INK.muted} anchorX="left" anchorY="middle">
+        <Text position={[0.16, 0.006, 33.2]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.11} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="middle">
           START HERE ↑
         </Text>
 
@@ -300,7 +300,7 @@ export function Lobby() {
 
         {/* How to visit: a quiet gallery label, not a menu. */}
         <group position={[LOBBY.minX + 0.02, 0, 33.6]} rotation={[0, Math.PI / 2, 0]}>
-          <Text position={[0, 2.5, 0]} fontSize={0.09} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
+          <Text position={[0, 2.5, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
             HOW TO VISIT
           </Text>
           {/* Two columns, one text each: keys, and what they do. */}
@@ -332,7 +332,7 @@ export function Lobby() {
             {MUSEUM.name.toUpperCase()}
           </Text>
           <Text position={[0, 2.1, 0]} fontSize={0.085} lineHeight={1.55} maxWidth={3.1} color={INK.body} anchorX="left" anchorY="top">
-            {`${MUSEUM.premise} Conceived, written, designed and built by ${MUSEUM.author}, ${MUSEUM.year}. Set in Inter by Rasmus Andersson.`}
+            {`${MUSEUM.premise} Conceived, written, designed and built by ${MUSEUM.author}, ${MUSEUM.year}. Set in Inter by Rasmus Andersson and Instrument Serif.`}
           </Text>
         </group>
       </RoomContents>

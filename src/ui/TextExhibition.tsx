@@ -183,7 +183,7 @@ export function TextExhibition({ visible, canVisit, onVisit }: { visible: boolea
 
       <footer className="text-exhibition__foot">
         <p>
-          Conceived, written, designed and built by {MUSEUM.author}, {MUSEUM.year}. Set in Inter by Rasmus Andersson.
+          Conceived, written, designed and built by {MUSEUM.author}, {MUSEUM.year}. Set in Inter by Rasmus Andersson and Instrument Serif.
         </p>
         <a className="meta" href={MUSEUM.source} target="_blank" rel="noreferrer">
           Source on GitHub

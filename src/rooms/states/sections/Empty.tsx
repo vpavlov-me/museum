@@ -5,6 +5,7 @@ import { basicMaterial, PALETTES } from '../../../scene/materials'
 import { StaticMerge } from '../../../scene/StaticMerge'
 import { roundedRect } from '../../../scene/geometry'
 import { CARDS, CELLS, CHAPTERS, CTA_LABEL, INK } from '../content'
+import { TYPE } from '../../../identity'
 
 const cell = CELLS.empty
 const palette = PALETTES.empty
@@ -28,7 +29,7 @@ export function EmptyState() {
       <LightPool position={[CENTER_X, 0.004, (cell.minZ + cell.maxZ) / 2 + 1]} size={[11, 11]} color="#e9e4d9" strength={0.05} />
 
       <group position={[CENTER_X, 0, WALL]}>
-        <Text position={[0, 2.42, 0]} fontSize={0.075} letterSpacing={0.16} color={INK.muted} anchorX="center" anchorY="middle">
+        <Text position={[0, 2.42, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="center" anchorY="middle">
           {`03 / CHAPTER ${CHAPTERS.empty.numeral}`}
         </Text>
         <Text position={[0, 2.24, 0]} fontSize={0.3} letterSpacing={-0.02} color={INK.text} anchorX="center" anchorY="top">

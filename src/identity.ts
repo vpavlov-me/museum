@@ -39,11 +39,23 @@ export const INK_ON_LIGHT = { text: INK.dark, body: INK.darkMuted, muted: INK.da
 
 export type Ink = { text: string; body: string; muted: string }
 
-/** One typeface for walls, labels and the 2D shell (Inter, OFL, subset and self-hosted in /public/fonts). */
+/**
+ * Two typefaces, both OFL and self-hosted in /public/fonts. Inter for everything read in
+ * detail (kickers, metadata, running text, labels, signs); Instrument Serif for display:
+ * room and wall titles, chapter names, object names, large dates and figures.
+ */
 export const FONT = {
   regular: '/fonts/inter-regular.woff',
   medium: '/fonts/inter-medium.woff',
+  display: '/fonts/instrument-serif-regular.woff',
+  displayItalic: '/fonts/instrument-serif-italic.woff',
 }
+
+export type Face = 'text' | 'display' | 'displayItalic'
+
+/** Display titles are set in title case, never in capitals: THE BUTTON reads The Button (Roman numerals stay). */
+export const displayCase = (title: string) =>
+  title.replace(/\b[A-Z][A-Z'’]*\b/g, (word) => (word.length > 1 && !/^[IVXLC]+$/.test(word) ? word[0] + word.slice(1).toLowerCase() : word))
 
 /**
  * Signage type scale, in metres of cap-to-descender on a wall. Kickers are set

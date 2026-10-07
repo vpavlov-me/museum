@@ -3,7 +3,7 @@ import { ExhibitLabel } from '../../components/ExhibitLabel'
 import { RoomShell } from '../../components/RoomShell'
 import { Text } from '../../components/Text'
 import { WallText } from '../../components/WallText'
-import { INK } from '../../identity'
+import { INK, TYPE } from '../../identity'
 import { DOORS, localDoor } from '../../museum/roomRegistry'
 import { RoomContents, useRoom } from '../../museum/RoomContext'
 import { Downlight, LightPool, Luminaire } from '../../scene/Light'
@@ -94,13 +94,13 @@ export function AcceptedRoom() {
 
         {/* I — INTERRUPT. Title and thesis on the wall the visitor turns towards. */}
         <group position={[interrupt.maxX - 0.02, 0, -6.35]} rotation={[0, -Math.PI / 2, 0]}>
-          <Text position={[0, 4.55, 0]} fontSize={0.1} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
+          <Text position={[0, 4.55, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
             ROOM 02
           </Text>
-          <Text position={[0, 4.36, 0]} fontSize={0.42} lineHeight={1} letterSpacing={-0.03} color={INK.text} anchorX="left" anchorY="top">
-            {'THINGS WE\nSOMEHOW ACCEPTED'}
+          <Text face="display" position={[0, 4.36, 0]} fontSize={0.5} lineHeight={0.95} letterSpacing={-0.005} color={INK.text} anchorX="left" anchorY="top">
+            {'Things We\nSomehow Accepted'}
           </Text>
-          <Text position={[0, 3.4, 0]} fontSize={0.1} letterSpacing={0.12} color={INK.muted} anchorX="left" anchorY="top">
+          <Text position={[0, 3.4, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
             ON INTERRUPTIONS THAT BECAME NORMAL
           </Text>
         </group>

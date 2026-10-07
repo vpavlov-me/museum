@@ -1,6 +1,6 @@
 import type { MutableRefObject } from 'react'
 import type * as THREE from 'three'
-import { INK } from '../identity'
+import { displayCase, INK, TYPE } from '../identity'
 import { Text } from './Text'
 import { facingRotation, type Facing } from './WallText'
 
@@ -40,16 +40,16 @@ export function ChapterMark({
 
   return (
     <group position={position} rotation={facingRotation(facing)} scale={scale}>
-      <Text ref={keep(0)} fontSize={0.1} letterSpacing={0.16} color={INK.muted} anchorX="left" anchorY="top">
+      <Text ref={keep(0)} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
         {`${room} / CHAPTER ${chapter.numeral}`}
       </Text>
-      <Text ref={keep(1)} position={[0, -0.2, 0]} fontSize={0.5} lineHeight={0.98} letterSpacing={-0.03} color={INK.text} anchorX="left" anchorY="top">
-        {chapter.name}
+      <Text ref={keep(1)} face="display" position={[0, -0.2, 0]} fontSize={0.58} lineHeight={0.95} letterSpacing={-0.005} color={INK.text} anchorX="left" anchorY="top">
+        {displayCase(chapter.name)}
       </Text>
       <Text
         ref={keep(2)}
         clipRect={lineClip}
-        position={[0, -0.32 - 0.49 * chapter.name.split('\n').length, 0]}
+        position={[0, -0.32 - 0.55 * chapter.name.split('\n').length, 0]}
         fontSize={0.13}
         lineHeight={1.45}
         maxWidth={width}

@@ -95,8 +95,8 @@ See `CLAUDE.md` for the working rules.
 ## Assets and credits
 
 - **Exhibition:** conceived, written, designed and built by Vladimir Pavlov, 2026.
-- **Typeface:** Inter by Rasmus Andersson, SIL Open Font License 1.1. Subset and self-hosted in
-  `public/fonts/`, with the license alongside.
+- **Typefaces:** Inter by Rasmus Andersson, and Instrument Serif by the Instrument Serif Project
+  Authors, both SIL Open Font License 1.1. Self-hosted in `public/fonts/`, with the licenses alongside.
 - **Sound:** synthesised in code (`src/audio/`); there are no audio files.
 - **Images:** the social preview (`public/og.png`), favicon and touch icon were made for this project
   from its own typography. Interface imagery in the rooms (the CAPTCHA tiles, feed posts, badges) is

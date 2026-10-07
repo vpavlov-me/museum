@@ -1,7 +1,7 @@
 import { DOORS, localDoor, WALL_THICKNESS } from '../museum/roomRegistry'
 import { RoomContents, useRoom } from '../museum/RoomContext'
 import type { Rect } from '../museum/types'
-import { INK } from '../identity'
+import { INK, TYPE } from '../identity'
 import { LightPool, Luminaire } from '../scene/Light'
 import { floorGeometry, PALETTES } from '../scene/materials'
 import { StaticMerge } from '../scene/StaticMerge'
@@ -83,7 +83,7 @@ export function TurnPassage({
       <RoomContents>
         {/* The wall that ends the first leg, and turns the visitor. */}
         <group position={[midA, 0, b.minZ + 0.012]}>
-          <Text position={[-0.78, 2.02, 0]} fontSize={0.075} letterSpacing={0.16} color={INK.muted} anchorX="left" anchorY="top">
+          <Text position={[-0.78, 2.02, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
             {kicker}
           </Text>
           <Text position={[-0.8, 1.86, 0]} fontSize={0.42} letterSpacing={-0.03} color={INK.text} anchorX="left" anchorY="top">

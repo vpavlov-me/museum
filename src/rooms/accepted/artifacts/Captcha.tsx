@@ -6,7 +6,7 @@ import { useSound } from '../../../audio/useSound'
 import { ExhibitLabel } from '../../../components/ExhibitLabel'
 import { Text } from '../../../components/Text'
 import { Wall } from '../../../components/Wall'
-import { INK } from '../../../identity'
+import { INK, TYPE } from '../../../identity'
 import { useRoomFrame } from '../../../museum/RoomContext'
 import { rect } from '../../../museum/types'
 import { useObstacle } from '../../../scene/Collision'
@@ -179,7 +179,7 @@ export function Captcha() {
       />
       <ExhibitLabel position={[CELLS.attend.minX + 0.2, 1.6, face]} exhibit={CARDS.captcha} width={1.15} />
 
-      <Text position={[0, 3.62, face]} fontSize={0.075} letterSpacing={0.16} color={INK.muted} anchorX="center" anchorY="middle">
+      <Text position={[0, 3.62, face]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="center" anchorY="middle">
         VERIFY THAT YOU ARE HUMAN
       </Text>
       <Text position={[0, 3.32, face]} fontSize={0.17} color={stage === 'retry' ? '#e8a598' : '#efede6'} anchorX="center" anchorY="middle">
