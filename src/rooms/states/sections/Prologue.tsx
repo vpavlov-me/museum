@@ -3,6 +3,7 @@ import { WallText } from '../../../components/WallText'
 import { LightPool, Luminaire } from '../../../scene/Light'
 import { PALETTES } from '../../../scene/materials'
 import { StaticMerge } from '../../../scene/StaticMerge'
+import { displayCase, TYPE } from '../../../identity'
 import { CELLS, INK, THESIS, THESIS_LAYOUT, TITLE } from '../content'
 
 const cell = CELLS.prologue
@@ -25,13 +26,13 @@ export function Prologue() {
       <LightPool position={[LEFT + 3, 0.004, cell.minZ + 1.6]} size={[7.5, 2.8]} color={WARM} strength={0.07} />
 
       <group position={[LEFT, 0, WALL]}>
-        <Text position={[0, 4.12, 0]} fontSize={0.1} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
+        <Text position={[0, 4.12, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
           {TITLE.kicker}
         </Text>
-        <Text position={[0, 3.93, 0]} fontSize={0.42} letterSpacing={-0.03} color={INK.text} anchorX="left" anchorY="top">
-          {TITLE.title}
+        <Text face="display" position={[0, 3.93, 0]} fontSize={0.5} letterSpacing={-0.005} color={INK.text} anchorX="left" anchorY="top">
+          {displayCase(TITLE.title)}
         </Text>
-        <Text position={[0, 3.38, 0]} fontSize={0.1} letterSpacing={0.12} color={INK.muted} anchorX="left" anchorY="top">
+        <Text position={[0, 3.31, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
           {TITLE.subtitle}
         </Text>
       </group>

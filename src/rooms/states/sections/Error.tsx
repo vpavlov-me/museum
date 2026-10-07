@@ -14,6 +14,7 @@ import { Downlight, LightPool, Luminaire } from '../../../scene/Light'
 import { basicMaterial, PALETTES } from '../../../scene/materials'
 import { StaticMerge } from '../../../scene/StaticMerge'
 import { CARDS, CELLS, CHAPTERS, ERROR_STATUS, INK } from '../content'
+import { TYPE } from '../../../identity'
 
 const cell = CELLS.error
 const palette = PALETTES.states
@@ -241,7 +242,7 @@ export function ErrorState() {
         </group>
       )}
 
-      <Text position={[exit.center, 3.62, wall]} fontSize={0.09} letterSpacing={0.16} color={INK.muted} anchorX="center" anchorY="middle">
+      <Text position={[exit.center, 3.62, wall]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="center" anchorY="middle">
         {SIGN[layout]}
       </Text>
 

@@ -98,10 +98,10 @@ export function PatternLabel({ position, facing, pattern, width = 1.5 }: { posit
       <Text fontSize={TYPE.labelMeta} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
         {pattern.also ? `PATTERN / ${pattern.also.toUpperCase()}` : 'PATTERN'}
       </Text>
-      <Text position={[0, -0.075, 0]} fontSize={0.1} letterSpacing={-0.01} color={INK.text} anchorX="left" anchorY="top">
+      <Text face="display" position={[0, -0.07, 0]} fontSize={0.12} color={INK.text} anchorX="left" anchorY="top">
         {pattern.name}
       </Text>
-      <Text position={[0, -0.22, 0]} fontSize={0.05} lineHeight={1.5} maxWidth={width} color={INK.body} anchorX="left" anchorY="top">
+      <Text position={[0, -0.235, 0]} fontSize={0.05} lineHeight={1.5} maxWidth={width} color={INK.body} anchorX="left" anchorY="top">
         {pattern.text}
       </Text>
     </group>

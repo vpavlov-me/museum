@@ -3,6 +3,7 @@ import { useFocusTarget } from '../../../scene/Interaction'
 import { Luminaire } from '../../../scene/Light'
 import { PALETTES } from '../../../scene/materials'
 import { StaticMerge } from '../../../scene/StaticMerge'
+import { displayCase, TYPE } from '../../../identity'
 import { CARDS, CELLS, CHAPTERS, INK } from '../content'
 
 const cell = CELLS.success
@@ -31,11 +32,11 @@ export function SuccessState() {
       </StaticMerge>
 
       <group position={[CENTER_X, 0, WALL]}>
-        <Text position={[0, 6.05, 0]} fontSize={0.1} letterSpacing={0.16} color={INK.darkMuted} anchorX="center" anchorY="middle">
+        <Text position={[0, 6.05, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.darkMuted} anchorX="center" anchorY="middle">
           {`03 / CHAPTER ${CHAPTERS.success.numeral}`}
         </Text>
-        <Text position={[0, 4.95, 0]} fontSize={1.5} letterSpacing={-0.04} color={INK.dark} anchorX="center" anchorY="middle">
-          {CHAPTERS.success.name}
+        <Text face="display" position={[0, 4.95, 0]} fontSize={1.75} letterSpacing={-0.01} color={INK.dark} anchorX="center" anchorY="middle">
+          {displayCase(CHAPTERS.success.name)}
         </Text>
         <Text position={[0, 3.82, 0]} fontSize={0.13} maxWidth={5} textAlign="center" color={INK.darkMuted} anchorX="center" anchorY="middle">
           {CHAPTERS.success.line}

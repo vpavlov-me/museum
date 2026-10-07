@@ -17,6 +17,7 @@ import { useFocusTarget } from '../../scene/Interaction'
 import { LightPool, Luminaire } from '../../scene/Light'
 import { basicMaterial, PALETTES, PLINTH_MATERIAL } from '../../scene/materials'
 import { StaticMerge } from '../../scene/StaticMerge'
+import { displayCase, TYPE } from '../../identity'
 import { AFTERWORD, AFTERWORD_LAYOUT, CARDS, CELLS, CONFIRMSHAMING, FLOW, INK, PATTERNS, RECEIPT, SALES, THESIS, THESIS_LAYOUT, TITLE, TOTAL } from './content'
 import { PatternLabel, Screen } from './shared'
 
@@ -63,13 +64,13 @@ function Welcome() {
       <LightPool position={[-8.6, 2.4, wall - 0.008]} rotation={[0, 0, 0]} size={[7.5, 4]} color="#eef2f5" strength={0.07} />
 
       <group position={[welcome.minX + 0.4, 0, wall]}>
-        <Text position={[0, 3.95, 0]} fontSize={0.1} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
+        <Text position={[0, 3.95, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
           {TITLE.kicker}
         </Text>
-        <Text position={[0, 3.76, 0]} fontSize={0.42} letterSpacing={-0.03} color={INK.text} anchorX="left" anchorY="top">
-          {TITLE.title}
+        <Text face="display" position={[0, 3.76, 0]} fontSize={0.5} letterSpacing={-0.005} color={INK.text} anchorX="left" anchorY="top">
+          {displayCase(TITLE.title)}
         </Text>
-        <Text position={[0, 3.21, 0]} fontSize={0.1} letterSpacing={0.12} color={INK.muted} anchorX="left" anchorY="top">
+        <Text position={[0, 3.14, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
           {TITLE.subtitle}
         </Text>
       </group>
@@ -227,10 +228,10 @@ function Checkout() {
         <ReceiptLine key={i} index={i} />
       ))}
       <group position={[-17.6, 2.05, checkout.maxZ - 0.03]} rotation={[0, Math.PI, 0]}>
-        <Text fontSize={0.075} letterSpacing={0.1} color={INK.muted} anchorX="left" anchorY="top">
+        <Text fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
           TOTAL
         </Text>
-        <Text position={[0, -0.12, 0]} fontSize={0.3} color={INK.text} anchorX="left" anchorY="top">
+        <Text face="display" position={[0, -0.12, 0]} fontSize={0.36} color={INK.text} anchorX="left" anchorY="top">
           {euros(TOTAL)}
         </Text>
       </group>

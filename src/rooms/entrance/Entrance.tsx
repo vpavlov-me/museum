@@ -1,7 +1,7 @@
 import { RoomShell } from '../../components/RoomShell'
 import { Text } from '../../components/Text'
 import { WallText, type WallTextLayout } from '../../components/WallText'
-import { INK } from '../../identity'
+import { INK, TYPE } from '../../identity'
 import { DOORS, localDoor } from '../../museum/roomRegistry'
 import { RoomContents, useRoom } from '../../museum/RoomContext'
 import { Luminaire } from '../../scene/Light'
@@ -45,8 +45,8 @@ export function Entrance() {
         <Text position={[0, 3.98, wall]} fontSize={0.075} letterSpacing={0.14} color={INK.muted} anchorX="center" anchorY="middle">
           EXHIBITION 01
         </Text>
-        <Text position={[0, 3.6, wall]} fontSize={0.5} letterSpacing={-0.03} color={INK.text} anchorX="center" anchorY="middle">
-          PERMANENT EXHIBITION
+        <Text face="display" position={[0, 3.6, wall]} fontSize={0.6} letterSpacing={-0.005} color={INK.text} anchorX="center" anchorY="middle">
+          Permanent Exhibition
         </Text>
 
         {/* Directional sign beside the door. */}
@@ -57,7 +57,7 @@ export function Entrance() {
           <Text position={[0, 1.78, 0]} fontSize={0.22} letterSpacing={-0.02} color={INK.text} anchorX="left" anchorY="top">
             The Button
           </Text>
-          <Text position={[0, 1.48, 0]} fontSize={0.075} letterSpacing={0.1} color={INK.muted} anchorX="left" anchorY="top">
+          <Text position={[0, 1.48, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
             A SMALL HISTORY OF DIGITAL AFFORDANCE
           </Text>
         </group>

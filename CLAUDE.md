@@ -102,7 +102,10 @@ v1 shipped as one exhibition of three rooms (#12). v2 (#20, #21) makes it a smal
   each room's `content.ts`). Whatever changes in a room must still work in all three.
 - **Passages:** the low, dark turn between rooms is `components/TurnPassage` (`turn="west"` mirrors it); a new exhibition gets one.
 - **Identity:** `identity.ts` and `styles.css` hold the ink, the type and the name; use them, not
-  new hex values (`INK_ON_LIGHT` on light stone). Every 3D text uses `components/Text` (Inter, self-hosted).
+  new hex values (`INK_ON_LIGHT` on light stone). Every 3D text uses `components/Text`: Inter by
+  default; `face="display"` (Instrument Serif) for titles, chapter and object names and large
+  figures, set with `displayCase` (title case, never capitals). Kickers use `TYPE.kicker` /
+  `TYPE.sign` with `TYPE.tracking`. Both faces are OFL and self-hosted.
 - **Materials:** `scene/materials.ts` palettes give every space its stone floor, plaster walls and
   trim, mapped by world position (no UVs needed) from textures generated at idle time; `Wall` adds
   skirting, shadow gap and architraves. Reflections come from one generated environment

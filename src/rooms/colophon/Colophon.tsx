@@ -53,7 +53,7 @@ export function Colophon() {
           <Text position={[0, 2.62, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
             END OF THE PERMANENT EXHIBITION
           </Text>
-          <Text position={[0, 2.46, 0]} fontSize={0.3} letterSpacing={-0.02} color={INK.text} anchorX="left" anchorY="top">
+          <Text face="display" position={[0, 2.46, 0]} fontSize={0.36} color={INK.text} anchorX="left" anchorY="top">
             Thank you for visiting.
           </Text>
           <Text position={[0, 2.0, 0]} fontSize={0.085} lineHeight={1.55} maxWidth={3.3} color={INK.body} anchorX="left" anchorY="top">

@@ -24,10 +24,10 @@ export function ExhibitLabel({
       <Text fontSize={0.042} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
         {`${exhibit.index} / ${exhibit.year} / ${exhibit.category}`}
       </Text>
-      <Text position={[0, -0.085, 0]} fontSize={0.085} letterSpacing={-0.01} maxWidth={width} color={INK.text} anchorX="left" anchorY="top">
+      <Text face="display" position={[0, -0.08, 0]} fontSize={0.1} maxWidth={width} color={INK.text} anchorX="left" anchorY="top">
         {exhibit.title}
       </Text>
-      <Text position={[0, -0.215, 0]} fontSize={0.042} lineHeight={1.5} maxWidth={width} color={INK.body} anchorX="left" anchorY="top">
+      <Text position={[0, -0.225, 0]} fontSize={0.042} lineHeight={1.5} maxWidth={width} color={INK.body} anchorX="left" anchorY="top">
         {exhibit.description}
       </Text>
     </group>

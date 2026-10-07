@@ -20,6 +20,15 @@
   font-display: block;
 }
 
+/* The display face: titles only, as on the walls (identity.ts FONT.display). */
+@font-face {
+  font-family: 'Instrument Serif Museum';
+  src: url('/fonts/instrument-serif-regular.woff2') format('woff2'), url('/fonts/instrument-serif-regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Ink — identity.ts INK */
   --ink-text: #efede6;
@@ -33,6 +42,8 @@
 
   /* Type */
   --font: 'Inter Museum', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Instrument Serif Museum', 'Times New Roman', serif;
+  --tracking-display: -0.005em;
   --type-display: clamp(56px, 9vw, 132px);
   --type-title: clamp(30px, 3.4vw, 44px);
   --type-body: 16px;
@@ -237,11 +248,12 @@ a:hover {
 }
 
 .entry h1 {
+  font-family: var(--font-display);
   margin: 0;
   font-size: var(--type-display);
   font-weight: 400;
   line-height: 0.9;
-  letter-spacing: -0.06em;
+  letter-spacing: var(--tracking-display);
 }
 
 .entry__premise {
@@ -482,11 +494,12 @@ a:hover {
 }
 
 .colophon h2 {
+  font-family: var(--font-display);
   margin: var(--space-2) 0 0;
   font-size: var(--type-title);
   font-weight: 400;
   line-height: 1.05;
-  letter-spacing: var(--tracking-title);
+  letter-spacing: var(--tracking-display);
 }
 
 .colophon p {
@@ -582,10 +595,11 @@ a:hover {
 }
 
 .notice h2 {
+  font-family: var(--font-display);
   margin: var(--space-2) 0 0;
   font-size: var(--type-title);
   font-weight: 400;
-  letter-spacing: var(--tracking-title);
+  letter-spacing: var(--tracking-display);
 }
 
 .notice p {
@@ -732,11 +746,12 @@ a:hover {
 }
 
 .text-exhibition h1 {
+  font-family: var(--font-display);
   margin: var(--space-3) 0 0;
   font-size: clamp(44px, 7vw, 88px);
   font-weight: 400;
   line-height: 0.95;
-  letter-spacing: -0.05em;
+  letter-spacing: var(--tracking-display);
 }
 
 .text-exhibition__premise {
@@ -760,11 +775,12 @@ a:hover {
 }
 
 .text-exhibition h2 {
+  font-family: var(--font-display);
   margin: var(--space-2) 0 0;
   font-size: var(--type-title);
   font-weight: 400;
   line-height: 1.05;
-  letter-spacing: var(--tracking-title);
+  letter-spacing: var(--tracking-display);
 }
 
 .text-exhibition__idea {
@@ -863,11 +879,12 @@ a:hover {
 }
 
 .exhibit-card h2 {
+  font-family: var(--font-display);
   margin: 0;
   font-size: 28px;
   font-weight: 400;
   line-height: 1;
-  letter-spacing: var(--tracking-title);
+  letter-spacing: var(--tracking-display);
 }
 
 .exhibit-card p {
