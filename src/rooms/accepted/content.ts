@@ -4,21 +4,20 @@ import { ACCEPTED_CELLS } from '../../museum/roomRegistry'
 import type { ExhibitCardData } from '../../museum/types'
 
 /*
- * Room 02 plan, room-local metres. The visitor enters at z = 0 through the
- * south-west corner and walks towards -z through three chapters, separated by
- * pauses and offset openings:
+ * Room 02 plan, room-local metres. The visitor enters at z = 0 near the west wall and
+ * walks towards -z through three chapters, an enfilade with every opening on x = 0:
  *
- *   INTERRUPT     z    0 … -17   thesis, cookie banner at z = -6.6, three modals
- *   (pause)       z  -17 … -21   low and quiet, the chapter II title
- *   PROVE/ATTEND  z  -21 … -35   one badge on a plinth, then many; CAPTCHA gate at z = -35.15
- *   WAIT/CONTINUE z  -35 … -46   skeleton panels as partitions
- *                 z  -46 … -66   the feed, ending at the door to Room 03
+ *   INTERRUPT     z    0 … -13   thesis, cookie banner at z = -6.6, three modals
+ *   (pause)       z  -13 … -16   low and quiet, the chapter II title
+ *   PROVE/ATTEND  z  -16 … -27   one badge on a plinth on the axis, then many; CAPTCHA gate at z = -27.15
+ *   WAIT/CONTINUE z  -27 … -36   skeleton panels as partitions
+ *                 z  -36 … -51   the feed, ending at the door to Room 03
  */
 export const CELLS = ACCEPTED_CELLS
 export const FEED = ACCEPTED_CELLS.feed
 
 export const BANNER_Z = -6.6
-export const CAPTCHA_Z = -35.15
+export const CAPTCHA_Z = -27.15
 
 export const CHAPTERS = {
   interrupt: { numeral: 'I', name: 'INTERRUPT', line: 'Interfaces that block what you came to do.' },
@@ -107,7 +106,7 @@ export type ModalLayer = {
 
 export const MODALS: ModalLayer[] = [
   {
-    z: -9.4,
+    z: -8.6,
     x: 1.9,
     y: 1.8,
     width: 2.6,
@@ -118,7 +117,7 @@ export const MODALS: ModalLayer[] = [
     secondary: 'No thanks, I prefer to stay uninformed',
   },
   {
-    z: -12,
+    z: -10.4,
     x: 5.8,
     y: 1.7,
     width: 2.4,
@@ -129,7 +128,7 @@ export const MODALS: ModalLayer[] = [
     secondary: 'Not now',
   },
   {
-    z: -14.6,
+    z: -12,
     x: 2.8,
     y: 1.62,
     width: 2.2,

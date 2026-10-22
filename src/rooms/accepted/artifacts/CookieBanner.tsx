@@ -18,6 +18,7 @@ const WIDTH = BANNER.maxX - BANNER.minX
 const CENTER_X = (BANNER.minX + BANNER.maxX) / 2
 const FACE_Z = BANNER.depth / 2 + 0.002
 const ACCEPT = { x: BANNER.maxX - 1.9, y: 1.12, width: 2, height: 0.5 }
+const COPY = { x: BANNER.minX + 0.7, maxWidth: ACCEPT.x - ACCEPT.width / 2 - 0.3 - (BANNER.minX + 0.7) }
 // Collision is released once the top edge has sunk below the knees.
 const RELEASE_AFTER_MS = 900
 
@@ -82,14 +83,14 @@ export function CookieBanner() {
       </mesh>
 
       <group position={[0, 0, FACE_Z + 0.002]}>
-        <Text position={[BANNER.minX + 0.7, 1.9, 0]} fontSize={0.3} letterSpacing={-0.02} color="#141414" anchorX="left" anchorY="top">
+        <Text position={[COPY.x, 1.9, 0]} fontSize={0.3} letterSpacing={-0.02} color="#141414" anchorX="left" anchorY="top">
           We value your privacy.
         </Text>
         <Text
-          position={[BANNER.minX + 0.7, 1.36, 0]}
+          position={[COPY.x, 1.36, 0]}
           fontSize={0.12}
           lineHeight={1.5}
-          maxWidth={5.4}
+          maxWidth={COPY.maxWidth}
           color="#4a4844"
           anchorX="left"
           anchorY="top"

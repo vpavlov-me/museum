@@ -16,44 +16,45 @@ import { InfiniteFeed } from './artifacts/InfiniteFeed'
 import { ModalStack } from './artifacts/ModalStack'
 import { NotificationBadges } from './artifacts/NotificationBadges'
 import { SkeletonLoader } from './artifacts/SkeletonLoader'
-import { BANNER_Z, CARDS, CELLS, CHAPTERS, COMPACT_LAYOUT, OBSERVATIONS, THESIS } from './content'
+import { BANNER_Z, CAPTCHA_Z, CARDS, CELLS, CHAPTERS, COMPACT_LAYOUT, OBSERVATIONS, THESIS } from './content'
 
 const palette = PALETTES.accepted
 const COOL = '#dfe6e8'
 const WARM = '#f2e9d8'
 const { interrupt, pause, attend, wait, feed } = CELLS
+const PAUSE_X = (pause.minX + pause.maxX) / 2
+const PAUSE_Z = (pause.minZ + pause.maxZ) / 2
 
 /** Short ceiling slots, deliberately out of step with each other: [x, z, width, length]. */
 const SLOTS: [number, number, number, number][] = [
   // I — fragmented, harsh.
   [0.6, -2.4, 0.12, 1.6],
   [4.4, -3.6, 0.12, 2.6],
-  [7.9, -1.4, 0.12, 1.1],
-  [2.2, -9.6, 0.12, 1.8],
-  [7.1, -11.6, 0.12, 2.4],
-  [0.4, -13.4, 0.12, 1.2],
-  [5.2, -15.6, 0.12, 1.4],
+  [7.6, -1.4, 0.12, 1.1],
+  [2.2, -8.8, 0.12, 1.8],
+  [6.8, -10.6, 0.12, 2.4],
+  [0.4, -12, 0.12, 1.2],
   // II — sparse; the badges supply the colour.
-  [-1.4, -26, 0.12, 3.2],
-  [5.6, -29.5, 0.12, 2.2],
-  [0, -33.8, 2.4, 0.12],
+  [-2.2, -20.4, 0.12, 3.2],
+  [3.2, -23.4, 0.12, 2.2],
+  [0, -26, 2.4, 0.12],
 ]
 
 /** Tube lights over the waiting zone: low, cool, regular, like a corridor nobody designed. */
 const TUBES: [number, number][] = [
-  [2.6, -37.2],
-  [2.6, -40.6],
-  [-0.8, -42.2],
-  [-0.8, -44.6],
+  [-1.6, -28.8],
+  [-1.6, -31.6],
+  [1.6, -33.2],
+  [1.6, -35.4],
 ]
 
 /**
  * Room 02 — Things We Somehow Accepted.
  * Unlike Room 01, nothing here waits politely on a plinth (except one badge, briefly).
  * Interface behavior is the architecture: things block the way, dim the view,
- * ask for verification and never finish loading. The room is cut into three chapters
- * — interrupt, prove / attend, wait / continue — by offset openings and a low pause,
- * so it never reads as one axis and the visitor keeps having to reorient.
+ * ask for verification and never finish loading. The room is an enfilade of three
+ * chapters — interrupt, prove / attend, wait / continue — and a low pause: the way on
+ * is always straight ahead, and something always stands in it.
  */
 export function AcceptedRoom() {
   const { origin } = useRoom()
@@ -80,7 +81,7 @@ export function AcceptedRoom() {
           <Luminaire key={`${x}:${z}`} position={[x, wait.height - 0.004, z]} size={[1.4, 0.07]} palette={palette} />
         ))}
         {/* The pause: one soft, warm panel. */}
-        <Luminaire position={[1, pause.height - 0.004, -19.1]} size={[2.2, 1.6]} palette={PALETTES.entrance} />
+        <Luminaire position={[PAUSE_X, pause.height - 0.004, PAUSE_Z]} size={[2.2, 1.6]} palette={PALETTES.entrance} />
         {/* The feed's single line gives the drifting posts something still to drift against. */}
         <Luminaire position={[0, feed.height - 0.004, (feed.minZ + feed.maxZ) / 2 + 0.4]} size={[0.06, feed.maxZ - feed.minZ - 1.6]} palette={palette} />
       </StaticMerge>
@@ -116,14 +117,15 @@ export function AcceptedRoom() {
 
       {/* The pause: the chapter II title, and its warm light. */}
       <RoomContents cells={[1]}>
-        <LightPool position={[1, 0.004, -19.1]} size={[4.4, 3.6]} color={WARM} strength={0.1} />
-        <ChapterMark position={[pause.minX + 0.25, 2.45, pause.minZ + 0.012]} facing="south" room="02" chapter={CHAPTERS.attend} width={3.1} scale={0.82} />
+        <LightPool position={[PAUSE_X, 0.004, PAUSE_Z]} size={[4.4, 3.2]} color={WARM} strength={0.1} />
+        {/* Beside the opening, not over it: the way on stays clear. */}
+        <ChapterMark position={[1.35, 2.45, pause.minZ + 0.012]} facing="south" room="02" chapter={CHAPTERS.attend} width={2.2} scale={0.82} />
       </RoomContents>
 
       {/* II — PROVE / ATTEND. */}
       <RoomContents cells={[2]}>
-        <LightPool position={[0, 0.004, -33.9]} size={[3.4, 2]} color={COOL} strength={0.1} />
-        <WallText position={[attend.minX + 0.02, -22.2]} facing="east" layout={COMPACT_LAYOUT} {...OBSERVATIONS.badges} />
+        <LightPool position={[0, 0.004, CAPTCHA_Z + 1.25]} size={[3.4, 2]} color={COOL} strength={0.1} />
+        <WallText position={[attend.minX + 0.02, attend.maxZ - 0.6]} facing="east" layout={COMPACT_LAYOUT} {...OBSERVATIONS.badges} />
         <NotificationBadges />
       </RoomContents>
       {/* The CAPTCHA is the wall between II and III, seen from both. */}
@@ -136,9 +138,9 @@ export function AcceptedRoom() {
         {TUBES.map(([x, z]) => (
           <LightPool key={`${x}:${z}`} position={[x, 0.004, z]} size={[2.6, 1.6]} color={COOL} strength={0.07} />
         ))}
-        <ChapterMark position={[wait.maxX - 0.02, 2.95, -38.9]} facing="west" room="02" chapter={CHAPTERS.wait} />
-        <ExhibitLabel position={[wait.maxX - 0.02, 1.6, -40.6]} rotation={[0, -Math.PI / 2, 0]} exhibit={CARDS.skeleton} />
-        <WallText position={[wait.minX + 0.02, -39.9]} facing="east" layout={COMPACT_LAYOUT} {...OBSERVATIONS.waiting} />
+        <ChapterMark position={[wait.maxX - 0.02, 2.95, -31.4]} facing="west" room="02" chapter={CHAPTERS.wait} />
+        <ExhibitLabel position={[wait.maxX - 0.02, 1.6, -34.6]} rotation={[0, -Math.PI / 2, 0]} exhibit={CARDS.skeleton} />
+        <WallText position={[wait.minX + 0.02, wait.maxZ - 0.5]} facing="east" layout={COMPACT_LAYOUT} {...OBSERVATIONS.waiting} />
         <SkeletonLoader />
       </RoomContents>
 

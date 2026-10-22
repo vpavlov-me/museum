@@ -59,8 +59,8 @@ export const WALL_THICKNESS = 0.2
 const BUTTON_ORIGIN: Vec2 = [0, 4.8]
 /** Room 02 is authored from the door it is entered through. */
 const ACCEPTED_ORIGIN: Vec2 = [-6.9, -10.7]
-/** Room 03 and the transition before it are authored from the door at the end of the feed. */
-const STATES_ORIGIN: Vec2 = [-6.9, -77]
+/** Room 03 and the transition before it are authored from the door at the end of the feed (see DOORS.acceptedExit). */
+const STATES_ORIGIN: Vec2 = [-6.9, -61.4]
 /** Interface Archaeology and the passage into it are authored from its door in the lobby's north wall. */
 export const ARCHAEOLOGY_ORIGIN: Vec2 = [12, 26.1]
 
@@ -76,15 +76,16 @@ export type Cell = Rect & { height: number }
 const cell = (minX: number, maxX: number, minZ: number, maxZ: number, height: number): Cell => ({ ...rect(minX, maxX, minZ, maxZ), height })
 
 /**
- * Room 02 as a sequence of offset cells, room-local. Each opening is shifted
- * sideways from the last, so the room never reads as one axis.
+ * Room 02 as an enfilade of cells, room-local: every opening on one axis (x = 0), so
+ * the way on is always straight ahead, and what stands in it (a banner, a gate, a
+ * placeholder) is the exhibit. The pause sits inside both its neighbours' walls.
  */
 export const ACCEPTED_CELLS = {
-  interrupt: cell(-1.5, 9.5, -17, -0.1, 4.8),
-  pause: cell(-1.5, 3.5, -21, -17.2, 2.8),
-  attend: cell(-3, 7, -35, -21.2, 4),
-  wait: cell(-2.5, 4.5, -46, -35.3, 3.4),
-  feed: cell(-1.5, 1.5, -66.2, -46.2, 3),
+  interrupt: cell(-1.5, 8.5, -13, -0.1, 4.8),
+  pause: cell(-1.5, 4.3, -16.4, -13.2, 2.8),
+  attend: cell(-4, 4.5, -27, -16.6, 4),
+  wait: cell(-3.5, 3.5, -36.3, -27.3, 3.4),
+  feed: cell(-1.5, 1.5, -50.6, -36.5, 3),
 }
 
 /** The threshold between Room 01 and Room 02, in world coordinates (its origin is the world origin). */
@@ -176,11 +177,11 @@ export const DOORS = {
   /** Opposite the entrance, on the same axis. */
   buttonExit: { x: 0, z: -4.3, width: 1.8, height: 2.5 },
   acceptedEntry: { ...inAccepted(0, 0), width: 2, height: 2.4 },
-  interruptExit: { ...inAccepted(0.8, -17.1), width: 1.8, height: 2.5 },
-  attendEntry: { ...inAccepted(2.4, -21.1), width: 1.8, height: 2.5 },
-  captcha: { ...inAccepted(0, -35.15), width: 2.7, height: 2.95, thickness: 0.3 },
-  feed: { ...inAccepted(0, -46.1), width: 2, height: 2.6 },
-  acceptedExit: { ...inAccepted(0, -66.3), width: 1.6, height: 2.4 },
+  interruptExit: { ...inAccepted(0, -13.1), width: 1.8, height: 2.5 },
+  attendEntry: { ...inAccepted(0, -16.5), width: 1.8, height: 2.5 },
+  captcha: { ...inAccepted(0, -27.15), width: 2.7, height: 2.95, thickness: 0.3 },
+  feed: { ...inAccepted(0, -36.4), width: 2, height: 2.6 },
+  acceptedExit: { ...inAccepted(0, -50.7), width: 1.6, height: 2.4 },
   statesEntry: { ...inStates(7, -7.8), width: 1.8, height: 2.4 },
   loadingEntry: { ...inStates(0.6, -15.1), width: 1.8, height: 2.6 },
   /** Held shut by a placeholder until the room has loaded. */

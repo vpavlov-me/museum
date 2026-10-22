@@ -22,13 +22,13 @@ type Shape = { kind: 'bar'; x0: number; x1: number; y: number; h: number } | { k
 
 type Panel = { id: string; x: number; z: number; width: number; height: number; shapes: Shape[] }
 
-// Two placeholder "pages", staggered like posts in a feed and standing in the way like
+// Two placeholder "pages", staggered like posts in a feed and standing across the axis like
 // partitions: the visitor has to walk around each one. Panel-local metres, y from the floor.
 const PANELS: Panel[] = [
   {
     id: 'post',
-    x: -1,
-    z: -39.5,
+    x: 0.6,
+    z: -30.4,
     width: 3,
     height: 2.85,
     shapes: [
@@ -43,8 +43,8 @@ const PANELS: Panel[] = [
   },
   {
     id: 'grid',
-    x: 3.15,
-    z: -43,
+    x: -1.3,
+    z: -34.4,
     width: 2.6,
     height: 2.6,
     shapes: [

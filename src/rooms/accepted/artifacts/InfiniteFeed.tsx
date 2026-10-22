@@ -9,8 +9,10 @@ import { basicMaterial } from '../../../scene/materials'
 import { CARDS, FEED } from '../content'
 import { CIRCLE, roundedRect, smoothstep } from '../shared'
 
-const CARD = { width: 1.5, height: 1.05, spacing: 1.6, perSide: 12, y: 1.6 }
-const SPAN = CARD.spacing * CARD.perSide
+const CARD = { width: 1.5, height: 1.05, spacing: 1.6, y: 1.6 }
+/** As many posts a side as the corridor holds: the loop is never longer than the feed. */
+const PER_SIDE = Math.floor((FEED.maxZ - FEED.minZ - 0.8) / CARD.spacing)
+const SPAN = CARD.spacing * PER_SIDE
 const TOP = FEED.maxZ - 0.4
 const BOTTOM = TOP - SPAN
 // Cards travel with the visitor at this fraction of their walking speed.
@@ -22,7 +24,7 @@ const INK = basicMaterial('#3b3a37')
 
 type Slot = { side: -1 | 1; base: number; seed: number; long: number }
 
-const SLOTS: Slot[] = Array.from({ length: CARD.perSide * 2 }, (_, i) => {
+const SLOTS: Slot[] = Array.from({ length: PER_SIDE * 2 }, (_, i) => {
   const side = i % 2 === 0 ? -1 : 1
   const n = Math.floor(i / 2)
   return { side, base: TOP - 0.4 - n * CARD.spacing - (side === 1 ? CARD.spacing / 2 : 0), seed: i, long: (i * 7) % 3 }

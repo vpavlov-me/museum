@@ -19,14 +19,15 @@ import { CIRCLE, hash, roundedRect, useVisitorAway } from '../shared'
 
 const RED = '#e5483b'
 const ROOM = CELLS.attend
-const PLINTH = { x: 2.4, z: -24.6, width: 1.1, height: 1, depth: 0.7 }
+/** On the axis, straight ahead of the door into the chapter. */
+const PLINTH = { x: 0, z: ROOM.maxZ - 3.6, width: 1.1, height: 1, depth: 0.7 }
 /** The app icon: a tile, its thickness, and the cradle it stands in. */
 const ICON = { size: 0.44, depth: 0.05, cradle: 0.05 }
 const COUNT = 42
 // After "mark all as read", the room stays quiet for a moment before it starts again.
 const QUIET_FOR = 2.5
 // Badges spread over this stretch of the chapter as the visitor walks deeper into it.
-const SPREAD = { start: ROOM.maxZ - 1.3, length: 9.6 }
+const SPREAD = { start: ROOM.maxZ - 1.3, length: ROOM.maxZ - ROOM.minZ - 2.8 }
 
 type Badge = {
   position: [number, number, number]
@@ -42,12 +43,13 @@ const countLabel = (i: number) => {
   return value > 99 ? '99+' : String(value)
 }
 
-// The observation text occupies roughly y 1.0–2.9 on the west wall between these z values.
-const TEXT_BAND = { minZ: -28.5, maxZ: -22, minY: 0.95, maxY: 3 }
+// The observation text occupies roughly y 1.0–2.9 on the west wall between these z values (see Room).
+const TEXT_BAND = { minZ: ROOM.maxZ - 6.9, maxZ: ROOM.maxZ - 0.4, minY: 0.95, maxY: 3 }
 
 function layoutBadges(): Badge[] {
   const badges: Badge[] = []
   const cx = (ROOM.minX + ROOM.maxX) / 2
+  const width = ROOM.maxX - ROOM.minX
   for (let i = 0; i < COUNT; i++) {
     const progress = i / (COUNT - 1)
     const z = THREE.MathUtils.clamp(SPREAD.start - progress * SPREAD.length + (hash(i) - 0.5) * 2, ROOM.minZ + 0.6, ROOM.maxZ - 0.4)
@@ -66,11 +68,11 @@ function layoutBadges(): Badge[] {
       position = [ROOM.maxX - 0.012, 0.5 + hash(i + 9) * 3, z]
       rotation = [0, -Math.PI / 2, 0]
     } else if (surface === 2) {
-      position = [cx + (hash(i + 3) - 0.5) * 9, ROOM.height - 0.012, z]
+      position = [cx + (hash(i + 3) - 0.5) * (width - 1), ROOM.height - 0.012, z]
       // Facing down, numbers upright for a visitor walking north.
       rotation = [Math.PI / 2, 0, Math.PI]
     } else {
-      position = [cx + (hash(i + 3) - 0.5) * 8.4, 0.006, z]
+      position = [cx + (hash(i + 3) - 0.5) * (width - 1.6), 0.006, z]
       rotation = [-Math.PI / 2, 0, 0]
     }
 
