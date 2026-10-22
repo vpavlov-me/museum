@@ -23,7 +23,7 @@ import { QuietButton } from './artifacts/QuietButton'
 import { RaisedButton } from './artifacts/RaisedButton'
 import { BUTTON, type ArtifactProps } from './artifacts/shared'
 import { TactileButton } from './artifacts/TactileButton'
-import { EXHIBITS, ROOM, THRESHOLDS, WALL_TEXTS, type ArtifactStyle, type ButtonExhibit } from './content'
+import { EXHIBITS, ROOM, THRESHOLDS, WALL_TEXT_LAYOUT, WALL_TEXTS, type ArtifactStyle, type ButtonExhibit } from './content'
 
 const PLINTH = { width: 2.6, height: 0.95, depth: 0.9 }
 const CRADLE = { height: 0.06 }
@@ -66,13 +66,12 @@ function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
   })
 
   const Artifact = ARTIFACTS[exhibit.artifact.style]
-  // Lit from the aisle side, so the face of the artifact catches the light.
-  const aisle = exhibit.side === 'left' ? 1 : -1
 
   return (
     <>
-      <Downlight at={[x + aisle * 1.7, z]} aim={[x, 1.1, z]} ceiling={ROOM.height} palette={palette} angle={0.36} penumbra={0.8} intensity={70} />
-      <group position={[x, 0, z]} rotation={[0, exhibit.side === 'left' ? Math.PI / 2 : -Math.PI / 2, 0]}>
+      {/* Lit from the aisle (west), so the face of the artifact catches the light. */}
+      <Downlight at={[x - 1.7, z]} aim={[x, 1.1, z]} ceiling={ROOM.height} palette={palette} angle={0.36} penumbra={0.8} intensity={70} />
+      <group position={[x, 0, z]} rotation={[0, -Math.PI / 2, 0]}>
         <Plinth width={PLINTH.width} height={PLINTH.height} depth={PLINTH.depth} />
 
         {/* Each button stands in a cradle on its plinth, as an object, not an image. */}
@@ -85,6 +84,11 @@ function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
 
         <ExhibitLabel position={[-PLINTH.width / 2 + 0.14, PLINTH.height - 0.1, PLINTH.depth / 2 + 0.004]} exhibit={exhibit} width={1.7} />
       </group>
+
+      {/* Its year, large, on the wall behind it: the row reads as a timeline. */}
+      <Text face="display" position={[ROOM.halfWidth - 0.02, 2.8, z]} rotation={[0, -Math.PI / 2, 0]} fontSize={0.9} color={INK.muted} anchorX="center" anchorY="middle">
+        {exhibit.year}
+      </Text>
     </>
   )
 }
@@ -122,12 +126,13 @@ export function TheButtonRoom() {
 
       <RoomContents>
         {/* The title wall is washed from below the ceiling, not by a lamp you can find. */}
-        <LightPool position={[0, 3, -halfLength + 0.012]} rotation={[0, 0, 0]} size={[11, 5]} strength={0.07} />
+        <LightPool position={[0, 3.4, -halfLength + 0.012]} rotation={[0, 0, 0]} size={[10, 4]} strength={0.07} />
 
-        <Text face="display" position={[0, 3.3, -halfLength + 0.02]} fontSize={1.2} letterSpacing={-0.01} color={INK.text} anchorX="center" anchorY="middle">
+        {/* The room's title, high on the wall it is walked towards; the way on, under it. */}
+        <Text face="display" position={[0, 4.25, -halfLength + 0.02]} fontSize={1.1} letterSpacing={-0.01} color={INK.text} anchorX="center" anchorY="middle">
           The Button
         </Text>
-        <Text position={[0, 2.45, -halfLength + 0.02]} fontSize={0.17} letterSpacing={0.12} color={INK.muted} anchorX="center" anchorY="middle">
+        <Text position={[0, 3.62, -halfLength + 0.02]} fontSize={0.15} letterSpacing={0.12} color={INK.muted} anchorX="center" anchorY="middle">
           ROOM 01 / A SMALL HISTORY OF DIGITAL AFFORDANCE
         </Text>
 
@@ -135,7 +140,7 @@ export function TheButtonRoom() {
         <DoorSign position={[exit.center, exit.height, -halfLength + 0.02]} facing="south" kicker="NEXT · ROOM 02" title="Things We Somehow Accepted" />
 
         {WALL_TEXTS.map((text) => (
-          <WallText key={text.id} position={text.position} facing={text.facing} kicker={text.kicker} title={text.title} body={text.body} />
+          <WallText key={text.id} position={text.position} facing={text.facing} layout={WALL_TEXT_LAYOUT} kicker={text.kicker} title={text.title} body={text.body} />
         ))}
 
         {EXHIBITS.map((exhibit) => (
