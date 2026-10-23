@@ -5,7 +5,7 @@ import { AFTERWORD, FINDS, INSTITUTE, THESIS as ARCHAEOLOGY_THESIS } from '../ro
 import { AFTERWORD as DARK_AFTERWORD, CONFIRMSHAMING, FLOW, PATTERNS, RECEIPT, THESIS as DARK_THESIS, TOTAL } from '../rooms/dark-patterns/content'
 import { CARDS as ACCEPTED, CHAPTERS as ACCEPTED_CHAPTERS, OBSERVATIONS, THESIS as ACCEPTED_THESIS } from '../rooms/accepted/content'
 import { CHAPTERS as STATES, THESIS as STATES_THESIS } from '../rooms/states/content'
-import { ESSAY, EXHIBITS } from '../rooms/the-button/content'
+import { ESSAY, EXHIBITS, KEY_VISUAL } from '../rooms/the-button/content'
 
 /** A wall or a label; `body` may hold several paragraphs, separated by blank lines. */
 type Entry = { kicker: string; title: string; body: string; quote?: string }
@@ -24,6 +24,8 @@ const ROOMS: { number: string; title: string; idea: string; entries: Entry[] }[]
         title: exhibit.title,
         body: exhibit.description,
       })),
+      // After the prologue, the installation over the centre of the hall.
+      ...(chapter.zone === 'P' ? [{ kicker: `${KEY_VISUAL.year} / ${KEY_VISUAL.category}`, title: KEY_VISUAL.title, body: KEY_VISUAL.description }] : []),
     ]),
   },
   {

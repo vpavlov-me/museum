@@ -76,6 +76,24 @@ export const FREE_WALLS: FreeWall[] = [
 
 const FACE = FREE_WALL.thickness / 2 + 0.02
 
+/**
+ * The key visual (#48): a kinetic installation hung over the centre of the hall, between
+ * the four bays. Its label stands on an oak lectern on the visitor's way in.
+ */
+export const KEY_VISUAL = {
+  id: 'key-visual',
+  index: '00',
+  year: '2026',
+  category: 'KINETIC INSTALLATION',
+  title: 'Twenty-Four Frames',
+  description:
+    'In 1878 Eadweard Muybridge photographed a galloping horse with a row of cameras and showed a movement too quick for the eye. Here the same is done to a press: twenty-four frames of one click, from rest to the bottom and back, hung in a slow ring. The material changes along the row, from bevel to gel to flat colour to light, and the press passes through it like a wave.',
+  /** Centre of the ring on the floor plane, room-local; the ring hangs above head height. */
+  centre: [0, 0.5] as [number, number],
+  /** The lectern with the label, south of the ring, facing the entrance. */
+  lectern: [0, 5.6] as [number, number],
+}
+
 export const EXHIBITS: ButtonExhibit[] = [
   // I. Before the screen: the physical buttons the metaphor grew out of. West bay, facing east.
   {
