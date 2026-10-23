@@ -45,7 +45,8 @@ Do not introduce this folder structure prematurely if a change is still small, b
 
 - light, modern galleries (v3): tall rooms (lobby 9 m, hall 12 m) of seamless grey cast concrete on
   a shadow gap, wide oak boards, plinths in the floor's oak, and daylight only: a band of frosted
-  windows under the ceiling (`components/Clerestory`), no lamps or spots (`PALETTES.lobby` and
+  windows under the ceiling with palm shadows swaying on the glass (`components/Clerestory`, drawn
+  in code), no lamps or spots (`PALETTES.lobby` and
   `PALETTES.hall`, `wallKind: 'concrete'`, `floorKind: 'oak'`); the closed rooms
   keep their dark stone and plaster until they are rebuilt;
 - warm off-white typography;

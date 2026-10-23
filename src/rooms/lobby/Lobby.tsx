@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { useSound } from '../../audio/useSound'
-import { Clerestory } from '../../components/Clerestory'
+import { Clerestory, LeafSway } from '../../components/Clerestory'
 import { DoorLeaf } from '../../components/DoorLeaf'
 import { LobbyPlan } from './LobbyPlan'
 import { RoomShell } from '../../components/RoomShell'
@@ -218,7 +218,7 @@ export function Lobby() {
         </mesh>
 
         {/* Daylight from a band of high windows round the lobby, as in the hall. */}
-        <Clerestory minX={LOBBY.minX} maxX={LOBBY.maxX} minZ={LOBBY.minZ} maxZ={LOBBY.maxZ} bottom={LOBBY.height - 2.5} top={LOBBY.height - 0.5} palette={palette} />
+        <Clerestory minX={LOBBY.minX} maxX={LOBBY.maxX} minZ={LOBBY.minZ} maxZ={LOBBY.maxZ} bottom={LOBBY.height - 2.5} top={LOBBY.height - 0.5} />
 
         {/* The recommended route, on the floor: from the front door to the permanent exhibition. */}
         <mesh position={[0, 0.003, (LOBBY.minZ + 33.6) / 2]} rotation={[-Math.PI / 2, 0, 0]} material={basicMaterial('#57544e')}>
@@ -228,6 +228,7 @@ export function Lobby() {
 
       <Furniture />
       <RoomContents>
+        <LeafSway />
         <LightPool position={[1, 0.004, CENTER_Z]} size={[26, 9]} color="#efe6d6" strength={0.02} />
 
         {/* The museum's name over the portal into The Button. */}

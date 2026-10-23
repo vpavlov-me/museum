@@ -2,7 +2,7 @@ import { useCallback, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useSound } from '../../audio/useSound'
-import { Clerestory } from '../../components/Clerestory'
+import { Clerestory, LeafSway } from '../../components/Clerestory'
 import { Cradle, CRADLE_SEAT } from '../../components/Cradle'
 import { DoorLeaf } from '../../components/DoorLeaf'
 import { ExhibitLabel } from '../../components/ExhibitLabel'
@@ -240,13 +240,14 @@ export function TheButtonRoom() {
         {FREE_WALLS.map((wall, i) => (
           <FreeWallBody key={i} wall={wall} />
         ))}
-        <Clerestory minX={minX} maxX={maxX} minZ={minZ} maxZ={maxZ} bottom={WINDOWS.bottom} top={WINDOWS.top} palette={palette} />
+        <Clerestory minX={minX} maxX={maxX} minZ={minZ} maxZ={maxZ} bottom={WINDOWS.bottom} top={WINDOWS.top} />
       </StaticMerge>
       {FREE_WALLS.map((wall, i) => (
         <FreeWallObstacle key={i} wall={wall} index={i} />
       ))}
 
       <RoomContents>
+        <LeafSway />
         {/* The prologue: the exhibition's title over its first chapter, on the wall the visitor meets first. */}
         <group position={[prologue.position[0], 0, prologue.position[1]]}>
           <Text position={[0, 3.86, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
