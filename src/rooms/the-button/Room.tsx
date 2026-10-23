@@ -282,6 +282,7 @@ export function TheButtonRoom() {
           facing="north"
           palette={palette}
           sign="LOBBY"
+          leaf="oak"
           prompt="RETURN TO THE LOBBY"
           card={RETURN_CARD}
           onUse={() => {

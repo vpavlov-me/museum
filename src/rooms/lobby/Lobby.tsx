@@ -19,7 +19,6 @@ import { useMuseumStore } from '../../museum/store'
 import { rect } from '../../museum/types'
 import { useObstacle } from '../../scene/Collision'
 import { useFocusTarget } from '../../scene/Interaction'
-import { LightPool } from '../../scene/Light'
 import { basicMaterial, CONCRETE_MATERIAL, OAK_MATERIAL, PALETTES } from '../../scene/materials'
 import { StaticMerge } from '../../scene/StaticMerge'
 
@@ -39,7 +38,6 @@ const palette = PALETTES.lobby
 const t = WALL_THICKNESS
 const NORTH = LOBBY.minZ + 0.02
 const SOUTH = LOBBY.maxZ - 0.02
-const CENTER_Z = (LOBBY.minZ + LOBBY.maxZ) / 2
 const LEAF = new THREE.MeshStandardMaterial({ color: '#615d57', roughness: 0.9 })
 /** Walking this close to an entrance starts loading its exhibition. */
 const APPROACH = 6.5
@@ -54,9 +52,10 @@ const DOOR_OF: Partial<Record<ExhibitionDefinition['id'], keyof typeof DOORS>> =
 }
 
 /*
- * v3 (#48): a modern hall in the language of The Button's: lime plaster, polished
- * concrete, shadow gaps, laylights. Two pieces of furniture, both against the walls and
- * out of the way: a long oak bench by the statement, and a concrete desk by the plan.
+ * v3 (#48): a tall hall in the language of The Button's: cast concrete, oak boards,
+ * shadow gaps, daylight from high windows. Two pieces of furniture, both against the
+ * walls and out of the way: a long oak bench by the statement, and a concrete desk by
+ * the plan.
  */
 const BENCH = { x: 11, z: 34.6, width: 4.2, depth: 0.48, height: 0.44 }
 const DESK = { x: -9.5, z: 34.2, width: 2.6, depth: 0.8, height: 1.05 }
@@ -229,8 +228,6 @@ export function Lobby() {
       <Furniture />
       <RoomContents>
         <LeafSway />
-        <LightPool position={[1, 0.004, CENTER_Z]} size={[26, 9]} color="#efe6d6" strength={0.02} />
-
         {/* The museum's name over the portal into The Button. */}
         <Text face="display" position={[permanent.x, 4.6, NORTH]} fontSize={0.5} letterSpacing={-0.005} color={INK.text} anchorX="center" anchorY="middle">
           {MUSEUM.name}
@@ -278,6 +275,7 @@ export function Lobby() {
           facing="north"
           palette={palette}
           sign="EXIT"
+          leaf="glass"
           prompt="LEAVE THE MUSEUM"
           card={{ index: 'EXIT', year: MUSEUM.year, category: 'INTERFACE MUSEUM', title: 'Leave the museum', description: 'The front door. Leaving ends the visit.' }}
           onUse={() => {
