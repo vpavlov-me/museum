@@ -58,7 +58,8 @@ function applyPower(power: number) {
 
 /* The network line runs along the east wall at waist height, then along the north wall to the exit. */
 const LINE = { x: cell.maxX - 0.025, y: 1, size: 0.022 }
-const BREAK = { z0: -69.4, z1: -70.6 }
+const MID = (cell.minZ + cell.maxZ) / 2
+const BREAK = { z0: MID + 0.7, z1: MID - 0.5 }
 const LIVE = new THREE.Color('#d3dbdb')
 const DEAD = new THREE.Color('#2a2928')
 const AMBER = new THREE.Color('#e0a050')
@@ -70,7 +71,7 @@ const PULSE = basicMaterial('#ffffff')
 const DROPPED = -0.9
 
 /* An interface on the west wall: three posts that lose their content when the connection does. */
-const PANEL = { z: -70, y: 1.65, width: 3.6, height: 1.9 }
+const PANEL = { z: MID + 0.1, y: 1.65, width: 3.6, height: 1.9 }
 const CARD = { width: 1, height: 1.5, spacing: 1.15 }
 type Piece = { x: number; y: number; width: number; height: number; color: string }
 const PIECES: Piece[] = [-1, 0, 1].flatMap((column, i) => {
@@ -91,11 +92,13 @@ const PIECE_MATERIAL = new THREE.MeshBasicMaterial({ color: '#ffffff' })
 /** Emergency guidance: small warm marks on the floor, from the entrance to the exit. They never go out. */
 const GUIDE = basicMaterial('#b98d55')
 const GUIDE_PATH: [number, number][] = [
-  [0.5, -63.9],
-  [0.5, -72.4],
-  [-2.5, -75.4],
-  [-2.5, -76.5],
+  [0.5, cell.maxZ - 0.7],
+  [0.5, cell.minZ + 4],
+  [-2.5, cell.minZ + 1],
+  [-2.5, cell.minZ + 0.5],
 ]
+/** Ceiling slots down the middle of the room. */
+const SLOT_Z = [MID + 2.8, MID, MID - 2.8]
 function guideMarks() {
   const marks: [number, number][] = []
   for (let i = 1; i < GUIDE_PATH.length; i++) {
@@ -190,7 +193,7 @@ export function OfflineState() {
       droppedAt.current = now
       setPhase('offline')
       // The air handling stops with the connection; only the building's own quiet is left.
-      play('power-down', [0.5, 3, -70])
+      play('power-down', [0.5, 3, MID])
       ambience.setVariant(OFFLINE_PLACE, 'states:offline-dark')
     }
 
@@ -260,7 +263,7 @@ export function OfflineState() {
   return (
     <>
       <StaticMerge>
-        {[-66.2, -70.1, -74].map((z) => (
+        {SLOT_Z.map((z) => (
           <Luminaire key={z} position={[0.5, cell.height - 0.004, z]} size={[0.14, 2.6]} palette={OFFLINE_PALETTE} />
         ))}
         {/* The connected half of the line: from the break to the exit, along two walls. */}
@@ -293,7 +296,7 @@ export function OfflineState() {
         </mesh>
       </StaticMerge>
 
-      {[-66.2, -70.1, -74].map((z) => (
+      {SLOT_Z.map((z) => (
         <LightPool key={z} position={[0.5, 0.004, z]} size={[3.2, 4]} material={POOLS} />
       ))}
       <LightPool position={[exit.center, 0.004, cell.minZ + 0.8]} size={[2.2, 1.4]} color="#b98d55" strength={0.05} />

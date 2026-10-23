@@ -26,7 +26,7 @@ export function SuccessState() {
       <StaticMerge>
         {[-1, 0, 1].flatMap((i) =>
           [-1, 0, 1].map((j) => (
-            <Luminaire key={`${i}:${j}`} position={[CENTER_X + i * 4.1, cell.height - 0.004, (cell.minZ + cell.maxZ) / 2 + j * 4.2]} size={[3.3, 3.5]} palette={palette} />
+            <Luminaire key={`${i}:${j}`} position={[CENTER_X + i * 3.6, cell.height - 0.004, (cell.minZ + cell.maxZ) / 2 + j * 3.8]} size={[2.9, 3.1]} palette={palette} />
           )),
         )}
       </StaticMerge>

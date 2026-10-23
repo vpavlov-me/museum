@@ -27,10 +27,12 @@ type Stage = 'broken' | 'retrying' | 'still' | 'resolved'
 type Layout = 'broken' | 'still' | 'resolved'
 
 /** The regular rhythm the room was designed with: pilasters and ceiling slots on these lines. */
-const RHYTHM = [-51, -53.4, -55.8, -58.2, -60.6]
-/** A wall-height gap in the east wall: where the slab plugging the exit belongs. */
-const GAP = { z0: -58.2, z1: -55.6, height: 3.2 }
-const SLAB = { width: 2.6, height: GAP.height, depth: t }
+const RHYTHM = [0, 1, 2, 3, 4].map((i) => cell.maxZ - 1.6 - i * 1.8)
+const SLAB = { width: 2.6, height: 3.2, depth: t }
+/** A wall-height gap in the east wall, between the pilasters: where the slab plugging the exit belongs. */
+const GAP = { z1: RHYTHM[2] + 0.2, z0: RHYTHM[2] + 0.2 - SLAB.width, height: SLAB.height }
+/** Where the message and RETRY are read, on the north wall left of the exit. */
+const MESSAGE_X = cell.minX + 2.4
 
 type Pose = { x: number; y: number; z: number; rotation: number }
 const pose = (x: number, z: number, rotation = 0, y = 0): Pose => ({ x, y, z, rotation })
@@ -71,7 +73,7 @@ const STRAY_SLOT: Record<Layout, Pose> = {
 const SIGN: Record<Layout, string> = { broken: 'EXIT  →', still: 'EXIT  →', resolved: 'EXIT  ↓' }
 const LINE_CLIP: [number, number, number, number] = [-0.1, -0.37, 2.35, 0.1]
 
-const MESSAGE_AT: [number, number, number] = [-4.6, 2.2, cell.minZ + 0.3]
+const MESSAGE_AT: [number, number, number] = [MESSAGE_X, 2.2, cell.minZ + 0.3]
 
 const UNIT_BOX = new THREE.BoxGeometry(1, 1, 1)
 
@@ -176,7 +178,7 @@ export function ErrorState() {
   const interactive = stage === 'broken' || stage === 'still'
   useFocusTarget({
     id: 'error-retry',
-    position: [-4.6, 1.5, cell.minZ + 0.2],
+    position: [MESSAGE_X, 1.5, cell.minZ + 0.2],
     distance: 3.8,
     card: stage === 'resolved' ? null : CARDS.error,
     labelled: true,
@@ -199,7 +201,7 @@ export function ErrorState() {
         </mesh>
 
         {/* Ceiling slots on the room's rhythm, all but the stray one. */}
-        {[-4.5, 0.5].flatMap((x) =>
+        {[cell.minX + 2.5, STRAY_SLOT.resolved.x].flatMap((x) =>
           RHYTHM.filter((z) => !(x === STRAY_SLOT.resolved.x && z === STRAY_SLOT.resolved.z)).map((z) => (
             <Luminaire key={`${x}:${z}`} position={[x, cell.height - 0.004, z]} size={SLOT_SIZE} palette={palette} />
           )),
@@ -210,7 +212,7 @@ export function ErrorState() {
         <planeGeometry args={SLOT_SIZE} />
       </mesh>
       {RHYTHM.map((z) => (
-        <LightPool key={z} position={[-2, 0.004, z]} size={[8, 1.6]} color={COOL} strength={0.035} />
+        <LightPool key={z} position={[(cell.minX + cell.maxX) / 2, 0.004, z]} size={[cell.maxX - cell.minX - 1, 1.6]} color={COOL} strength={0.035} />
       ))}
 
       <instancedMesh ref={pilasters} args={[UNIT_BOX, palette.wall, 9]} frustumCulled={false} />
@@ -260,7 +262,7 @@ export function ErrorState() {
           </group>
         )}
       </group>
-      <Downlight at={[-4.6, cell.minZ + 2]} aim={[-4.6, 2.4, cell.minZ]} ceiling={cell.height} palette={palette} angle={0.5} penumbra={0.15} intensity={45} color={COOL} />
+      <Downlight at={[MESSAGE_X, cell.minZ + 2]} aim={[MESSAGE_X, 2.4, cell.minZ]} ceiling={cell.height} palette={palette} angle={0.5} penumbra={0.15} intensity={45} color={COOL} />
     </>
   )
 }

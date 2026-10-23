@@ -8,11 +8,11 @@ import type { ExhibitCardData } from '../../museum/types'
  * z = -7.8 and walked towards -z, one state per cell:
  *
  *   prologue   z  -7.9 … -15    title and thesis
- *   I   LOADING  z -15.2 … -27    unresolved; a placeholder holds the way on
- *   II  EMPTY    z -27.2 … -49    vast and almost bare
- *   III ERROR    z -49.2 … -63    structurally wrong; a wall slab plugs the exit
- *   IV  OFFLINE  z -63.2 … -77    the lights go; reconnect to continue
- *   V   SUCCESS  z -77.2 … -93    tall and bright; a low doorway on to the colophon
+ *   I   LOADING  z -15.2 … -24    unresolved; a placeholder holds the way on
+ *   II  EMPTY    z -24.2 … -39    large, high and almost bare
+ *   III ERROR    z -39.2 … -49    structurally wrong; a wall slab plugs the exit
+ *   IV  OFFLINE  z -49.4 … -59    the lights go; reconnect to continue
+ *   V   SUCCESS  z -59.6 … -72    tall and bright; a low doorway on to the colophon
  */
 export const CELLS = STATES_CELLS
 

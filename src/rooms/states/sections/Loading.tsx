@@ -18,8 +18,8 @@ import { smoothstep, stateZoneNow } from '../shared'
 const cell = CELLS.loading
 const DOOR_Z = cell.minZ - 0.1
 const BARRIER = { width: 2.36, height: 1.15, depth: 0.16 }
-const BENCH = { x: 3, z: -20.6, width: 2.2, height: 0.45, depth: 0.5 }
-const TEXT = { x: cell.maxX - 0.02, top: 3.2, start: -24.7 }
+const BENCH = { x: 3, z: -19.4, width: 2.2, height: 0.45, depth: 0.5 }
+const TEXT = { x: cell.maxX - 0.02, top: 3.2, start: -22.6 }
 
 /**
  * Authored progress: quick at first, then the familiar stall at 93%, a jump to 99%
@@ -58,9 +58,9 @@ const BENCH_COLOR = '#262523'
 /** Walls, a bench, and bars standing in for text: lit like the room, so once resolved they are the room. */
 const SOLIDS: Placeholder[] = [
   // Wall panels along the west wall, from the entrance onwards.
-  { position: [cell.minX + 0.02, 1.7, -17.3], size: [0.04, 3.2, 2.5], resolveAt: 0.2, becomes: WALL },
-  { position: [cell.minX + 0.02, 1.7, -20.4], size: [0.04, 3.2, 2.5], resolveAt: 0.45, becomes: WALL },
-  { position: [cell.minX + 0.02, 1.7, -23.5], size: [0.04, 3.2, 2.5], resolveAt: 0.7, becomes: WALL },
+  { position: [cell.minX + 0.02, 1.7, -16.9], size: [0.04, 3.2, 2.5], resolveAt: 0.2, becomes: WALL },
+  { position: [cell.minX + 0.02, 1.7, -19.6], size: [0.04, 3.2, 2.5], resolveAt: 0.45, becomes: WALL },
+  { position: [cell.minX + 0.02, 1.7, -22.3], size: [0.04, 3.2, 2.5], resolveAt: 0.7, becomes: WALL },
   // And the stretch of east wall nearest the exit.
   { position: [cell.maxX - 0.02, 1.7, -17.3], size: [0.04, 3.2, 2.5], resolveAt: 0.3, becomes: WALL },
   // Somewhere to wait.
@@ -83,7 +83,7 @@ const SOLIDS: Placeholder[] = [
 ]
 
 /** Ceiling slots, still grey: their light is one of the last things to arrive. */
-const SLOTS: Placeholder[] = [-18, -21.1, -24.2].map((z, i) => ({
+const SLOTS: Placeholder[] = [-17.4, -19.8, -22.2].map((z, i) => ({
   position: [3, cell.height - 0.004, z],
   size: [0.14, 0.001, 2.2],
   resolveAt: 0.62 + i * 0.12,

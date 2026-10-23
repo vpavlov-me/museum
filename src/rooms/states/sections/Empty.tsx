@@ -14,7 +14,7 @@ const WALL = cell.minZ + 0.02
 const CTA = { y: 1.18, width: 0.6, height: 0.13 }
 
 /**
- * II — EMPTY. After two dense rooms, the largest and barest volume in the museum:
+ * II — EMPTY. After two dense rooms, the largest and barest volume in the exhibition:
  * one soft light, one wall, a short sentence, and a primary action at the scale of
  * a light switch. Nothing else. The emptiness is the exhibit.
  */
@@ -26,7 +26,7 @@ export function EmptyState() {
       <StaticMerge>
         <Luminaire position={[CENTER_X, cell.height - 0.004, (cell.minZ + cell.maxZ) / 2 + 1]} size={[4.6, 4.6]} palette={palette} />
       </StaticMerge>
-      <LightPool position={[CENTER_X, 0.004, (cell.minZ + cell.maxZ) / 2 + 1]} size={[11, 11]} color="#e9e4d9" strength={0.05} />
+      <LightPool position={[CENTER_X, 0.004, (cell.minZ + cell.maxZ) / 2 + 1]} size={[9, 9]} color="#e9e4d9" strength={0.05} />
 
       <group position={[CENTER_X, 0, WALL]}>
         <Text position={[0, 2.42, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="center" anchorY="middle">
@@ -39,7 +39,7 @@ export function EmptyState() {
           {CHAPTERS.empty.line}
         </Text>
 
-        {/* The primary action, at the scale of a light switch on an 18-metre wall. */}
+        {/* The primary action, at the scale of a light switch on a 14-metre wall. */}
         <mesh position={[0, CTA.y, 0]} geometry={roundedRect(CTA.width, CTA.height, CTA.height / 2)} material={basicMaterial(INK.text)} />
         <Text position={[0, CTA.y, 0.002]} fontSize={0.034} color={INK.dark} anchorX="center" anchorY="middle">
           {`+  ${CTA_LABEL}`}

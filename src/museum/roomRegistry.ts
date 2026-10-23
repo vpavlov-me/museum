@@ -115,11 +115,11 @@ export const TRANSITION_03 = {
  */
 export const STATES_CELLS = {
   prologue: cell(-1, 10, -15, -7.9, 4.4),
-  loading: cell(-1, 7, -27, -15.2, 4),
-  empty: cell(-6, 12, -49, -27.2, 7.5),
-  error: cell(-7, 3, -63, -49.2, 4.2),
-  offline: cell(-4, 5, -77, -63.2, 3.8),
-  success: cell(-9, 4, -93, -77.2, 8.5),
+  loading: cell(-1, 7, -24, -15.2, 4),
+  empty: cell(-5, 9, -39, -24.2, 6.5),
+  error: cell(-5, 3, -49.2, -39.2, 4.2),
+  offline: cell(-4, 5, -59.4, -49.4, 3.8),
+  success: cell(-8, 3, -71.6, -59.6, 8.5),
 }
 
 /** The passage from the lobby into Interface Archaeology, local to it: the same low turn as before Room 03. */
@@ -161,7 +161,7 @@ export const ARCHAEOLOGY_CELLS = {
 }
 
 /** After Room 03: a low, warm room that closes the permanent exhibition, with the way back to the lobby. Local to Room 03. */
-export const COLOPHON = cell(-6, 1, -101, -93.2, 3.2)
+export const COLOPHON = cell(-6, 1, -79.6, -71.8, 3.2)
 
 const inAccepted = (x: number, z: number) => ({ x: ACCEPTED_ORIGIN[0] + x, z: ACCEPTED_ORIGIN[1] + z })
 const inStates = (x: number, z: number) => ({ x: STATES_ORIGIN[0] + x, z: STATES_ORIGIN[1] + z })
@@ -185,13 +185,13 @@ export const DOORS = {
   statesEntry: { ...inStates(7, -7.8), width: 1.8, height: 2.4 },
   loadingEntry: { ...inStates(0.6, -15.1), width: 1.8, height: 2.6 },
   /** Held shut by a placeholder until the room has loaded. */
-  loadingExit: { ...inStates(4.4, -27.1), width: 2.4, height: 3 },
-  errorEntry: { ...inStates(-3.5, -49.1), width: 1.8, height: 2.6 },
+  loadingExit: { ...inStates(4.4, -24.1), width: 2.4, height: 3 },
+  errorEntry: { ...inStates(-3.5, -39.1), width: 1.8, height: 2.6 },
   /** Plugged by a misplaced wall slab until the error is resolved. */
-  errorExit: { ...inStates(0.5, -63.1), width: 1.8, height: 2.6 },
+  errorExit: { ...inStates(0.5, -49.3), width: 1.8, height: 2.6 },
   /** Closed by a sliding panel until the connection is restored. */
-  offlineExit: { ...inStates(-2.5, -77.1), width: 1.8, height: 2.6 },
-  successExit: { ...inStates(-2.5, -93.1), width: 1.6, height: 2.5 },
+  offlineExit: { ...inStates(-2.5, -59.5), width: 1.8, height: 2.6 },
+  successExit: { ...inStates(-2.5, -71.7), width: 1.6, height: 2.5 },
   /** From the lobby into the passage to Dark Patterns. */
   lobbyDark: { ...inDark(0, 0), width: 1.8, height: 2.6 },
   darkEntry: { ...inDark(-7, -7.8), width: 1.8, height: 2.4 },

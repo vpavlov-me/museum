@@ -68,18 +68,18 @@ const PERMANENT: TourStop[] = [
   { id: 'feed-end', title: "You're all caught up", at: [-6.9, -59.4], yaw: N },
   // 03 Interface States
   { id: 'states', title: 'Interface States', at: [-1.5, -71.6], yaw: N, via: [[-6.9, -68], [0.1, -68], [0.1, -70.3]] },
-  { id: 'loading', title: 'I. Loading', at: [-6.3, -79.3], yaw: -0.35, via: [[-6.3, -74.8]] },
-  { id: 'loading-door', title: 'Loading…', at: [-2.5, -87.3], yaw: N, via: [[-6.3, -83.8]] },
-  { id: 'empty', title: 'II. Empty', at: [-2.5, -92], yaw: 0.15 },
-  { id: 'empty-cta', title: 'Nothing here yet', at: [-4.65, -107.8], yaw: N },
-  { id: 'error', title: 'III. Error', at: [-10.4, -112.4], yaw: N, via: [[-10.4, -108.8]] },
-  { id: 'error-retry', title: 'Something went wrong', at: [-11.5, -122], yaw: N },
-  { id: 'offline', title: 'IV. Offline', at: [-6.4, -126.4], yaw: N, via: [[-6.4, -122.8]] },
-  { id: 'offline-node', title: 'Reconnect', at: [-3, -131.4], yaw: E + 0.25 },
-  { id: 'success', title: 'V. Success', at: [-9.4, -141.8], yaw: N, via: [[-9.4, -137.2]] },
+  { id: 'loading', title: 'I. Loading', at: [-6.3, -78.6], yaw: -0.35, via: [[-6.3, -74.8]] },
+  { id: 'loading-door', title: 'Loading…', at: [-2.5, -84.2], yaw: N, via: [[-6.3, -82.6]] },
+  { id: 'empty', title: 'II. Empty', at: [-2.5, -89], yaw: 0.15 },
+  { id: 'empty-cta', title: 'Nothing here yet', at: [-4.9, -97.8], yaw: N },
+  { id: 'error', title: 'III. Error', at: [-10.4, -102.4], yaw: N, via: [[-10.4, -98.8]] },
+  { id: 'error-retry', title: 'Something went wrong', at: [-9.5, -108.2], yaw: N },
+  { id: 'offline', title: 'IV. Offline', at: [-6.4, -112.6], yaw: N, via: [[-6.4, -109]] },
+  { id: 'offline-node', title: 'Reconnect', at: [-3, -115.8], yaw: E + 0.25 },
+  { id: 'success', title: 'V. Success', at: [-9.4, -124.2], yaw: N, via: [[-9.4, -119.4]] },
   // Colophon, and the way back
-  { id: 'colophon', title: 'Thank you for visiting', at: [-10.2, -158.4], yaw: 0.15, via: [[-9.4, -153.2]] },
-  { id: 'permanent-return', title: 'Back to the lobby', at: [-7.6, -160.7], yaw: N },
+  { id: 'colophon', title: 'Thank you for visiting', at: [-10.2, -137], yaw: 0.15, via: [[-9.4, -131.7]] },
+  { id: 'permanent-return', title: 'Back to the lobby', at: [-7.6, -139.3], yaw: N },
 ]
 
 const ARCHAEOLOGY: TourStop[] = [
