@@ -3,8 +3,8 @@ import * as THREE from 'three'
 /*
  * Shared materials. Every architectural surface in a space uses one of a handful
  * of instances, so static architecture can be merged per material (StaticMerge)
- * and the renderer compiles only a few programs. No external textures: stone, marble
- * and plaster are generated once from a small procedural noise.
+ * and the renderer compiles only a few programs. No external textures: stone, marble,
+ * plaster, cast concrete and oak boards are generated once from a small procedural noise.
  */
 
 const mulberry32 = (seed: number) => () => {
@@ -192,6 +192,79 @@ const MARBLE = stoneMaps({ columns: 2, rows: 2, bond: false }, true)
 /** Polished concrete: one slab per repeat, a saw-cut joint every four metres, a soft mottle. */
 const CONCRETE = stoneMaps({ columns: 1, rows: 1, bond: false }, false)
 
+/**
+ * Maps drawn pixel by pixel while the page is idle, in slices, like the stone: a colour
+ * map (a multiplier of the palette's colour) and a roughness map. They start plain.
+ */
+function idleMaps(size: number, pixel: (x: number, y: number) => [number, number]) {
+  const color = new Uint8Array(size * size * 4).fill(Math.round(0.92 * 255))
+  const roughness = new Uint8Array(size * size * 4).fill(Math.round(0.8 * 255))
+  const maps = { color: toTexture(color, size), roughness: toTexture(roughness, size) }
+  let next = 0
+  const slice = () => {
+    const end = Math.min(size, next + 32)
+    for (let y = next; y < end; y++) {
+      for (let x = 0; x < size; x++) {
+        const [c, r] = pixel(x, y)
+        const i = (y * size + x) * 4
+        color[i] = color[i + 1] = color[i + 2] = Math.round(Math.min(1, Math.max(0, c)) * 255)
+        roughness[i] = roughness[i + 1] = roughness[i + 2] = Math.round(Math.min(1, Math.max(0, r)) * 255)
+        color[i + 3] = roughness[i + 3] = 255
+      }
+    }
+    next = end
+    if (next < size) return later(slice)
+    maps.color.needsUpdate = true
+    maps.roughness.needsUpdate = true
+  }
+  later(slice)
+  return maps
+}
+
+/*
+ * Oak boards (v3, #48): wide planks running along z, each its own tone and length, with
+ * long grain and a fine dark joint. One repeat covers STONE_REPEAT metres, like the stone.
+ */
+const PLANKS = { across: 18, lengths: [0.5, 0.68], size: 1024 }
+const OAK_FLOOR = (() => {
+  const { across, lengths, size } = PLANKS
+  const joint = 1.2 / size
+  return idleMaps(size, (x, y) => {
+    const u = x / size
+    const v = y / size
+    const column = Math.floor(u * across)
+    const random = mulberry32(column * 31 + 5)
+    // Each column of boards is cut to its own length and starts at its own offset.
+    const length = lengths[0] + random() * (lengths[1] - lengths[0])
+    const offset = random()
+    const along = (v / length + offset) % 1
+    const board = Math.floor(v / length + offset)
+    const lu = (u * across) % 1
+    const edge = Math.min(lu / across, (1 - lu) / across, (along * length), (1 - along) * length)
+    const tone = mulberry32(column * 131 + board * 17 + 3)()
+    // Grain: noise stretched far along the board, so it reads as long lines.
+    const grain = sampleNoise(x * 3, y * 0.08 + column * 40, size) * 0.6 + sampleNoise(x * 9, y * 0.3 + column * 11, size) * 0.4
+    const isJoint = edge < joint ? 1 : 0
+    const c = (0.78 + tone * 0.18 + (grain - 0.5) * 0.3) * (1 - isJoint * 0.5)
+    return [c, 0.55 + grain * 0.2 + isJoint * 0.3]
+  })
+})()
+
+/*
+ * Cast-in-place concrete (v3, #48): one continuous grey, cloudy in tone and finely
+ * pored, with no joints or tie holes. One repeat covers CONCRETE_REPEAT metres.
+ */
+const CONCRETE_REPEAT = 4.8
+const CAST_CONCRETE = (() => {
+  const size = 512
+  return idleMaps(size, (x, y) => {
+    const cloud = sampleNoise(x * 0.5, y * 0.5, size) * 0.55 + sampleNoise(x * 2, y * 2, size) * 0.3 + sampleNoise(x * 8, y * 8, size) * 0.15
+    const pores = sampleNoise(x * 23, y * 23, size)
+    const c = 0.86 + (cloud - 0.5) * 0.3 - (pores > 0.84 ? 0.06 : 0)
+    return [c, 0.85 + (cloud - 0.5) * 0.15]
+  })
+})()
+
 /** Metres covered by one repeat of the plaster texture. */
 const PLASTER_REPEAT = 2.5
 /** Plaster: a faint, broad unevenness in tone and sheen, never a pattern. */
@@ -294,21 +367,26 @@ export type PaletteColors = {
   floorRoughness?: number
   /** Architraves and skirting; by default a dark stone. */
   trim?: string
-  /** `concrete` for polished concrete (v3); `marble` for light, veined slabs; `stone` (default) for dark tiles. */
-  floorKind?: 'stone' | 'marble' | 'concrete'
+  /** `oak` for boards and `concrete` for polished concrete (v3); `marble` for light, veined slabs; `stone` (default) for dark tiles. */
+  floorKind?: 'stone' | 'marble' | 'concrete' | 'oak'
+  /** `concrete` for cast-in-place concrete walls and ceiling (v3); `plaster` (default) otherwise. */
+  wallKind?: 'plaster' | 'concrete'
   /** How walls meet the floor: a skirting board (default), or a recessed shadow gap and no architraves (v3). */
   base?: 'board' | 'shadow'
 }
 
 /** A new set of palette materials. Use the shared PALETTES unless a space needs to animate its own. */
 export function createPalette(colors: PaletteColors): Palette {
-  const stone = colors.floorKind === 'marble' ? MARBLE : colors.floorKind === 'concrete' ? CONCRETE : STONE
+  const stone = colors.floorKind === 'marble' ? MARBLE : colors.floorKind === 'concrete' ? CONCRETE : colors.floorKind === 'oak' ? OAK_FLOOR : STONE
   const light = colors.floorKind === 'marble' || colors.floorKind === 'concrete'
+  const cast = colors.wallKind === 'concrete'
   const trim = colors.trim ?? '#1f1d1b'
   // Light stone trim keeps a trace of its own light, like the ceilings, so the undersides of beams and cornices stay stone, not shadow.
   const trimGlow = colors.floorKind === 'marble' ? 0.32 : 0
   return {
-    wall: worldMapped(new THREE.MeshStandardMaterial({ color: colors.wall, roughness: 0.92, map: PLASTER }), PLASTER_REPEAT),
+    wall: cast
+      ? worldMapped(new THREE.MeshStandardMaterial({ color: colors.wall, roughness: 0.92, map: CAST_CONCRETE.color, roughnessMap: CAST_CONCRETE.roughness }), CONCRETE_REPEAT)
+      : worldMapped(new THREE.MeshStandardMaterial({ color: colors.wall, roughness: 0.92, map: PLASTER }), PLASTER_REPEAT),
     floor: reflects(worldMapped(
       new THREE.MeshStandardMaterial({
         color: colors.floor,
@@ -316,12 +394,17 @@ export function createPalette(colors: PaletteColors): Palette {
         map: stone.color,
         roughnessMap: stone.roughness,
         // Dark stone shows the room's light, not a grey sky; light marble takes more of it.
-        envMapIntensity: light ? 0.8 : 0.6,
+        envMapIntensity: light ? 0.8 : colors.floorKind === 'oak' ? 0.35 : 0.6,
       }),
       STONE_REPEAT,
     )),
     // Ceilings face away from the sky light; a trace of self-illumination keeps them a surface, not a void.
-    ceiling: new THREE.MeshStandardMaterial({ color: colors.ceiling, roughness: 1, emissive: colors.ceiling, emissiveIntensity: 0.9 }),
+    ceiling: cast
+      ? worldMapped(
+          new THREE.MeshStandardMaterial({ color: colors.ceiling, roughness: 1, map: CAST_CONCRETE.color, emissive: colors.ceiling, emissiveIntensity: 0.5, emissiveMap: CAST_CONCRETE.color }),
+          CONCRETE_REPEAT,
+        )
+      : new THREE.MeshStandardMaterial({ color: colors.ceiling, roughness: 1, emissive: colors.ceiling, emissiveIntensity: 0.9 }),
     skirting: reflects(new THREE.MeshStandardMaterial({ color: trim, roughness: 0.42, envMapIntensity: 1.2 })),
     reveal: new THREE.MeshStandardMaterial({ color: '#1c1b1a', roughness: 0.8 }),
     trim: reflects(new THREE.MeshStandardMaterial({ color: trim, roughness: 0.42, envMapIntensity: 1.2, emissive: trim, emissiveIntensity: trimGlow })),
@@ -336,9 +419,9 @@ export const STATES_COLORS: PaletteColors = { wall: '#53514d', floor: '#292826',
 
 /** One palette per kind of space: the same museum, different temperatures. */
 export const PALETTES = {
-  // v3 (#48): the lobby and the hall share one modern language: lime plaster, polished concrete, shadow gaps, top light.
-  lobby: createPalette({ wall: '#dcd7ce', floor: '#a9a397', ceiling: '#e6e2da', glow: '#fbf9f4', floorRoughness: 0.4, floorKind: 'concrete', trim: '#3d3a35', base: 'shadow' }),
-  hall: createPalette({ wall: '#e2ddd4', floor: '#b0aa9f', ceiling: '#ebe7e0', glow: '#fdfbf7', floorRoughness: 0.38, floorKind: 'concrete', trim: '#3d3a35', base: 'shadow' }),
+  // v3 (#48): the lobby and the hall share one modern language: grey cast concrete, oak boards, shadow gaps, top light.
+  lobby: createPalette({ wall: '#b3b1ac', floor: '#a47c52', ceiling: '#b9b7b2', glow: '#fbf9f4', floorRoughness: 0.55, floorKind: 'oak', wallKind: 'concrete', trim: '#3d3a35', base: 'shadow' }),
+  hall: createPalette({ wall: '#b6b4af', floor: '#a67e54', ceiling: '#bdbbb6', glow: '#fdfbf7', floorRoughness: 0.55, floorKind: 'oak', wallKind: 'concrete', trim: '#3d3a35', base: 'shadow' }),
   // Lightest: warm, welcoming, establishes scale.
   entrance: createPalette({ wall: '#77736c', floor: '#45423e', ceiling: '#47443f', glow: '#bdb6a8' }),
   // Neutral gallery: calm grey walls, a satin floor that catches the downlights.
@@ -366,8 +449,16 @@ export const PALETTES = {
 /** Dark satin lacquer: plinths answer the downlights with a soft highlight the walls do not have. */
 export const PLINTH_MATERIAL = reflects(new THREE.MeshStandardMaterial({ color: '#1c1b1a', roughness: 0.38 }))
 
-/** Oiled oak: v3's plinths, benches and desk (#48). */
-export const OAK_MATERIAL = new THREE.MeshStandardMaterial({ color: '#b08a5c', roughness: 0.62 })
+/** Oak without joints: the floor's grain on solid pieces, so a label set on them stays legible. */
+const OAK_SOLID = idleMaps(512, (x, y) => {
+  const grain = sampleNoise(x * 3, y * 0.08, 512) * 0.6 + sampleNoise(x * 9, y * 0.3, 512) * 0.4
+  return [0.87 + (grain - 0.5) * 0.14, 0.55 + grain * 0.2]
+})
+
+/** Oiled oak: v3's plinths, bench and desk (#48), the colour and grain of the floor, mapped by world position. */
+export const OAK_MATERIAL = reflects(
+  worldMapped(new THREE.MeshStandardMaterial({ color: '#a67e54', roughness: 0.55, map: OAK_SOLID.color, roughnessMap: OAK_SOLID.roughness, envMapIntensity: 0.35 }), 2),
+)
 
 /** Board-marked concrete: the lobby's desk. */
 export const CONCRETE_MATERIAL = new THREE.MeshStandardMaterial({ color: '#c3beb5', roughness: 0.85, map: PLASTER })

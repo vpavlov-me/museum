@@ -66,13 +66,13 @@ export const ARCHAEOLOGY_ORIGIN: Vec2 = [12, 26.1]
 export const DARK_ORIGIN: Vec2 = [-9, 26.1]
 
 /** The lobby, in world coordinates: south of the permanent exhibition's entrance hall, across all three entrances. */
-export const LOBBY = { minX: -14, maxX: 16, minZ: 26.2, maxZ: 36, height: 5 }
+export const LOBBY = { minX: -14, maxX: 16, minZ: 26.2, maxZ: 36, height: 9 }
 
 /**
  * v3 (#48): The Button is one open hall, 24 x 32 m and 7 m high, entered straight from
  * the lobby. Room-local, centred on its origin; the lobby's north wall is its south wall.
  */
-export const BUTTON_HALL = { ...rect(-12, 12, -16, 16), height: 7, origin: [0, 10] as Vec2 }
+export const BUTTON_HALL = { ...rect(-12, 12, -16, 16), height: 12, origin: [0, 10] as Vec2 }
 
 /** A rectangular cell with its own ceiling height, room-local. */
 export type Cell = Rect & { height: number }

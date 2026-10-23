@@ -17,7 +17,7 @@ export const facingRotation = (facing: Facing): [number, number, number] => {
   }
 }
 
-export type WallTextLayout = { top: number; titleWidth: number; gap: number; bodyWidth: number }
+export type WallTextLayout = { top: number; titleWidth: number; gap: number; bodyWidth: number; bodySize?: number }
 
 // Two-column wall label: kicker + title on the left, essay on the right.
 // Both columns hang from the same top line so the block stays near eye level.
@@ -42,7 +42,7 @@ export function WallText({
   /** Light walls take INK_ON_LIGHT. */
   ink?: Ink
 }) {
-  const { top, titleWidth, gap, bodyWidth } = layout
+  const { top, titleWidth, gap, bodyWidth, bodySize = 0.155 } = layout
 
   return (
     <group position={[position[0], 0, position[1]]} rotation={facingRotation(facing)}>
@@ -64,7 +64,7 @@ export function WallText({
       </Text>
       <Text
         position={[titleWidth + gap, top - 0.03, 0]}
-        fontSize={0.155}
+        fontSize={bodySize}
         lineHeight={1.55}
         maxWidth={bodyWidth}
         color={ink.body}

@@ -2,6 +2,7 @@ import { useCallback, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useSound } from '../../audio/useSound'
+import { Clerestory } from '../../components/Clerestory'
 import { Cradle, CRADLE_SEAT } from '../../components/Cradle'
 import { DoorLeaf } from '../../components/DoorLeaf'
 import { ExhibitLabel } from '../../components/ExhibitLabel'
@@ -16,12 +17,11 @@ import { RoomContents, useRoom } from '../../museum/RoomContext'
 import { box } from '../../museum/types'
 import { useObstacle } from '../../scene/Collision'
 import { useFocusTarget } from '../../scene/Interaction'
-import { Downlight, Luminaire } from '../../scene/Light'
 import { FIXTURE_MATERIAL, OAK_MATERIAL, PALETTES } from '../../scene/materials'
 import { StaticMerge } from '../../scene/StaticMerge'
 import { ARTIFACTS } from './artifacts'
 import { WALNUT } from './artifacts/shared'
-import { EXHIBITS, FREE_WALL, FREE_WALLS, WALL_TEXTS, type ButtonExhibit, type FreeWall } from './content'
+import { ESSAY, EXHIBITS, FREE_WALL, FREE_WALLS, type ButtonExhibit, type Chapter, type FreeWall } from './content'
 
 const CRADLE = { height: 0.06 }
 const palette = PALETTES.hall
@@ -42,19 +42,13 @@ const FRAME = { width: 0.62, height: 0.8, depth: 0.05, border: 0.035, centre: 1.
 const GLASS = new THREE.MeshStandardMaterial({ color: '#ffffff', transparent: true, opacity: 0.1, roughness: 0.05, depthWrite: false })
 
 /** Texts on the free-standing walls: narrower than the default block, hung a little higher. */
-const WALL_TEXT_LAYOUT: WallTextLayout = { top: 2.7, titleWidth: 2.2, gap: 0.35, bodyWidth: 3.6 }
-/** The prologue hangs a little lower, under the exhibition's title. */
-const PROLOGUE_LAYOUT: WallTextLayout = { ...WALL_TEXT_LAYOUT, top: 2.55 }
+const CHAPTER_LAYOUT: WallTextLayout = { top: 2.55, titleWidth: 2, gap: 0.4, bodyWidth: 3.6, bodySize: 0.125 }
+/** Each chapter's quote, set large above it; the prologue's runs along the hall's west wall by the entrance. */
+const QUOTE = { top: 3.72, size: 0.28, width: 6 }
+const ENTRANCE_QUOTE = { at: [-12 + 0.01, 15.2] as [number, number], top: 3.1, size: 0.42, width: 5.6 }
 
-/** The laylights: square panels on a grid across the whole ceiling, the hall's even daylight. */
-const LAYLIGHT = { size: 2.4, pitch: 3.2 }
-const laylights = (() => {
-  const panels: [number, number][] = []
-  for (let x = minX + LAYLIGHT.pitch * 0.75; x < maxX - 1; x += LAYLIGHT.pitch) {
-    for (let z = minZ + LAYLIGHT.pitch * 0.75; z < maxZ - 1; z += LAYLIGHT.pitch) panels.push([x, z])
-  }
-  return panels
-})()
+/** The clerestory: a band of frosted windows high round the hall, its only light (#48). */
+const WINDOWS = { bottom: height - 2.9, top: height - 0.6 }
 
 /** Which way is "in front" of a plinth facing this way, in room x and z. */
 const FRONT: Record<ButtonExhibit['facing'], [number, number]> = { south: [0, 1], north: [0, -1], east: [1, 0], west: [-1, 0] }
@@ -88,12 +82,9 @@ function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
 
   const Artifact = spec.component
   const artifact = <Artifact label={exhibit.artifact.label} pressedAt={pressedAt} />
-  const lightAt = onWall ? FRAME.centre : 1.1
 
   return (
     <>
-      {/* Lit from in front, so the face of the object catches the light. */}
-      <Downlight at={[x + fx * 1.7, z + fz * 1.7]} aim={[x, lightAt, z]} ceiling={height} palette={palette} angle={0.3} penumbra={0.8} intensity={90} distance={12} />
       <group position={[x + fx * 0.01, 0, z + fz * 0.01]} rotation={facingRotation(exhibit.facing)}>
         {display ? (
           <>
@@ -201,6 +192,25 @@ function FreeWallObstacle({ wall, index }: { wall: FreeWall; index: number }) {
   return null
 }
 
+/**
+ * A chapter of the essay on its wall: the quote set large across the top, then the
+ * chapter's title and its first paragraph at eye level. The rest is in the text version.
+ */
+function ChapterWall({ chapter }: { chapter: Chapter }) {
+  return (
+    <>
+      {chapter.zone !== 'P' && (
+        <group position={[chapter.position[0], 0, chapter.position[1]]} rotation={facingRotation(chapter.facing)}>
+          <Text face="displayItalic" position={[0, QUOTE.top, 0]} fontSize={QUOTE.size} lineHeight={1.1} maxWidth={QUOTE.width} color={INK.text} anchorX="left" anchorY="top">
+            {`“${chapter.quote}”`}
+          </Text>
+        </group>
+      )}
+      <WallText position={chapter.position} facing={chapter.facing} layout={CHAPTER_LAYOUT} ink={INK} kicker={chapter.kicker} title={chapter.title} body={chapter.paragraphs[0]} />
+    </>
+  )
+}
+
 /** The end of the exhibition: a door back to the lobby, in the epilogue's corner of the hall's south wall. */
 const RETURN_X = 8.5
 const RETURN_CARD = {
@@ -212,7 +222,7 @@ const RETURN_CARD = {
 }
 
 /**
- * The Button (#48): one open hall straight off the lobby, under a ceiling of laylights.
+ * The Button (#48): one open hall straight off the lobby, 12 m high, lit by daylight from high windows.
  * The visitor sees all of it from the entrance and walks it in any order; free-standing
  * walls make its bays without closing it. Nothing has to be pressed to go on.
  */
@@ -220,7 +230,7 @@ export function TheButtonRoom() {
   const { origin } = useRoom()
   const portal = localDoor(DOORS.lobbyPermanent, origin)
   const play = useSound()
-  const prologue = WALL_TEXTS[0]
+  const prologue = ESSAY[0]
 
   return (
     <>
@@ -230,16 +240,14 @@ export function TheButtonRoom() {
         {FREE_WALLS.map((wall, i) => (
           <FreeWallBody key={i} wall={wall} />
         ))}
-        {laylights.map(([x, z]) => (
-          <Luminaire key={`${x}:${z}`} position={[x, height - 0.004, z]} size={[LAYLIGHT.size, LAYLIGHT.size]} palette={palette} />
-        ))}
+        <Clerestory minX={minX} maxX={maxX} minZ={minZ} maxZ={maxZ} bottom={WINDOWS.bottom} top={WINDOWS.top} palette={palette} />
       </StaticMerge>
       {FREE_WALLS.map((wall, i) => (
         <FreeWallObstacle key={i} wall={wall} index={i} />
       ))}
 
       <RoomContents>
-        {/* The prologue: the room's title over its first text, on the wall the visitor meets first. */}
+        {/* The prologue: the exhibition's title over its first chapter, on the wall the visitor meets first. */}
         <group position={[prologue.position[0], 0, prologue.position[1]]}>
           <Text position={[0, 3.86, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
             EXHIBITION 01 / A SMALL HISTORY OF DIGITAL AFFORDANCE
@@ -248,9 +256,15 @@ export function TheButtonRoom() {
             The Button
           </Text>
         </group>
+        {/* Its quote, large, on the long wall to the left of the entrance. */}
+        <group position={[ENTRANCE_QUOTE.at[0], 0, ENTRANCE_QUOTE.at[1]]} rotation={facingRotation('east')}>
+          <Text face="displayItalic" position={[0, ENTRANCE_QUOTE.top, 0]} fontSize={ENTRANCE_QUOTE.size} lineHeight={1.1} maxWidth={ENTRANCE_QUOTE.width} color={INK.text} anchorX="left" anchorY="top">
+            {`“${prologue.quote}”`}
+          </Text>
+        </group>
 
-        {WALL_TEXTS.map((text) => (
-          <WallText key={text.id} position={text.position} facing={text.facing} layout={text === prologue ? PROLOGUE_LAYOUT : WALL_TEXT_LAYOUT} ink={INK} kicker={text.kicker} title={text.title} body={text.body} />
+        {ESSAY.map((chapter) => (
+          <ChapterWall key={chapter.id} chapter={chapter} />
         ))}
 
         {EXHIBITS.map((exhibit) => (

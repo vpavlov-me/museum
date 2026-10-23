@@ -5,9 +5,10 @@ import { AFTERWORD, FINDS, INSTITUTE, THESIS as ARCHAEOLOGY_THESIS } from '../ro
 import { AFTERWORD as DARK_AFTERWORD, CONFIRMSHAMING, FLOW, PATTERNS, RECEIPT, THESIS as DARK_THESIS, TOTAL } from '../rooms/dark-patterns/content'
 import { CARDS as ACCEPTED, CHAPTERS as ACCEPTED_CHAPTERS, OBSERVATIONS, THESIS as ACCEPTED_THESIS } from '../rooms/accepted/content'
 import { CHAPTERS as STATES, THESIS as STATES_THESIS } from '../rooms/states/content'
-import { EXHIBITS, WALL_TEXTS } from '../rooms/the-button/content'
+import { ESSAY, EXHIBITS } from '../rooms/the-button/content'
 
-type Entry = { kicker: string; title: string; body: string }
+/** A wall or a label; `body` may hold several paragraphs, separated by blank lines. */
+type Entry = { kicker: string; title: string; body: string; quote?: string }
 
 /** The permanent exhibition: the same words as on the walls, in the order a visitor meets them. */
 const ROOMS: { number: string; title: string; idea: string; entries: Entry[] }[] = [
@@ -15,11 +16,15 @@ const ROOMS: { number: string; title: string; idea: string; entries: Entry[] }[]
     number: '01',
     title: 'The Button',
     idea: 'Interface as an object. Thirteen buttons in one hall, from the typewriter key to the button that has almost disappeared: before the screen, the drawn button, the material button and the button dissolving.',
-  entries: [
-      ...WALL_TEXTS.slice(0, 1).map((text) => ({ kicker: text.kicker, title: text.title, body: text.body })),
-      ...EXHIBITS.map((exhibit) => ({ kicker: `${exhibit.year} / ${exhibit.category}`, title: exhibit.title, body: exhibit.description })),
-      ...WALL_TEXTS.slice(1).map((text) => ({ kicker: text.kicker, title: text.title, body: text.body })),
-    ],
+  // The essay complete, each chapter followed by the objects of its bay.
+  entries: ESSAY.flatMap((chapter) => [
+      { kicker: chapter.kicker, title: chapter.title, body: chapter.paragraphs.join('\n\n'), quote: chapter.quote },
+      ...EXHIBITS.filter((exhibit) => exhibit.bay === chapter.zone).map((exhibit) => ({
+        kicker: `${exhibit.index} / ${exhibit.year} / ${exhibit.category}`,
+        title: exhibit.title,
+        body: exhibit.description,
+      })),
+    ]),
   },
   {
     number: '02',
@@ -102,7 +107,10 @@ function Entries({ entries, level }: { entries: Entry[]; level: 3 | 4 }) {
         <section key={entry.title} className="text-exhibition__entry">
           <div className="meta">{entry.kicker}</div>
           <Heading>{entry.title}</Heading>
-          <p>{entry.body}</p>
+          {entry.quote && <blockquote>{entry.quote}</blockquote>}
+          {entry.body.split('\n\n').map((paragraph) => (
+            <p key={paragraph.slice(0, 24)}>{paragraph}</p>
+          ))}
         </section>
       ))}
     </>

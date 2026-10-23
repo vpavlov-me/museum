@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { useSound } from '../../audio/useSound'
+import { Clerestory } from '../../components/Clerestory'
 import { DoorLeaf } from '../../components/DoorLeaf'
 import { LobbyPlan } from './LobbyPlan'
 import { RoomShell } from '../../components/RoomShell'
@@ -18,7 +19,7 @@ import { useMuseumStore } from '../../museum/store'
 import { rect } from '../../museum/types'
 import { useObstacle } from '../../scene/Collision'
 import { useFocusTarget } from '../../scene/Interaction'
-import { LightPool, Luminaire } from '../../scene/Light'
+import { LightPool } from '../../scene/Light'
 import { basicMaterial, CONCRETE_MATERIAL, OAK_MATERIAL, PALETTES } from '../../scene/materials'
 import { StaticMerge } from '../../scene/StaticMerge'
 
@@ -216,10 +217,8 @@ export function Lobby() {
           <boxGeometry args={[DESK.width + 0.04, 0.04, DESK.depth + 0.04]} />
         </mesh>
 
-        {/* A laylight over the whole lobby: the brightest, most even light before the galleries. */}
-        {[-9, -3, 3, 9].map((x) =>
-          [28.6, 33.4].map((z) => <Luminaire key={`${x}:${z}`} position={[x + 1, LOBBY.height - 0.004, z]} size={[3.6, 2.8]} palette={palette} />),
-        )}
+        {/* Daylight from a band of high windows round the lobby, as in the hall. */}
+        <Clerestory minX={LOBBY.minX} maxX={LOBBY.maxX} minZ={LOBBY.minZ} maxZ={LOBBY.maxZ} bottom={LOBBY.height - 2.5} top={LOBBY.height - 0.5} palette={palette} />
 
         {/* The recommended route, on the floor: from the front door to the permanent exhibition. */}
         <mesh position={[0, 0.003, (LOBBY.minZ + 33.6) / 2]} rotation={[-Math.PI / 2, 0, 0]} material={basicMaterial('#57544e')}>
