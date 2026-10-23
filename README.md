@@ -12,8 +12,9 @@ their code stays in `src/rooms/`, closed.
 
 ## The museum
 
-Every visit starts in the **lobby**. Its north wall holds the three entrances, each signed beside
-its door; a line on the floor leads to the one that is open. Every exhibition ends at a door back
+Every visit starts in the **lobby**, a light concrete-and-plaster hall. Its north wall holds the
+three entrances, each signed beside its door; a line on the floor leads to the one that is open,
+straight into The Button's hall. Every exhibition ends at a door back
 to the lobby, and the lobby's front door leaves the museum.
 
 | | Exhibition | Idea | |
@@ -74,7 +75,7 @@ src/
   scene/       world, player, collision, focus + E, light rig and fixtures, materials, precompile
   audio/       engine, synthesis, sound catalogue, room tone
   components/  architecture and signage: RoomShell, Wall, TurnPassage, DoorLeaf, WallText, Text…
-  rooms/       lobby; permanent.ts (entrance, the-button, passage, accepted, states, colophon),
+  rooms/       lobby; permanent.ts (the-button; entrance, passage, accepted, states, colophon closed),
                archaeology/ and dark-patterns/, each exhibition one chunk (each room with its content.ts)
   ui/          entry, HUD, pause, plan, guided tour controls, colophon, text version, notices
 ```

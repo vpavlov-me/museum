@@ -28,6 +28,8 @@ export const INK = {
   darkMuted: '#5f5c56',
   /** The museum's own background: what lies beyond the walls. */
   void: '#0a0a0a',
+  /** The air of the light galleries: distance fades towards it, not towards the void. */
+  haze: '#e6e2da',
 }
 
 /** The same roles, for walls of light stone (the lobby): dark ink in place of off-white. */

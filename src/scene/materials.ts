@@ -187,8 +187,10 @@ const later = (task: () => void) => {
 
 /** Large tiles in a running bond: the exhibition rooms' dark stone. */
 const STONE = stoneMaps({ columns: 2, rows: 4, bond: true }, false)
-/** Square slabs with veins: the lobby's marble. */
+/** Square slabs with veins: the old lobby's marble. */
 const MARBLE = stoneMaps({ columns: 2, rows: 2, bond: false }, true)
+/** Polished concrete: one slab per repeat, a saw-cut joint every four metres, a soft mottle. */
+const CONCRETE = stoneMaps({ columns: 1, rows: 1, bond: false }, false)
 
 /** Metres covered by one repeat of the plaster texture. */
 const PLASTER_REPEAT = 2.5
@@ -280,6 +282,8 @@ export type Palette = {
   threshold: THREE.MeshBasicMaterial
   /** Luminous ceiling slots and panels. */
   glow: THREE.MeshBasicMaterial
+  /** How walls meet the floor (see PaletteColors). */
+  base: 'board' | 'shadow'
 }
 
 export type PaletteColors = {
@@ -290,13 +294,16 @@ export type PaletteColors = {
   floorRoughness?: number
   /** Architraves and skirting; by default a dark stone. */
   trim?: string
-  /** `marble` for light, veined slabs (the lobby); `stone` (default) for dark tiles. */
-  floorKind?: 'stone' | 'marble'
+  /** `concrete` for polished concrete (v3); `marble` for light, veined slabs; `stone` (default) for dark tiles. */
+  floorKind?: 'stone' | 'marble' | 'concrete'
+  /** How walls meet the floor: a skirting board (default), or a recessed shadow gap and no architraves (v3). */
+  base?: 'board' | 'shadow'
 }
 
 /** A new set of palette materials. Use the shared PALETTES unless a space needs to animate its own. */
 export function createPalette(colors: PaletteColors): Palette {
-  const stone = colors.floorKind === 'marble' ? MARBLE : STONE
+  const stone = colors.floorKind === 'marble' ? MARBLE : colors.floorKind === 'concrete' ? CONCRETE : STONE
+  const light = colors.floorKind === 'marble' || colors.floorKind === 'concrete'
   const trim = colors.trim ?? '#1f1d1b'
   // Light stone trim keeps a trace of its own light, like the ceilings, so the undersides of beams and cornices stay stone, not shadow.
   const trimGlow = colors.floorKind === 'marble' ? 0.32 : 0
@@ -309,7 +316,7 @@ export function createPalette(colors: PaletteColors): Palette {
         map: stone.color,
         roughnessMap: stone.roughness,
         // Dark stone shows the room's light, not a grey sky; light marble takes more of it.
-        envMapIntensity: colors.floorKind === 'marble' ? 0.8 : 0.6,
+        envMapIntensity: light ? 0.8 : 0.6,
       }),
       STONE_REPEAT,
     )),
@@ -320,6 +327,7 @@ export function createPalette(colors: PaletteColors): Palette {
     trim: reflects(new THREE.MeshStandardMaterial({ color: trim, roughness: 0.42, envMapIntensity: 1.2, emissive: trim, emissiveIntensity: trimGlow })),
     threshold: new THREE.MeshBasicMaterial({ color: '#141413' }),
     glow: new THREE.MeshBasicMaterial({ color: colors.glow }),
+    base: colors.base ?? 'board',
   }
 }
 
@@ -328,8 +336,9 @@ export const STATES_COLORS: PaletteColors = { wall: '#53514d', floor: '#292826',
 
 /** One palette per kind of space: the same museum, different temperatures. */
 export const PALETTES = {
-  // The lobby: a classical hall in light, veined marble, pale walls and light stone trim.
-  lobby: createPalette({ wall: '#d6d0c4', floor: '#b3ac9f', ceiling: '#d8d1c4', glow: '#fbf6ec', floorRoughness: 0.42, floorKind: 'marble', trim: '#e9e4da' }),
+  // v3 (#48): the lobby and the hall share one modern language: lime plaster, polished concrete, shadow gaps, top light.
+  lobby: createPalette({ wall: '#dcd7ce', floor: '#a9a397', ceiling: '#e6e2da', glow: '#fbf9f4', floorRoughness: 0.4, floorKind: 'concrete', trim: '#3d3a35', base: 'shadow' }),
+  hall: createPalette({ wall: '#e2ddd4', floor: '#b0aa9f', ceiling: '#ebe7e0', glow: '#fdfbf7', floorRoughness: 0.38, floorKind: 'concrete', trim: '#3d3a35', base: 'shadow' }),
   // Lightest: warm, welcoming, establishes scale.
   entrance: createPalette({ wall: '#77736c', floor: '#45423e', ceiling: '#47443f', glow: '#bdb6a8' }),
   // Neutral gallery: calm grey walls, a satin floor that catches the downlights.
@@ -356,6 +365,12 @@ export const PALETTES = {
 
 /** Dark satin lacquer: plinths answer the downlights with a soft highlight the walls do not have. */
 export const PLINTH_MATERIAL = reflects(new THREE.MeshStandardMaterial({ color: '#1c1b1a', roughness: 0.38 }))
+
+/** Oiled oak: v3's plinths, benches and desk (#48). */
+export const OAK_MATERIAL = new THREE.MeshStandardMaterial({ color: '#b08a5c', roughness: 0.62 })
+
+/** Board-marked concrete: the lobby's desk. */
+export const CONCRETE_MATERIAL = new THREE.MeshStandardMaterial({ color: '#c3beb5', roughness: 0.85, map: PLASTER })
 
 /** Dark bronze: the museum's fixtures (stands, holders, frames, cradles), satin, with a little of the room in it. */
 export const FIXTURE_MATERIAL = reflects(new THREE.MeshStandardMaterial({ color: '#2b2722', roughness: 0.38, metalness: 0.55 }))

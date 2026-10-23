@@ -148,7 +148,7 @@ function App() {
             }
           >
             <color attach="background" args={[INK.void]} />
-            <fog attach="fog" args={[INK.void, 18, 40]} />
+            <fog attach="fog" args={[INK.haze, 30, 90]} />
             <Suspense fallback={null}>
               <MuseumWorld
                 visit={visit}

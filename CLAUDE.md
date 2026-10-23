@@ -43,8 +43,9 @@ Do not introduce this folder structure prematurely if a change is still small, b
 
 ## Visual language
 
-- dark, intimate exhibition rooms (dark stone floors, warm plaster, light on the exhibits) and one
-  light, classical hall: the lobby, in marble with pilasters and coffers;
+- light, modern galleries (v3): polished concrete floors, warm plaster walls on a shadow gap, oak
+  plinths, laylights for even top light (`PALETTES.lobby` and `PALETTES.hall`); the closed rooms
+  keep their dark stone and plaster until they are rebuilt;
 - warm off-white typography;
 - sparse accent colors reserved for exhibits;
 - large editorial typography;

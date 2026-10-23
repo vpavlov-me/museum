@@ -49,10 +49,10 @@ export const EXHIBITIONS: ExhibitionDefinition[] = [
     status: 'open',
     slug: 'permanent',
     recommended: 1,
-    // For now one room, The Button (#48); Rooms 02 and 03 are closed while it is rebuilt.
-    spaces: ['entrance', 'the-button'],
+    // For now one room, The Button (#48): an open hall straight off the lobby. Rooms 02 and 03 are closed.
+    spaces: ['the-button'],
     door: 0,
-    start: { at: [0, 24.6], yaw: 0 },
+    start: { at: [0, 23.5], yaw: 0 },
     load: () => import('../rooms/permanent'),
   },
   {

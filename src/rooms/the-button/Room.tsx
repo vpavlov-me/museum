@@ -8,27 +8,43 @@ import { ExhibitLabel } from '../../components/ExhibitLabel'
 import { Plinth } from '../../components/Plinth'
 import { RoomShell } from '../../components/RoomShell'
 import { Text } from '../../components/Text'
-import { WallText } from '../../components/WallText'
-import { INK, MUSEUM } from '../../identity'
+import { facingRotation, WallText, type WallTextLayout } from '../../components/WallText'
+import { INK_ON_LIGHT as INK, MUSEUM, TYPE } from '../../identity'
 import { navigation } from '../../museum/navigation'
-import { DOORS, localDoor } from '../../museum/roomRegistry'
+import { BUTTON_HALL, DOORS, localDoor } from '../../museum/roomRegistry'
 import { RoomContents, useRoom } from '../../museum/RoomContext'
 import { box } from '../../museum/types'
 import { useObstacle } from '../../scene/Collision'
 import { useFocusTarget } from '../../scene/Interaction'
-import { Downlight, LightPool, Luminaire } from '../../scene/Light'
-import { basicMaterial, PALETTES } from '../../scene/materials'
+import { Downlight, Luminaire } from '../../scene/Light'
+import { OAK_MATERIAL, PALETTES } from '../../scene/materials'
 import { StaticMerge } from '../../scene/StaticMerge'
 import { FlatButton } from './artifacts/FlatButton'
 import { QuietButton } from './artifacts/QuietButton'
 import { RaisedButton } from './artifacts/RaisedButton'
 import { BUTTON, type ArtifactProps } from './artifacts/shared'
 import { TactileButton } from './artifacts/TactileButton'
-import { EXHIBITS, ROOM, THRESHOLDS, WALL_TEXTS, type ArtifactStyle, type ButtonExhibit } from './content'
+import { EXHIBITS, FREE_WALL, FREE_WALLS, WALL_TEXTS, type ArtifactStyle, type ButtonExhibit, type FreeWall } from './content'
 
 const PLINTH = { width: 2.6, height: 0.95, depth: 0.9 }
 const CRADLE = { height: 0.06 }
-const palette = PALETTES.gallery
+const palette = PALETTES.hall
+const { minX, maxX, minZ, maxZ, height } = BUTTON_HALL
+
+/** Texts on the free-standing walls: narrower than the default block, hung a little higher. */
+const WALL_TEXT_LAYOUT: WallTextLayout = { top: 2.7, titleWidth: 2.2, gap: 0.35, bodyWidth: 3.6 }
+/** The prologue hangs a little lower, under the exhibition's title. */
+const PROLOGUE_LAYOUT: WallTextLayout = { ...WALL_TEXT_LAYOUT, top: 2.55 }
+
+/** The laylights: square panels on a grid across the whole ceiling, the hall's even daylight. */
+const LAYLIGHT = { size: 2.4, pitch: 3.2 }
+const laylights = (() => {
+  const panels: [number, number][] = []
+  for (let x = minX + LAYLIGHT.pitch * 0.75; x < maxX - 1; x += LAYLIGHT.pitch) {
+    for (let z = minZ + LAYLIGHT.pitch * 0.75; z < maxZ - 1; z += LAYLIGHT.pitch) panels.push([x, z])
+  }
+  return panels
+})()
 
 /** Each era answers a press in its own material: a hard clack, a soft gel, a dry tick, almost nothing. */
 const PRESS_SOUNDS: Record<ArtifactStyle, SoundName> = {
@@ -45,8 +61,12 @@ const ARTIFACTS: Record<ArtifactStyle, ComponentType<ArtifactProps>> = {
   quiet: QuietButton,
 }
 
+/** Which way is "in front" of a plinth facing this way, in room x and z. */
+const FRONT: Record<ButtonExhibit['facing'], [number, number]> = { south: [0, 1], north: [0, -1], east: [1, 0], west: [-1, 0] }
+
 function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
   const [x, z] = exhibit.position
+  const [fx, fz] = FRONT[exhibit.facing]
   const clock = useThree((state) => state.clock)
   const pressedAt = useRef(-Infinity)
   const play = useSound()
@@ -55,8 +75,9 @@ function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
     play(PRESS_SOUNDS[exhibit.artifact.style], [x, PLINTH.height + 0.1, z])
   }, [clock, play, exhibit.artifact.style, x, z])
 
-  // Plinths are rotated to face the aisle, so their long side runs along z.
-  useObstacle(exhibit.id, box(x, z, PLINTH.depth, PLINTH.width))
+  const across = fx !== 0
+  useObstacle(exhibit.id, box(x, z, across ? PLINTH.depth : PLINTH.width, across ? PLINTH.width : PLINTH.depth))
+  // Pressing is optional (#48): the label is the exhibit; the button may still be pressed.
   useFocusTarget({
     id: exhibit.id,
     position: [x, 1.3, z],
@@ -67,14 +88,13 @@ function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
   })
 
   const Artifact = ARTIFACTS[exhibit.artifact.style]
-  // Lit from the aisle side, so the face of the artifact catches the light.
-  const aisle = exhibit.side === 'left' ? 1 : -1
 
   return (
     <>
-      <Downlight at={[x + aisle * 1.7, z]} aim={[x, 1.1, z]} ceiling={ROOM.height} palette={palette} angle={0.36} penumbra={0.8} intensity={70} />
-      <group position={[x, 0, z]} rotation={[0, exhibit.side === 'left' ? Math.PI / 2 : -Math.PI / 2, 0]}>
-        <Plinth width={PLINTH.width} height={PLINTH.height} depth={PLINTH.depth} />
+      {/* Lit from in front, so the face of the artifact catches the light. */}
+      <Downlight at={[x + fx * 1.7, z + fz * 1.7]} aim={[x, 1.1, z]} ceiling={height} palette={palette} angle={0.3} penumbra={0.8} intensity={90} distance={12} />
+      <group position={[x, 0, z]} rotation={facingRotation(exhibit.facing)}>
+        <Plinth width={PLINTH.width} height={PLINTH.height} depth={PLINTH.depth} material={OAK_MATERIAL} />
 
         {/* Each button stands in a cradle on its plinth, as an object, not an image. */}
         <group position={[0, PLINTH.height, 0]}>
@@ -84,13 +104,43 @@ function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
           <Artifact label={exhibit.artifact.label} pressedAt={pressedAt} />
         </group>
 
-        <ExhibitLabel position={[-PLINTH.width / 2 + 0.14, PLINTH.height - 0.1, PLINTH.depth / 2 + 0.004]} exhibit={exhibit} width={1.7} />
+        <ExhibitLabel position={[-PLINTH.width / 2 + 0.14, PLINTH.height - 0.1, PLINTH.depth / 2 + 0.004]} exhibit={exhibit} width={1.7} ink={INK} />
       </group>
     </>
   )
 }
 
-/** The end of the exhibition, for now (#48): a door back to the lobby where the way on to Room 02 was. */
+/**
+ * A free-standing wall: plaster, floating on a shadow gap like the hall's own walls, with
+ * a clean top. It stands 4 m high in a 7 m hall, so the hall above it stays one space.
+ */
+function FreeWallBody({ wall }: { wall: FreeWall }) {
+  const length = wall.to - wall.from
+  const mid = (wall.from + wall.to) / 2
+  const gap = 0.035
+  const [x, z] = wall.axis === 'x' ? [mid, wall.at] : [wall.at, mid]
+  const [sx, sz] = wall.axis === 'x' ? [length, FREE_WALL.thickness] : [FREE_WALL.thickness, length]
+  return (
+    <>
+      <mesh position={[x, gap + (FREE_WALL.height - gap) / 2, z]} material={palette.wall}>
+        <boxGeometry args={[sx, FREE_WALL.height - gap, sz]} />
+      </mesh>
+      <mesh position={[x, gap / 2, z]} material={palette.skirting}>
+        <boxGeometry args={[Math.max(0.01, sx - 0.024), gap, Math.max(0.01, sz - 0.024)]} />
+      </mesh>
+    </>
+  )
+}
+
+function FreeWallObstacle({ wall, index }: { wall: FreeWall; index: number }) {
+  const length = wall.to - wall.from
+  const mid = (wall.from + wall.to) / 2
+  useObstacle(`free-wall-${index}`, wall.axis === 'x' ? box(mid, wall.at, length, FREE_WALL.thickness) : box(wall.at, mid, FREE_WALL.thickness, length))
+  return null
+}
+
+/** The end of the exhibition: a door back to the lobby, in the epilogue's corner of the hall's south wall. */
+const RETURN_X = 8.5
 const RETURN_CARD = {
   index: 'END',
   year: MUSEUM.year,
@@ -99,71 +149,66 @@ const RETURN_CARD = {
   description: 'The end of the permanent exhibition, for now. The door leads back to the lobby.',
 }
 
+/**
+ * The Button (#48): one open hall straight off the lobby, under a ceiling of laylights.
+ * The visitor sees all of it from the entrance and walks it in any order; free-standing
+ * walls make its bays without closing it. Nothing has to be pressed to go on.
+ */
 export function TheButtonRoom() {
   const { origin } = useRoom()
-  const exit = localDoor(DOORS.buttonExit, origin)
-  const { halfWidth, halfLength, height } = ROOM
+  const portal = localDoor(DOORS.lobbyPermanent, origin)
   const play = useSound()
+  const prologue = WALL_TEXTS[0]
 
   return (
     <>
       <StaticMerge>
-        <RoomShell
-          minX={-halfWidth}
-          maxX={halfWidth}
-          minZ={-halfLength}
-          maxZ={halfLength}
-          height={height}
-          palette={palette}
-          north={{}}
-          south={{ door: localDoor(DOORS.entrance, origin) }}
-        />
-
-        {THRESHOLDS.map((z) => (
-          <mesh key={z} position={[0, 0.002, z]} rotation={[-Math.PI / 2, 0, 0]} material={basicMaterial('#3a3836')}>
-            <planeGeometry args={[halfWidth * 2 - 3, 0.025]} />
-          </mesh>
+        {/* The lobby builds its half of the shared south wall; the hall, taller, builds its own half above and beside the portal. */}
+        <RoomShell minX={minX} maxX={maxX} minZ={minZ} maxZ={maxZ} height={height} palette={palette} north={{}} south={{ door: portal, split: true }} />
+        {FREE_WALLS.map((wall, i) => (
+          <FreeWallBody key={i} wall={wall} />
         ))}
-
-        {/* Wall-washer slots along both long walls: the gallery's even, quiet light. */}
-        {[-1, 1].map((side) => (
-          <Luminaire key={side} position={[side * (halfWidth - 0.45), height - 0.004, 0]} size={[0.14, halfLength * 2 - 1.6]} palette={palette} />
+        {laylights.map(([x, z]) => (
+          <Luminaire key={`${x}:${z}`} position={[x, height - 0.004, z]} size={[LAYLIGHT.size, LAYLIGHT.size]} palette={palette} />
         ))}
       </StaticMerge>
+      {FREE_WALLS.map((wall, i) => (
+        <FreeWallObstacle key={i} wall={wall} index={i} />
+      ))}
 
       <RoomContents>
-        {/* The title wall is washed from below the ceiling, not by a lamp you can find. */}
-        <LightPool position={[0, 3, -halfLength + 0.012]} rotation={[0, 0, 0]} size={[11, 5]} strength={0.07} />
-
-        <Text face="display" position={[0, 3.3, -halfLength + 0.02]} fontSize={1.2} letterSpacing={-0.01} color={INK.text} anchorX="center" anchorY="middle">
-          The Button
-        </Text>
-        <Text position={[0, 2.45, -halfLength + 0.02]} fontSize={0.17} letterSpacing={0.12} color={INK.muted} anchorX="center" anchorY="middle">
-          ROOM 01 / A SMALL HISTORY OF DIGITAL AFFORDANCE
-        </Text>
-
-        {/* The way out, back to the lobby. */}
-        <DoorLeaf
-          id="permanent-return"
-          x={exit.center}
-          wall={-halfLength + 0.02}
-          palette={palette}
-          sign="LOBBY"
-          prompt="RETURN TO THE LOBBY"
-          card={RETURN_CARD}
-          onUse={() => {
-            play('exit-door', [exit.center, 1.2, -halfLength])
-            navigation.returnToLobby('permanent')
-          }}
-        />
+        {/* The prologue: the room's title over its first text, on the wall the visitor meets first. */}
+        <group position={[prologue.position[0], 0, prologue.position[1]]}>
+          <Text position={[0, 3.86, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
+            EXHIBITION 01 / A SMALL HISTORY OF DIGITAL AFFORDANCE
+          </Text>
+          <Text face="display" position={[0, 3.7, 0]} fontSize={0.5} letterSpacing={-0.01} color={INK.text} anchorX="left" anchorY="top">
+            The Button
+          </Text>
+        </group>
 
         {WALL_TEXTS.map((text) => (
-          <WallText key={text.id} position={text.position} facing={text.facing} kicker={text.kicker} title={text.title} body={text.body} />
+          <WallText key={text.id} position={text.position} facing={text.facing} layout={text === prologue ? PROLOGUE_LAYOUT : WALL_TEXT_LAYOUT} ink={INK} kicker={text.kicker} title={text.title} body={text.body} />
         ))}
 
         {EXHIBITS.map((exhibit) => (
           <ExhibitStand key={exhibit.id} exhibit={exhibit} />
         ))}
+
+        <DoorLeaf
+          id="permanent-return"
+          x={RETURN_X}
+          wall={maxZ - 0.02}
+          facing="north"
+          palette={palette}
+          sign="LOBBY"
+          prompt="RETURN TO THE LOBBY"
+          card={RETURN_CARD}
+          onUse={() => {
+            play('exit-door', [RETURN_X, 1.2, maxZ])
+            navigation.returnToLobby('permanent')
+          }}
+        />
       </RoomContents>
     </>
   )
