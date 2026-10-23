@@ -19,11 +19,12 @@ import { rect } from '../../museum/types'
 import { useObstacle } from '../../scene/Collision'
 import { useFocusTarget } from '../../scene/Interaction'
 import { LightPool, Luminaire } from '../../scene/Light'
-import { basicMaterial, PALETTES } from '../../scene/materials'
+import { basicMaterial, CONCRETE_MATERIAL, OAK_MATERIAL, PALETTES } from '../../scene/materials'
 import { StaticMerge } from '../../scene/StaticMerge'
 
 /*
- * The lobby: where every visit starts and ends. Bright, plain and compact. Its north
+ * The lobby: where every visit starts and ends. Bright, plain and compact, in v3's
+ * modern language (#48). Its north
  * wall holds the museum's three entrances, each signed beside its door: the permanent
  * exhibition straight ahead (START HERE, and a line on the floor leading to it),
  * Interface Archaeology to the right, the temporary exhibition (Dark Patterns) to the
@@ -52,69 +53,17 @@ const DOOR_OF: Partial<Record<ExhibitionDefinition['id'], keyof typeof DOORS>> =
 }
 
 /*
- * The classical order of the hall, in light stone: engaged columns (pilasters) on the
- * walls, a cornice all round, and a coffered ceiling whose coffers are the laylights.
- * All of it stays within a pilaster's depth of the walls: nothing stands in the way.
+ * v3 (#48): a modern hall in the language of The Button's: lime plaster, polished
+ * concrete, shadow gaps, laylights. Two pieces of furniture, both against the walls and
+ * out of the way: a long oak bench by the statement, and a concrete desk by the plan.
  */
-const PILASTER = { width: 0.52, depth: 0.2, base: 0.3, capital: 0.26 }
-const CORNICE = { height: 0.32, depth: 0.16 }
-const BEAM = { width: 0.32, depth: 0.34 }
-/** Between the entrances and their signs on the north wall; clear of the front door and credits on the south. */
-const PILASTERS_NORTH = [-12.2, -3.6, 7.6]
-const PILASTERS_SOUTH = [-9.4, 1.2, 6.4, 11.6]
+const BENCH = { x: 11, z: 34.6, width: 4.2, depth: 0.48, height: 0.44 }
+const DESK = { x: -9.5, z: 34.2, width: 2.6, depth: 0.8, height: 1.05 }
 
-/** A pilaster against a wall face at `wall` (z), standing into the room towards `into` (+1 south, -1 north). */
-function Pilaster({ x, wall, into }: { x: number; wall: number; into: 1 | -1 }) {
-  const z = (depth: number) => wall + (into * depth) / 2
-  const shaft = LOBBY.height - CORNICE.height - PILASTER.base - PILASTER.capital
-  return (
-    <>
-      <mesh position={[x, PILASTER.base / 2, z(PILASTER.depth + 0.08)]} material={palette.trim}>
-        <boxGeometry args={[PILASTER.width + 0.12, PILASTER.base, PILASTER.depth + 0.08]} />
-      </mesh>
-      <mesh position={[x, PILASTER.base + shaft / 2, z(PILASTER.depth)]} material={palette.trim}>
-        <boxGeometry args={[PILASTER.width, shaft, PILASTER.depth]} />
-      </mesh>
-      <mesh position={[x, PILASTER.base + shaft + PILASTER.capital / 2, z(PILASTER.depth + 0.07)]} material={palette.trim}>
-        <boxGeometry args={[PILASTER.width + 0.14, PILASTER.capital, PILASTER.depth + 0.07]} />
-      </mesh>
-    </>
-  )
-}
-
-/** Cornice, pilasters and coffers: the lobby's order. */
-function Order() {
-  const top = LOBBY.height - CORNICE.height / 2
-  const width = LOBBY.maxX - LOBBY.minX
-  const length = LOBBY.maxZ - LOBBY.minZ
-  return (
-    <>
-      {/* Cornice: a band of stone under the ceiling, all the way round. */}
-      {[LOBBY.minZ + CORNICE.depth / 2, LOBBY.maxZ - CORNICE.depth / 2].map((z) => (
-        <mesh key={`cz${z}`} position={[(LOBBY.minX + LOBBY.maxX) / 2, top, z]} material={palette.trim}>
-          <boxGeometry args={[width, CORNICE.height, CORNICE.depth]} />
-        </mesh>
-      ))}
-      {[LOBBY.minX + CORNICE.depth / 2, LOBBY.maxX - CORNICE.depth / 2].map((x) => (
-        <mesh key={`cx${x}`} position={[x, top, (LOBBY.minZ + LOBBY.maxZ) / 2]} material={palette.trim}>
-          <boxGeometry args={[CORNICE.depth, CORNICE.height, length]} />
-        </mesh>
-      ))}
-
-      {PILASTERS_NORTH.map((x) => <Pilaster key={`n${x}`} x={x} wall={LOBBY.minZ} into={1} />)}
-      {PILASTERS_SOUTH.map((x) => <Pilaster key={`s${x}`} x={x} wall={LOBBY.maxZ} into={-1} />)}
-
-      {/* Coffers: beams between the laylights, across and along the hall. */}
-      {[-12, -5, 1, 7, 13].map((x) => (
-        <mesh key={`bx${x}`} position={[x, LOBBY.height - BEAM.depth / 2, (LOBBY.minZ + LOBBY.maxZ) / 2]} material={palette.trim}>
-          <boxGeometry args={[BEAM.width, BEAM.depth, length]} />
-        </mesh>
-      ))}
-      <mesh position={[(LOBBY.minX + LOBBY.maxX) / 2, LOBBY.height - BEAM.depth / 2, 31]} material={palette.trim}>
-        <boxGeometry args={[width, BEAM.depth, BEAM.width]} />
-      </mesh>
-    </>
-  )
+function Furniture() {
+  useObstacle('lobby-bench', rect(BENCH.x - BENCH.width / 2, BENCH.x + BENCH.width / 2, BENCH.z - BENCH.depth / 2, BENCH.z + BENCH.depth / 2))
+  useObstacle('lobby-desk', rect(DESK.x - DESK.width / 2, DESK.x + DESK.width / 2, DESK.z - DESK.depth / 2, DESK.z + DESK.depth / 2))
+  return null
 }
 
 const STATEMENT_LAYOUT: WallTextLayout = { top: 2.55, titleWidth: 3, gap: 0.45, bodyWidth: 3.6 }
@@ -250,13 +199,22 @@ export function Lobby() {
   return (
     <>
       <StaticMerge>
-        {/* The north wall has three openings, so the lobby builds it in three lengths. */}
+        {/* The north wall has three openings, so the lobby builds it in three lengths: its own half, since The Button's hall builds the other. */}
         <RoomShell {...LOBBY} palette={palette} north={null} south={{}} />
-        <Wall axis="x" at={LOBBY.minZ - t / 2} from={LOBBY.minX - t} to={west} height={LOBBY.height} palette={palette} door={opening(dark)} />
-        <Wall axis="x" at={LOBBY.minZ - t / 2} from={west} to={east} height={LOBBY.height} palette={palette} door={opening(permanent)} />
-        <Wall axis="x" at={LOBBY.minZ - t / 2} from={east} to={LOBBY.maxX + t} height={LOBBY.height} palette={palette} door={opening(archaeology)} />
+        <Wall axis="x" at={LOBBY.minZ - t / 4} from={LOBBY.minX - t} to={west} height={LOBBY.height} thickness={t / 2} palette={palette} door={opening(dark)} />
+        <Wall axis="x" at={LOBBY.minZ - t / 4} from={west} to={east} height={LOBBY.height} thickness={t / 2} palette={palette} door={opening(permanent)} />
+        <Wall axis="x" at={LOBBY.minZ - t / 4} from={east} to={LOBBY.maxX + t} height={LOBBY.height} thickness={t / 2} palette={palette} door={opening(archaeology)} />
 
-        <Order />
+        {/* The bench and the desk. */}
+        <mesh position={[BENCH.x, BENCH.height / 2, BENCH.z]} material={OAK_MATERIAL}>
+          <boxGeometry args={[BENCH.width, BENCH.height, BENCH.depth]} />
+        </mesh>
+        <mesh position={[DESK.x, DESK.height / 2, DESK.z]} material={CONCRETE_MATERIAL}>
+          <boxGeometry args={[DESK.width, DESK.height, DESK.depth]} />
+        </mesh>
+        <mesh position={[DESK.x, DESK.height + 0.02, DESK.z]} material={OAK_MATERIAL}>
+          <boxGeometry args={[DESK.width + 0.04, 0.04, DESK.depth + 0.04]} />
+        </mesh>
 
         {/* A laylight over the whole lobby: the brightest, most even light before the galleries. */}
         {[-9, -3, 3, 9].map((x) =>
@@ -269,14 +227,13 @@ export function Lobby() {
         </mesh>
       </StaticMerge>
 
+      <Furniture />
       <RoomContents>
         <LightPool position={[1, 0.004, CENTER_Z]} size={[26, 9]} color="#efe6d6" strength={0.02} />
 
-        <Text face="display" position={[permanent.x, 4.22, NORTH]} fontSize={0.66} letterSpacing={-0.005} color={INK.text} anchorX="center" anchorY="middle">
+        {/* The museum's name over the portal into The Button. */}
+        <Text face="display" position={[permanent.x, 4.6, NORTH]} fontSize={0.5} letterSpacing={-0.005} color={INK.text} anchorX="center" anchorY="middle">
           {MUSEUM.name}
-        </Text>
-        <Text position={[permanent.x, 3.72, NORTH]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="center" anchorY="middle">
-          LOBBY
         </Text>
         <Text position={[0.16, 0.006, 33.2]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.11} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="middle">
           START HERE ↑

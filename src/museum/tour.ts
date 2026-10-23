@@ -45,17 +45,14 @@ export type Route = 'lobby' | 'permanent' | 'archaeology' | 'dark-patterns'
 const LOBBY: TourStop[] = [{ id: 'lobby', title: 'Lobby', at: [1, 33.2], yaw: N }]
 
 const PERMANENT: TourStop[] = [
-  // Entrance
-  { id: 'entrance', title: 'Permanent Exhibition', at: [0, 24.6], yaw: N, via: [[0, 27.4]] },
-  { id: 'statement', title: 'The interface as an object', at: [0.6, 20.6], yaw: W },
-  // 01 The Button
-  { id: 'button-room', title: 'The Button', at: [0, 11.5], yaw: N },
-  { id: 'button-1995', title: '1995, the raised button', at: [3.4, 8.5], yaw: E },
-  { id: 'button-2007', title: '2007, the tactile button', at: [-3.4, 2.5], yaw: W },
-  { id: 'button-2013', title: '2013, the flat button', at: [-3.4, -3.5], yaw: W },
-  { id: 'button-2026', title: '2026, the quiet button', at: [3.4, -10], yaw: E },
-  // For now the exhibition ends here (#48): Room 01's door back to the lobby.
-  { id: 'permanent-return', title: 'Back to the lobby', at: [-6, -12.3], yaw: N },
+  // The Button (#48): one hall straight off the lobby, walked round its walls.
+  { id: 'the-button', title: 'The Button', at: [0, 23.5], yaw: N, via: [[0, 27.4]] },
+  { id: 'prologue', title: 'A button is a promise', at: [-8.5, 21.8], yaw: N },
+  { id: 'button-1995', title: '1995, the raised button', at: [-7, 0.8], yaw: N, via: [[-2, 20], [-2, 0.8]] },
+  { id: 'button-2007', title: '2007, the tactile button', at: [7.5, 0.8], yaw: N },
+  { id: 'button-2013', title: '2013, the flat button', at: [6.8, 9.5], yaw: E, via: [[11.2, 0.8], [11.2, 5.5], [6.8, 5.5]] },
+  { id: 'button-2026', title: '2026, the quiet button', at: [6.8, 14], yaw: E },
+  { id: 'permanent-return', title: 'Back to the lobby', at: [8.5, 24.3], yaw: S, via: [[6.8, 16.5], [4.2, 16.5], [4.2, 20.5]] },
 ]
 
 const ARCHAEOLOGY: TourStop[] = [

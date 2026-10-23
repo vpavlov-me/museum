@@ -16,10 +16,29 @@ const SHADOW_GAP = 0.045
 /** Architrave: a flat frame around an opening, proud of both faces. */
 const ARCHITRAVE = { width: 0.13, proud: 0.022 }
 
-/** A solid stretch of wall with a skirting board at its foot and a shadow gap at its head, built along local x. */
+/** A recessed shadow gap at the foot of a wall, in place of a skirting board (v3): the wall seems to float a little above the floor. */
+const FLOOR_GAP = { height: 0.035, inset: 0.012 }
+
+/** A solid stretch of wall with a skirting board (or a shadow gap) at its foot and a shadow gap at its head, built along local x. */
 function Segment({ from, to, height, thickness, palette }: { from: number; to: number; height: number; thickness: number; palette: Palette }) {
   if (to - from <= 0.001) return null
   const x = (from + to) / 2
+  if (palette.base === 'shadow') {
+    const body = height - FLOOR_GAP.height
+    return (
+      <>
+        <mesh position={[x, FLOOR_GAP.height + body / 2, 0]} material={palette.wall}>
+          <boxGeometry args={[to - from, body, thickness]} />
+        </mesh>
+        <mesh position={[x, FLOOR_GAP.height / 2, 0]} material={palette.skirting}>
+          <boxGeometry args={[to - from, FLOOR_GAP.height, thickness - FLOOR_GAP.inset * 2]} />
+        </mesh>
+        <mesh position={[x, height - SHADOW_GAP / 2, 0]} material={palette.reveal}>
+          <boxGeometry args={[to - from, SHADOW_GAP, thickness + 0.004]} />
+        </mesh>
+      </>
+    )
+  }
   return (
     <>
       <mesh position={[x, height / 2, 0]} material={palette.wall}>
@@ -100,13 +119,13 @@ export function Wall({
         </mesh>
       )}
 
-      {/* Architrave: jambs and head on both faces, stopping on the skirting. */}
-      {[left - ARCHITRAVE.width / 2, right + ARCHITRAVE.width / 2].map((x) => (
+      {/* Architrave: jambs and head on both faces, stopping on the skirting. A modern wall (shadow gap at its foot) has none. */}
+      {palette.base === 'board' && [left - ARCHITRAVE.width / 2, right + ARCHITRAVE.width / 2].map((x) => (
         <mesh key={`a${x}`} position={[x, door.height / 2, 0]} material={palette.trim}>
           <boxGeometry args={[ARCHITRAVE.width, door.height, thickness + ARCHITRAVE.proud * 2]} />
         </mesh>
       ))}
-      {lintel > ARCHITRAVE.width && (
+      {palette.base === 'board' && lintel > ARCHITRAVE.width && (
         <mesh position={[door.center, door.height + ARCHITRAVE.width / 2, 0]} material={palette.trim}>
           <boxGeometry args={[door.width + ARCHITRAVE.width * 2, ARCHITRAVE.width, thickness + ARCHITRAVE.proud * 2]} />
         </mesh>

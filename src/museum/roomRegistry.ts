@@ -68,6 +68,12 @@ export const DARK_ORIGIN: Vec2 = [-9, 26.1]
 /** The lobby, in world coordinates: south of the permanent exhibition's entrance hall, across all three entrances. */
 export const LOBBY = { minX: -14, maxX: 16, minZ: 26.2, maxZ: 36, height: 5 }
 
+/**
+ * v3 (#48): The Button is one open hall, 24 x 32 m and 7 m high, entered straight from
+ * the lobby. Room-local, centred on its origin; the lobby's north wall is its south wall.
+ */
+export const BUTTON_HALL = { ...rect(-12, 12, -16, 16), height: 7, origin: [0, 10] as Vec2 }
+
 /** A rectangular cell with its own ceiling height, room-local. */
 export type Cell = Rect & { height: number }
 
@@ -168,8 +174,8 @@ export const inDark = (x: number, z: number) => ({ x: DARK_ORIGIN[0] + x, z: DAR
 export const inArchaeology = (x: number, z: number) => ({ x: ARCHAEOLOGY_ORIGIN[0] + x, z: ARCHAEOLOGY_ORIGIN[1] + z })
 
 export const DOORS = {
-  /** From the lobby into the permanent exhibition's entrance hall. */
-  lobbyPermanent: { x: 0, z: 26.1, width: 2.4, height: 3.2 },
+  /** From the lobby straight into the hall of The Button (#48): a wide, tall portal. */
+  lobbyPermanent: { x: 0, z: 26.1, width: 4, height: 4.2 },
   entrance: { x: 0, z: 13.9, width: 2.4, height: 3 },
   buttonExit: { x: -6, z: -13.9, width: 1.8, height: 2.5 },
   acceptedEntry: { ...inAccepted(0, 0), width: 2, height: 2.4 },
@@ -213,7 +219,7 @@ export const DOORS = {
  * rebuilt as an exhibition. Their definitions stay, so they can open again unchanged;
  * closed, they have no floor, no doors and no place on the plans.
  */
-const CLOSED = new Set(['passage', 'accepted', 'transition-03', 'states', 'colophon', 'dark-passage', 'dark-patterns', 'archaeology-passage', 'archaeology'])
+const CLOSED = new Set(['entrance', 'passage', 'accepted', 'transition-03', 'states', 'colophon', 'dark-passage', 'dark-patterns', 'archaeology-passage', 'archaeology'])
 
 const ALL_SPACES: SpaceDefinition[] = [
   {
@@ -236,9 +242,9 @@ const ALL_SPACES: SpaceDefinition[] = [
     id: 'the-button',
     number: '01',
     title: 'The Button',
-    hudLabel: 'ROOM 01 / THE BUTTON',
-    origin: [0, 0],
-    bounds: [rect(-8.7, 8.7, -13.8, 13.8)],
+    hudLabel: 'THE BUTTON',
+    origin: BUTTON_HALL.origin,
+    bounds: [offsetRect(BUTTON_HALL, BUTTON_HALL.origin)],
   },
   {
     id: 'passage',
@@ -351,8 +357,16 @@ const doorRect = (door: DoorDefinition): Rect => {
   return rect(door.x - door.width / 2, door.x + door.width / 2, door.z - half, door.z + half)
 }
 
+/**
+ * The lobby's doors to the exhibitions in preparation: walled up, though The Button's hall
+ * now runs behind them, so they would otherwise join the lobby to the hall.
+ */
+const WALLED: readonly DoorDefinition[] = [DOORS.lobbyDark, DOORS.lobbyArchaeology]
+
 /** The doors that join two open spaces: a door into a closed space is a wall. */
-const OPEN_DOORS = Object.values(DOORS).filter((door) => SPACES.filter((space) => space.bounds.some((bounds) => overlaps(bounds, doorRect(door)))).length >= 2)
+const OPEN_DOORS = Object.values(DOORS).filter(
+  (door) => !WALLED.includes(door) && SPACES.filter((space) => space.bounds.some((bounds) => overlaps(bounds, doorRect(door)))).length >= 2,
+)
 
 /** Every floor area the visitor may stand on: spaces plus the openings that join them. */
 export const WALKABLE: Rect[] = [...SPACES.flatMap((space) => space.bounds), ...OPEN_DOORS.map(doorRect)]

@@ -33,7 +33,7 @@ export function Entry({
       <header className="entry__top meta">
         <span className="brand">{MUSEUM.name}</span>
         <span>
-          {COUNT} exhibitions · {MUSEUM.year}
+          {COUNT} {OPEN_EXHIBITIONS.length === 1 ? 'exhibition' : 'exhibitions'} · {MUSEUM.year}
         </span>
       </header>
 

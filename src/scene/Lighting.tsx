@@ -4,27 +4,25 @@ import * as THREE from 'three'
 import { setEnvironment } from './materials'
 
 /**
- * What polished surfaces reflect: a dark gallery, its ceiling broken by long light
- * panels, like the museum's own rooms. Dark stone then reflects darkness and lights,
- * not a pale sky, and reads darker and deeper the more polished it is.
+ * What polished surfaces reflect: a light gallery under a ceiling of laylights, like
+ * v3's lobby and hall (#48). Polished concrete then shows soft, pale walls and the
+ * glow of the ceiling, not a dark room.
  */
 function galleryEnvironment() {
   const scene = new THREE.Scene()
-  const shell = new THREE.Mesh(new THREE.BoxGeometry(24, 6, 24), new THREE.MeshBasicMaterial({ color: new THREE.Color('#1c1b1a'), side: THREE.BackSide }))
-  shell.position.y = 3
+  const shell = new THREE.Mesh(new THREE.BoxGeometry(24, 7, 24), new THREE.MeshBasicMaterial({ color: new THREE.Color('#a8a39a'), side: THREE.BackSide }))
+  shell.position.y = 3.5
   scene.add(shell)
-  const panel = new THREE.MeshBasicMaterial({ color: new THREE.Color('#fff4e2').multiplyScalar(3.2), side: THREE.DoubleSide })
-  const geometry = new THREE.PlaneGeometry(1.2, 9)
-  for (const x of [-6, -2, 2, 6]) {
-    const light = new THREE.Mesh(geometry, panel)
-    light.rotation.x = Math.PI / 2
-    light.position.set(x, 5.9, 0)
-    scene.add(light)
+  const panel = new THREE.MeshBasicMaterial({ color: new THREE.Color('#fffaf0').multiplyScalar(2.2), side: THREE.DoubleSide })
+  const geometry = new THREE.PlaneGeometry(2.4, 2.4)
+  for (const x of [-7.2, -3.6, 0, 3.6, 7.2]) {
+    for (const z of [-7.2, -3.6, 0, 3.6, 7.2]) {
+      const light = new THREE.Mesh(geometry, panel)
+      light.rotation.x = Math.PI / 2
+      light.position.set(x, 6.9, z)
+      scene.add(light)
+    }
   }
-  // A paler band of wall, where the light washes it.
-  const wash = new THREE.Mesh(new THREE.PlaneGeometry(24, 2.4), new THREE.MeshBasicMaterial({ color: new THREE.Color('#5a5650'), side: THREE.DoubleSide }))
-  wash.position.set(0, 2.2, -11.9)
-  scene.add(wash)
   return scene
 }
 
@@ -56,15 +54,15 @@ function Reflections() {
 }
 
 /**
- * Museum-wide base light: a warm sky and a dark ground, so floors read lighter than
- * ceilings and walls fall in between, plus one weak key that separates wall planes.
- * How bright each space feels comes mostly from its palette; realtime light is
- * reserved for exhibits (see Downlight).
+ * Museum-wide base light: a soft, slightly warm sky and a pale ground, the light of a
+ * gallery under laylights, where the floor bounces light back onto the walls (#48),
+ * plus one weak key that separates wall planes. How bright each space feels comes
+ * mostly from its palette; realtime light is reserved for exhibits (see Downlight).
  */
 export function Lighting() {
   return (
     <>
-      <hemisphereLight args={['#ebe7df', '#2a2724', 4]} />
+      <hemisphereLight args={['#f1eee8', '#8d877d', 3.4]} />
       <directionalLight position={[-5, 9, 4]} intensity={1.4} color="#fff6ea" />
       <Reflections />
     </>
