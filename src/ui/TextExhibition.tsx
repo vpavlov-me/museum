@@ -14,7 +14,7 @@ const ROOMS: { number: string; title: string; idea: string; entries: Entry[] }[]
   {
     number: '01',
     title: 'The Button',
-    idea: 'Interface as an object. Four buttons on four plinths, from 1995 to 2026.',
+    idea: 'Interface as an object. Thirteen buttons in one hall, from the typewriter key to the button that has almost disappeared: before the screen, the drawn button, the material button and the button dissolving.',
   entries: [
       ...WALL_TEXTS.slice(0, 1).map((text) => ({ kicker: text.kicker, title: text.title, body: text.body })),
       ...EXHIBITS.map((exhibit) => ({ kicker: `${exhibit.year} / ${exhibit.category}`, title: exhibit.title, body: exhibit.description })),

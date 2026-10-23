@@ -24,7 +24,7 @@ export function ExhibitLabel({
 }) {
   return (
     <group position={position} rotation={rotation} scale={scale}>
-      <Text fontSize={0.042} letterSpacing={0.14} color={ink.muted} anchorX="left" anchorY="top">
+      <Text fontSize={0.042} letterSpacing={0.14} maxWidth={width} color={ink.muted} anchorX="left" anchorY="top">
         {`${exhibit.index} / ${exhibit.year} / ${exhibit.category}`}
       </Text>
       <Text face="display" position={[0, -0.08, 0]} fontSize={0.1} maxWidth={width} color={ink.text} anchorX="left" anchorY="top">

@@ -1,6 +1,6 @@
-import { useCallback, useRef, type ComponentType } from 'react'
+import { useCallback, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
-import type { SoundName } from '../../audio/sounds'
+import * as THREE from 'three'
 import { useSound } from '../../audio/useSound'
 import { Cradle, CRADLE_SEAT } from '../../components/Cradle'
 import { DoorLeaf } from '../../components/DoorLeaf'
@@ -17,19 +17,29 @@ import { box } from '../../museum/types'
 import { useObstacle } from '../../scene/Collision'
 import { useFocusTarget } from '../../scene/Interaction'
 import { Downlight, Luminaire } from '../../scene/Light'
-import { OAK_MATERIAL, PALETTES } from '../../scene/materials'
+import { FIXTURE_MATERIAL, OAK_MATERIAL, PALETTES } from '../../scene/materials'
 import { StaticMerge } from '../../scene/StaticMerge'
-import { FlatButton } from './artifacts/FlatButton'
-import { QuietButton } from './artifacts/QuietButton'
-import { RaisedButton } from './artifacts/RaisedButton'
-import { BUTTON, type ArtifactProps } from './artifacts/shared'
-import { TactileButton } from './artifacts/TactileButton'
-import { EXHIBITS, FREE_WALL, FREE_WALLS, WALL_TEXTS, type ArtifactStyle, type ButtonExhibit, type FreeWall } from './content'
+import { ARTIFACTS } from './artifacts'
+import { WALNUT } from './artifacts/shared'
+import { EXHIBITS, FREE_WALL, FREE_WALLS, WALL_TEXTS, type ButtonExhibit, type FreeWall } from './content'
 
-const PLINTH = { width: 2.6, height: 0.95, depth: 0.9 }
 const CRADLE = { height: 0.06 }
 const palette = PALETTES.hall
 const { minX, maxX, minZ, maxZ, height } = BUTTON_HALL
+
+/**
+ * The displays: a low oak plinth for an object you hold in the hand, a wide one for a
+ * screen-sized button, a vitrine (an oak plinth under a glass hood with bronze edges) for
+ * a piece of a screen, shown at a little over half size, and a frame on the wall.
+ */
+const DISPLAYS = {
+  plinth: { width: 1, depth: 0.7, height: 1.05, scale: 1 },
+  wide: { width: 2.6, depth: 0.9, height: 0.95, scale: 1 },
+  vitrine: { width: 1.6, depth: 0.85, height: 0.95, scale: 0.55 },
+} as const
+const HOOD = { width: 1.44, height: 0.62, depth: 0.7, edge: 0.012 }
+const FRAME = { width: 0.62, height: 0.8, depth: 0.05, border: 0.035, centre: 1.45 }
+const GLASS = new THREE.MeshStandardMaterial({ color: '#ffffff', transparent: true, opacity: 0.1, roughness: 0.05, depthWrite: false })
 
 /** Texts on the free-standing walls: narrower than the default block, hung a little higher. */
 const WALL_TEXT_LAYOUT: WallTextLayout = { top: 2.7, titleWidth: 2.2, gap: 0.35, bodyWidth: 3.6 }
@@ -46,67 +56,119 @@ const laylights = (() => {
   return panels
 })()
 
-/** Each era answers a press in its own material: a hard clack, a soft gel, a dry tick, almost nothing. */
-const PRESS_SOUNDS: Record<ArtifactStyle, SoundName> = {
-  bevel: 'button-bevel',
-  gloss: 'button-gloss',
-  flat: 'button-flat',
-  quiet: 'button-quiet',
-}
-
-const ARTIFACTS: Record<ArtifactStyle, ComponentType<ArtifactProps>> = {
-  bevel: RaisedButton,
-  gloss: TactileButton,
-  flat: FlatButton,
-  quiet: QuietButton,
-}
-
 /** Which way is "in front" of a plinth facing this way, in room x and z. */
 const FRONT: Record<ButtonExhibit['facing'], [number, number]> = { south: [0, 1], north: [0, -1], east: [1, 0], west: [-1, 0] }
 
 function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
   const [x, z] = exhibit.position
   const [fx, fz] = FRONT[exhibit.facing]
+  const spec = ARTIFACTS[exhibit.artifact.kind]
+  const onWall = exhibit.display === 'wall'
+  const display = exhibit.display === 'wall' ? null : DISPLAYS[exhibit.display]
   const clock = useThree((state) => state.clock)
   const pressedAt = useRef(-Infinity)
   const play = useSound()
   const press = useCallback(() => {
     pressedAt.current = clock.elapsedTime
-    play(PRESS_SOUNDS[exhibit.artifact.style], [x, PLINTH.height + 0.1, z])
-  }, [clock, play, exhibit.artifact.style, x, z])
+    play(spec.sound, [x, 1.1, z])
+  }, [clock, play, spec.sound, x, z])
 
   const across = fx !== 0
-  useObstacle(exhibit.id, box(x, z, across ? PLINTH.depth : PLINTH.width, across ? PLINTH.width : PLINTH.depth))
+  const footprint = display ? box(x, z, across ? display.depth : display.width, across ? display.width : display.depth) : null
+  useObstacle(exhibit.id, footprint)
   // Pressing is optional (#48): the label is the exhibit; the button may still be pressed.
   useFocusTarget({
     id: exhibit.id,
-    position: [x, 1.3, z],
+    position: [x + fx * 0.2, onWall ? FRAME.centre : 1.3, z + fz * 0.2],
     card: exhibit,
     labelled: true,
     prompt: exhibit.artifact.prompt,
     onInteract: press,
   })
 
-  const Artifact = ARTIFACTS[exhibit.artifact.style]
+  const Artifact = spec.component
+  const artifact = <Artifact label={exhibit.artifact.label} pressedAt={pressedAt} />
+  const lightAt = onWall ? FRAME.centre : 1.1
 
   return (
     <>
-      {/* Lit from in front, so the face of the artifact catches the light. */}
-      <Downlight at={[x + fx * 1.7, z + fz * 1.7]} aim={[x, 1.1, z]} ceiling={height} palette={palette} angle={0.3} penumbra={0.8} intensity={90} distance={12} />
-      <group position={[x, 0, z]} rotation={facingRotation(exhibit.facing)}>
-        <Plinth width={PLINTH.width} height={PLINTH.height} depth={PLINTH.depth} material={OAK_MATERIAL} />
-
-        {/* Each button stands in a cradle on its plinth, as an object, not an image. */}
-        <group position={[0, PLINTH.height, 0]}>
-          <Cradle width={BUTTON.width + 0.16} height={CRADLE.height} />
-        </group>
-        <group position={[0, PLINTH.height + CRADLE.height - CRADLE_SEAT + BUTTON.height / 2, 0]}>
-          <Artifact label={exhibit.artifact.label} pressedAt={pressedAt} />
-        </group>
-
-        <ExhibitLabel position={[-PLINTH.width / 2 + 0.14, PLINTH.height - 0.1, PLINTH.depth / 2 + 0.004]} exhibit={exhibit} width={1.7} ink={INK} />
+      {/* Lit from in front, so the face of the object catches the light. */}
+      <Downlight at={[x + fx * 1.7, z + fz * 1.7]} aim={[x, lightAt, z]} ceiling={height} palette={palette} angle={0.3} penumbra={0.8} intensity={90} distance={12} />
+      <group position={[x + fx * 0.01, 0, z + fz * 0.01]} rotation={facingRotation(exhibit.facing)}>
+        {display ? (
+          <>
+            <Plinth width={display.width} height={display.height} depth={display.depth} material={OAK_MATERIAL} />
+            <group position={[0, display.height, 0]} scale={display.scale}>
+              {spec.cradle !== null && <Cradle width={spec.cradle + 0.16} height={CRADLE.height} />}
+              <group position={[0, (spec.cradle !== null ? CRADLE.height - CRADLE_SEAT : 0) + (spec.height ?? 0) / 2, 0]}>{artifact}</group>
+            </group>
+            {exhibit.display === 'vitrine' && <Hood top={display.height} />}
+            <ExhibitLabel position={[-display.width / 2 + 0.14, display.height - 0.1, display.depth / 2 + 0.004]} exhibit={exhibit} width={display.width - 0.28} ink={INK} />
+          </>
+        ) : (
+          <>
+            <WallFrame />
+            <group position={[0, FRAME.centre, FRAME.depth]}>{artifact}</group>
+            <ExhibitLabel position={[FRAME.width / 2 + 0.3, FRAME.centre + FRAME.height / 2 - 0.05, 0.004]} exhibit={exhibit} width={0.9} ink={INK} />
+          </>
+        )}
       </group>
     </>
+  )
+}
+
+/** A vitrine's glass hood on its plinth, its edges in dark bronze. */
+function Hood({ top }: { top: number }) {
+  const { width: w, height: h, depth: d, edge: e } = HOOD
+  const posts: [number, number][] = [
+    [-w / 2, -d / 2],
+    [w / 2, -d / 2],
+    [-w / 2, d / 2],
+    [w / 2, d / 2],
+  ]
+  return (
+    <group position={[0, top, 0]}>
+      <mesh position={[0, h / 2, 0]} material={GLASS} renderOrder={2}>
+        <boxGeometry args={[w, h, d]} />
+      </mesh>
+      {posts.map(([px, pz]) => (
+        <mesh key={`${px}:${pz}`} position={[px, h / 2, pz]} material={FIXTURE_MATERIAL}>
+          <boxGeometry args={[e, h, e]} />
+        </mesh>
+      ))}
+      {[-d / 2, d / 2].map((pz) => (
+        <mesh key={pz} position={[0, h, pz]} material={FIXTURE_MATERIAL}>
+          <boxGeometry args={[w + e, e, e]} />
+        </mesh>
+      ))}
+      {[-w / 2, w / 2].map((px) => (
+        <mesh key={px} position={[px, h, 0]} material={FIXTURE_MATERIAL}>
+          <boxGeometry args={[e, e, d + e]} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+/** A shallow frame on the wall: bronze edges round a walnut mount. Its back is on the wall. */
+function WallFrame() {
+  const { width: w, height: h, depth: d, border: b, centre } = FRAME
+  return (
+    <group position={[0, centre, 0]}>
+      <mesh position={[0, 0, d / 2 - 0.01]} material={WALNUT}>
+        <boxGeometry args={[w - 2 * b, h - 2 * b, d - 0.02]} />
+      </mesh>
+      {[-1, 1].map((side) => (
+        <mesh key={`h${side}`} position={[0, side * (h / 2 - b / 2), d / 2]} material={FIXTURE_MATERIAL}>
+          <boxGeometry args={[w, b, d]} />
+        </mesh>
+      ))}
+      {[-1, 1].map((side) => (
+        <mesh key={`v${side}`} position={[side * (w / 2 - b / 2), 0, d / 2]} material={FIXTURE_MATERIAL}>
+          <boxGeometry args={[b, h - 2 * b, d]} />
+        </mesh>
+      ))}
+    </group>
   )
 }
 

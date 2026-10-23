@@ -20,6 +20,19 @@ export const SOUNDS = {
     noise(c, out, t, { duration: 0.12, gain: 0.025, filter: 'bandpass', freq: 2500, q: 0.7, attack: 0.04 })
     return tone(c, out, t, { freq: 880, duration: 0.28, gain: 0.01, attack: 0.05 })
   },
+  // Before the screen: a typebar striking, a spring snapping the contacts apart, a bell in another room.
+  'key-strike': (c, out, t) => {
+    noise(c, out, t, { duration: 0.03, gain: 0.2, filter: 'bandpass', freq: 3200, q: 1.5 })
+    return noise(c, out, t + 0.06, { duration: 0.05, gain: 0.12, filter: 'bandpass', freq: 900, q: 1 })
+  },
+  'switch-snap': (c, out, t) => {
+    noise(c, out, t, { duration: 0.012, gain: 0.22, filter: 'highpass', freq: 2200 })
+    return tone(c, out, t, { freq: 220, to: 160, duration: 0.05, gain: 0.08 })
+  },
+  bell: (c, out, t) => {
+    tone(c, out, t + 0.25, { freq: 1568, duration: 0.9, gain: 0.018, attack: 0.004 })
+    return tone(c, out, t + 0.25, { freq: 1175, duration: 1.1, gain: 0.024, attack: 0.004 })
+  },
 
   // Room 02: friction, kept small. Modals and badges arrive on their own, so they are the quietest.
   'banner-accept': (c, out, t) => {
