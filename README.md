@@ -19,7 +19,7 @@ to the lobby, and the lobby's front door leaves the museum.
 
 | | Exhibition | Idea | |
 |---|---|---|---|
-| **01** | **Permanent Exhibition** | **The Button** (interface as an object): thirteen buttons in one hall, from the typewriter key to the button that has almost gone. Later also **Things We Somehow Accepted** (interface behavior as architecture) and **Interface States** (interface state as the state of the world). | open: Room 01 |
+| **01** | **Permanent Exhibition** | **The Button** (interface as an object): thirteen buttons in one hall, from the typewriter key to the button that has almost gone, and over its centre a kinetic ring of twenty-four frames of one press. Later also **Things We Somehow Accepted** (interface behavior as architecture) and **Interface States** (interface state as the state of the world). | open: Room 01 |
 | **02** | **Interface Archaeology** | The interface outside its own time: our interfaces as a future archive digs them up and catalogues them, often wrongly. | in preparation |
 | **03** | **Dark Patterns** (temporary) | Interfaces designed against the people using them, walked as a purchase and a cancellation: the signs use the patterns, small labels name them. | in preparation |
 

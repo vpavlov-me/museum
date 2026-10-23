@@ -20,6 +20,7 @@ import { useFocusTarget } from '../../scene/Interaction'
 import { FIXTURE_MATERIAL, OAK_MATERIAL, PALETTES } from '../../scene/materials'
 import { StaticMerge } from '../../scene/StaticMerge'
 import { ARTIFACTS } from './artifacts'
+import { KeyVisual } from './KeyVisual'
 import { WALNUT } from './artifacts/shared'
 import { ESSAY, EXHIBITS, FREE_WALL, FREE_WALLS, type ButtonExhibit, type Chapter, type FreeWall } from './content'
 
@@ -267,6 +268,8 @@ export function TheButtonRoom() {
         {ESSAY.map((chapter) => (
           <ChapterWall key={chapter.id} chapter={chapter} />
         ))}
+
+        <KeyVisual />
 
         {EXHIBITS.map((exhibit) => (
           <ExhibitStand key={exhibit.id} exhibit={exhibit} />

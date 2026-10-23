@@ -49,6 +49,8 @@ const PERMANENT: TourStop[] = [
   // each bay's chapter on the wall facing it, then its objects.
   { id: 'the-button', title: 'The Button', at: [0, 23.5], yaw: N, via: [[0, 27.4]] },
   { id: 'prologue', title: 'A button is a promise', at: [-8.5, 21.8], yaw: N },
+  // The key visual, hung over the centre of the hall.
+  { id: 'key-visual', title: 'Twenty-Four Frames', at: [0, 18.4], yaw: N, pitch: 0.12 },
   // I. Before the screen.
   { id: 'chapter-1', title: 'I. Before the screen', at: [-9.3, 10.4], yaw: E, via: [[-3.8, 19.5], [-3.8, 16.5], [-6.6, 16.2]] },
   { id: 'typewriter', title: '1878, the typewriter key', at: [-6.6, 15], yaw: W, pitch: -0.15 },
