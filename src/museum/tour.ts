@@ -45,13 +45,26 @@ export type Route = 'lobby' | 'permanent' | 'archaeology' | 'dark-patterns'
 const LOBBY: TourStop[] = [{ id: 'lobby', title: 'Lobby', at: [1, 33.2], yaw: N }]
 
 const PERMANENT: TourStop[] = [
-  // The Button (#48): one hall straight off the lobby, walked round its walls.
+  // The Button (#48): one hall straight off the lobby, its bays walked clockwise, in the essay's order.
   { id: 'the-button', title: 'The Button', at: [0, 23.5], yaw: N, via: [[0, 27.4]] },
   { id: 'prologue', title: 'A button is a promise', at: [-8.5, 21.8], yaw: N },
-  { id: 'button-1995', title: '1995, the raised button', at: [-7, 0.8], yaw: N, via: [[-2, 20], [-2, 0.8]] },
-  { id: 'button-2007', title: '2007, the tactile button', at: [7.5, 0.8], yaw: N },
-  { id: 'button-2013', title: '2013, the flat button', at: [6.8, 9.5], yaw: E, via: [[11.2, 0.8], [11.2, 5.5], [6.8, 5.5]] },
-  { id: 'button-2026', title: '2026, the quiet button', at: [6.8, 14], yaw: E },
+  // I. Before the screen.
+  { id: 'typewriter', title: '1878, the typewriter key', at: [-6.6, 15], yaw: W, pitch: -0.15, via: [[-3.8, 19.5], [-3.8, 16.5]] },
+  { id: 'switch', title: '1884, the light switch', at: [-9.8, 12], yaw: W },
+  { id: 'call', title: '1900s, the call button', at: [-6.6, 9], yaw: W, pitch: -0.1 },
+  { id: 'doorbell', title: '1910s, the bell push', at: [-6.6, 5.4], yaw: W, pitch: -0.1 },
+  // II. Drawing a press.
+  { id: 'star', title: '1981, the command as a word', at: [-9, -1.3], yaw: N, pitch: -0.2, via: [[-6.6, 4], [-11, 4], [-11, 1.6]] },
+  { id: 'macintosh', title: '1984, the default button', at: [-5.5, -1.3], yaw: N, pitch: -0.2 },
+  { id: 'raised', title: '1995, the raised button', at: [-2, -1.3], yaw: N, pitch: -0.2 },
+  // III. The material age.
+  { id: 'aqua', title: '2001, the gel button', at: [2, -1.3], yaw: N, pitch: -0.2 },
+  { id: 'slide', title: '2007, slide to unlock', at: [5.5, -1.3], yaw: N, pitch: -0.2 },
+  { id: 'leather', title: '2011, the leather button', at: [9, -1.3], yaw: N, pitch: -0.2 },
+  // IV. Dissolving.
+  { id: 'word', title: '2013, the button as a word', at: [6.6, 5.8], yaw: E, pitch: -0.1, via: [[11, 1.2], [11, 3.9], [6.6, 3.9]] },
+  { id: 'material', title: '2014, the paper button', at: [6.6, 9.3], yaw: E, pitch: -0.1 },
+  { id: 'quiet', title: 'Today, the quiet button', at: [6.6, 13], yaw: E, pitch: -0.1 },
   { id: 'permanent-return', title: 'Back to the lobby', at: [8.5, 24.3], yaw: S, via: [[6.8, 16.5], [4.2, 16.5], [4.2, 20.5]] },
 ]
 
