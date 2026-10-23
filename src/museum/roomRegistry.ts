@@ -80,16 +80,10 @@ export type Cell = Rect & { height: number }
 const cell = (minX: number, maxX: number, minZ: number, maxZ: number, height: number): Cell => ({ ...rect(minX, maxX, minZ, maxZ), height })
 
 /**
- * Room 02 as a sequence of offset cells, room-local. Each opening is shifted
- * sideways from the last, so the room never reads as one axis.
+ * Room 02, Things We Somehow Accepted (v4, #55): one open hall straight north of The
+ * Button's, through a wide portal on the axis of both. Room-local; the portal is at z = 14.
  */
-export const ACCEPTED_CELLS = {
-  interrupt: cell(-1.5, 9.5, -17, -0.1, 4.8),
-  pause: cell(-1.5, 3.5, -21, -17.2, 2.8),
-  attend: cell(-3, 7, -35, -21.2, 4),
-  wait: cell(-2.5, 4.5, -46, -35.3, 3.4),
-  feed: cell(-1.5, 1.5, -66.2, -46.2, 3),
-}
+export const ACCEPTED_HALL = { ...rect(-12, 12, -14, 14), height: 12, origin: [0, -20.2] as Vec2 }
 
 /** The threshold between Room 01 and Room 02, in world coordinates (its origin is the world origin). */
 export const THRESHOLD = {
@@ -178,6 +172,8 @@ export const DOORS = {
   lobbyPermanent: { x: 0, z: 26.1, width: 4, height: 4.2 },
   entrance: { x: 0, z: 13.9, width: 2.4, height: 3 },
   buttonExit: { x: -6, z: -13.9, width: 1.8, height: 2.5 },
+  /** v4 (#55): the portal from The Button's hall into Room 02's, on the axis of both. */
+  buttonAccepted: { x: 0, z: -6.1, width: 3.2, height: 5 },
   acceptedEntry: { ...inAccepted(0, 0), width: 2, height: 2.4 },
   interruptExit: { ...inAccepted(0.8, -17.1), width: 1.8, height: 2.5 },
   attendEntry: { ...inAccepted(2.4, -21.1), width: 1.8, height: 2.5 },
@@ -219,7 +215,7 @@ export const DOORS = {
  * rebuilt as an exhibition. Their definitions stay, so they can open again unchanged;
  * closed, they have no floor, no doors and no place on the plans.
  */
-const CLOSED = new Set(['entrance', 'passage', 'accepted', 'transition-03', 'states', 'colophon', 'dark-passage', 'dark-patterns', 'archaeology-passage', 'archaeology'])
+const CLOSED = new Set(['entrance', 'passage', 'transition-03', 'states', 'colophon', 'dark-passage', 'dark-patterns', 'archaeology-passage', 'archaeology'])
 
 const ALL_SPACES: SpaceDefinition[] = [
   {
@@ -258,9 +254,9 @@ const ALL_SPACES: SpaceDefinition[] = [
     id: 'accepted',
     number: '02',
     title: 'Things We Somehow Accepted',
-    hudLabel: 'ROOM 02 / THINGS WE SOMEHOW ACCEPTED',
-    origin: ACCEPTED_ORIGIN,
-    bounds: Object.values(ACCEPTED_CELLS).map((c) => offsetRect(c, ACCEPTED_ORIGIN)),
+    hudLabel: 'THINGS WE SOMEHOW ACCEPTED',
+    origin: ACCEPTED_HALL.origin,
+    bounds: [offsetRect(ACCEPTED_HALL, ACCEPTED_HALL.origin)],
   },
   {
     id: 'transition-03',

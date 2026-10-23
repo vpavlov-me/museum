@@ -6,9 +6,9 @@ You walk through it in a browser: from a lobby into an exhibition, and back.
 **Visit:** https://museum-dquality.vercel.app ·
 [permanent exhibition](https://museum-dquality.vercel.app/exhibitions/permanent)
 
-For now the museum is the lobby and one room, **The Button**, while that room is rebuilt as an
-exhibition of objects in a modern hall (#48). The other rooms and exhibitions are in preparation:
-their code stays in `src/rooms/`, closed.
+The museum is being rebuilt hall by hall (#48, #55): the lobby and two halls of the permanent
+exhibition, **The Button** and **Things We Somehow Accepted**, are open. The other rooms and
+exhibitions are in preparation: their code stays in `src/rooms/`, closed.
 
 ## The museum
 
@@ -19,7 +19,7 @@ to the lobby, and the lobby's front door leaves the museum.
 
 | | Exhibition | Idea | |
 |---|---|---|---|
-| **01** | **Permanent Exhibition** | **The Button** (interface as an object): thirteen buttons in one hall, from the typewriter key to the button that has almost gone, and over its centre a kinetic ring of twenty-four frames of one press. Later also **Things We Somehow Accepted** (interface behavior as architecture) and **Interface States** (interface state as the state of the world). | open: Room 01 |
+| **01** | **Permanent Exhibition** | **The Button** (interface as an object): thirteen buttons in one hall, from the typewriter key to the button that has almost gone, and over its centre a kinetic ring of twenty-four frames of one press. Then **Things We Somehow Accepted**: conventions that began as compromises, shown as objects, round a feed that rises through the hall without end. Later also **Interface States** (interface state as the state of the world). | open: Rooms 01–02 |
 | **02** | **Interface Archaeology** | The interface outside its own time: our interfaces as a future archive digs them up and catalogues them, often wrongly. | in preparation |
 | **03** | **Dark Patterns** (temporary) | Interfaces designed against the people using them, walked as a purchase and a cancellation: the signs use the patterns, small labels name them. | in preparation |
 
@@ -75,7 +75,7 @@ src/
   scene/       world, player, collision, focus + E, light rig and fixtures, materials, precompile
   audio/       engine, synthesis, sound catalogue, room tone
   components/  architecture and signage: RoomShell, Wall, TurnPassage, DoorLeaf, WallText, Text…
-  rooms/       lobby; permanent.ts (the-button; entrance, passage, accepted, states, colophon closed),
+  rooms/       lobby; permanent.ts (the-button, accepted; entrance, passage, states, colophon closed),
                archaeology/ and dark-patterns/, each exhibition one chunk (each room with its content.ts)
   ui/          entry, HUD, pause, plan, guided tour controls, colophon, text version, notices
 ```

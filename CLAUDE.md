@@ -65,16 +65,19 @@ Do not introduce this folder structure prematurely if a change is still small, b
 - Prefer proximity, gaze or clear interaction prompts.
 - Always preserve an obvious way to release pointer lock.
 
-## Current state: v3, one room done properly (#48)
+## Current state: v4, the museum grows again (#55)
 
 v1 shipped as one exhibition of three rooms (#12); v2 (#20, #21) made it a small museum with a
-lobby and three exhibitions. v3 narrows it on purpose: **the lobby and one room, The Button**, made
-as good as they can be before the museum grows again. Rooms 02–03, Interface Archaeology and Dark
-Patterns are **closed, not deleted**: `CLOSED` in `museum/roomRegistry.ts` and `in-preparation` in
-`museum/exhibitions.ts`; their code stays in `src/rooms/`.
+lobby and three exhibitions. v3 (#48) narrowed it on purpose to **the lobby and one room, The
+Button**, made as good as it could be. v4 (#55) brings the closed exhibitions back one hall at a
+time, by The Button's rules: the permanent exhibition becomes an enfilade of halls (The Button →
+Things We Somehow Accepted → Interface States), with Interface Archaeology and Dark Patterns as
+wings off the lobby. What is not yet rebuilt stays **closed, not deleted**: `CLOSED` in
+`museum/roomRegistry.ts` and `in-preparation` in `museum/exhibitions.ts`. Shared pieces for a
+hall: `components/FreeWall`, `components/ChapterWall` (the essay), `components/Clerestory`.
 
-- Follow #48 step by step: concept (approved before code), modern architecture, exhibits, the essay
-  on the walls, the key visual, polish.
+- Follow #55 step by step, one hall per step, each with its objects, its essay and its key visual
+  (the concept was approved before code).
 - **An exhibition, not a route.** One open hall the visitor can see from its entrance and walk in any
   order; free-standing walls divide it, nothing has to be passed through in sequence.
 - **Exhibits are objects** on plinths, in cases or on walls, each with a label (description and a

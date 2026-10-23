@@ -97,7 +97,7 @@ export function LobbyPlan({ position }: { position: [number, number, number] }) 
           {[...EXHIBITIONS.map((e) => `${e.number}  ${e.title}${e.status !== 'open' ? ' (in preparation)' : e.kind === 'temporary' ? ' (temporary)' : ''}`), 'Lobby'].join('\n')}
         </Text>
         <Text position={[0, -0.36 - (EXHIBITIONS.length + 1) * 0.2, 0]} fontSize={0.045} lineHeight={1.5} maxWidth={1.3} color={INK.body} anchorX="left" anchorY="top">
-          For now the permanent exhibition is one room, The Button; the others are in preparation. Each exhibition ends at a door back to this lobby. Press P for this plan at any time.
+          The permanent exhibition is two halls in a row, The Button and Things We Somehow Accepted; the others are in preparation. Each exhibition ends at a door back to this lobby. Press P for this plan at any time.
         </Text>
       </group>
     </group>

@@ -3,7 +3,7 @@ import { MUSEUM } from '../identity'
 import { EXHIBITIONS, OPEN_EXHIBITIONS } from '../museum/exhibitions'
 import { AFTERWORD, FINDS, INSTITUTE, THESIS as ARCHAEOLOGY_THESIS } from '../rooms/archaeology/content'
 import { AFTERWORD as DARK_AFTERWORD, CONFIRMSHAMING, FLOW, PATTERNS, RECEIPT, THESIS as DARK_THESIS, TOTAL } from '../rooms/dark-patterns/content'
-import { CARDS as ACCEPTED, CHAPTERS as ACCEPTED_CHAPTERS, OBSERVATIONS, THESIS as ACCEPTED_THESIS } from '../rooms/accepted/content'
+import { ESSAY as ACCEPTED_ESSAY, ZONE_CARDS as ACCEPTED_CARDS } from '../rooms/accepted/content'
 import { CHAPTERS as STATES, THESIS as STATES_THESIS } from '../rooms/states/content'
 import { ESSAY, EXHIBITS, KEY_VISUAL } from '../rooms/the-button/content'
 
@@ -31,15 +31,12 @@ const ROOMS: { number: string; title: string; idea: string; entries: Entry[] }[]
   {
     number: '02',
     title: 'Things We Somehow Accepted',
-    idea: 'Interface behavior as architecture. A cookie banner across the room, modals that dim it, badges on every surface, a CAPTCHA gate, skeleton panels in the way and a feed with no end.',
-  entries: [
-      ACCEPTED_THESIS,
-      ...[ACCEPTED.banner, ACCEPTED.modal].map((card) => ({ kicker: `${ACCEPTED_CHAPTERS.interrupt.name} / ${card.year}`, title: card.title, body: card.description })),
-      ...[ACCEPTED.badge, ACCEPTED.captcha].map((card) => ({ kicker: `${ACCEPTED_CHAPTERS.attend.name.replace('\n', ' ')} / ${card.year}`, title: card.title, body: card.description })),
-      OBSERVATIONS.badges,
-      ...[ACCEPTED.skeleton, ACCEPTED.feed].map((card) => ({ kicker: `${ACCEPTED_CHAPTERS.wait.name.replace('\n', ' ')} / ${card.year}`, title: card.title, body: card.description })),
-      OBSERVATIONS.waiting,
-    ],
+    idea: 'Interface conventions that began as compromises and became the way things are, shown as objects: a cookie banner hung overhead, dialogs on a plinth, a wall of badges, a CAPTCHA, skeleton screens, and a feed rising through the middle of the hall without end.',
+    // The essay complete, each chapter followed by the objects of its bay.
+    entries: ACCEPTED_ESSAY.flatMap((chapter) => [
+      { kicker: chapter.kicker, title: chapter.title, body: chapter.paragraphs.join('\n\n'), quote: chapter.quote },
+      ...ACCEPTED_CARDS[chapter.zone].map((card) => ({ kicker: `${card.index} / ${card.year} / ${card.category}`, title: card.title, body: card.description })),
+    ]),
   },
   {
     number: '03',
@@ -169,7 +166,7 @@ export function TextExhibition({ visible, canVisit, onVisit }: { visible: boolea
       <section id="exhibition-permanent" className="text-exhibition__room" aria-labelledby="exhibition-permanent-title">
         <div className="meta">Exhibition 01</div>
         <h2 id="exhibition-permanent-title">Permanent Exhibition</h2>
-        <p className="text-exhibition__idea">{EXHIBITIONS[0].subtitle} For now, one room; more will follow.</p>
+        <p className="text-exhibition__idea">{EXHIBITIONS[0].subtitle} Two halls so far; Interface States will follow.</p>
         {OPEN_ROOMS.map((room) => (
           <section key={room.number} className="text-exhibition__subroom" aria-labelledby={`room-${room.number}`}>
             <div className="meta">Room {room.number}</div>
