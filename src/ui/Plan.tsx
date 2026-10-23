@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { EXHIBITIONS, exhibitionOf } from '../museum/exhibitions'
-import { LOBBY, SPACES } from '../museum/roomRegistry'
+import { SPACES } from '../museum/roomRegistry'
 import { useMuseumStore, visitor } from '../museum/store'
 
 /*
@@ -20,15 +20,18 @@ const MAX_Z = Math.max(...bounds.map((r) => r.maxZ)) + PAD
 
 const TONE: Record<string, string> = { lobby: 'plan__lobby', permanent: 'plan__permanent', archaeology: 'plan__archaeology', 'dark-patterns': 'plan__dark' }
 
-/** Names written on the plan, world [x, z]: the permanent exhibition's rooms, and the archaeology wing. */
-const LABELS: { text: string; at: [number, number] }[] = [
-  { text: 'LOBBY', at: [(LOBBY.minX + LOBBY.maxX) / 2, (LOBBY.minZ + LOBBY.maxZ) / 2] },
-  { text: 'ROOM 01', at: [0, 0] },
-  { text: 'ROOM 02', at: [-9, -48] },
-  { text: 'ROOM 03', at: [-11, -132] },
-  { text: 'ARCHAEOLOGY', at: [18, -4] },
-  { text: 'DARK PATTERNS', at: [-24, 7] },
-]
+/**
+ * Names written on the plan, world [x, z]: each open space's name near its north wall,
+ * clear of the visitor's mark, so a closed room is never named and a moved one is named
+ * where it now stands.
+ */
+const LABELS: { text: string; at: [number, number] }[] = SPACES.map((space) => {
+  const minX = Math.min(...space.bounds.map((r) => r.minX))
+  const maxX = Math.max(...space.bounds.map((r) => r.maxX))
+  const minZ = Math.min(...space.bounds.map((r) => r.minZ))
+  const maxZ = Math.max(...space.bounds.map((r) => r.maxZ))
+  return { text: space.hudLabel, at: [(minX + maxX) / 2, minZ + Math.min(2.5, (maxZ - minZ) / 2)] }
+})
 
 export function Plan({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const visited = useMuseumStore((state) => state.visited)

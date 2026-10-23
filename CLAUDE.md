@@ -121,8 +121,9 @@ Patterns are **closed, not deleted**: `CLOSED` in `museum/roomRegistry.ts` and `
   default; `face="display"` (Instrument Serif) for titles, chapter and object names and large
   figures, set with `displayCase` (title case, never capitals). Kickers use `TYPE.kicker` /
   `TYPE.sign` with `TYPE.tracking`. Both faces are OFL and self-hosted.
-- **Materials:** `scene/materials.ts` palettes give every space its stone floor, plaster walls and
-  trim, mapped by world position (no UVs needed) from textures generated at idle time; `Wall` adds
+- **Materials:** `scene/materials.ts` palettes give every space its floor (stone, or v3's oak boards),
+  walls (plaster, or v3's cast concrete) and trim, mapped by world position (no UVs needed) from
+  textures generated at idle time; `Wall` adds
   skirting, shadow gap and architraves. Reflections come from one generated environment
   (`scene/Lighting`). No image textures.
 - **Sound:** synthesised in `audio/`. It is optional, never carries information, and only starts
