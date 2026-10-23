@@ -24,10 +24,11 @@ import { StaticMerge } from '../../scene/StaticMerge'
 
 /*
  * The lobby: where every visit starts and ends. Bright, plain and compact. Its north
- * wall holds the museum's three entrances, each signed beside its door: the permanent
- * exhibition straight ahead (START HERE, and a line on the floor leading to it),
- * Interface Archaeology to the right, the temporary exhibition (Dark Patterns) to the
- * left. The front door, the credits and how to visit are behind the visitor.
+ * wall, the one the visitor faces on arrival, holds the museum's three entrances, each
+ * signed beside its door, and the plan of the museum: the permanent exhibition straight
+ * ahead (START HERE), Interface Archaeology to the right, the temporary exhibition
+ * (Dark Patterns) to the left. A line on the floor leads from where the visitor arrives
+ * to each of them. The front door, the credits and how to visit are behind the visitor.
  *
  * An exhibition's door stays shut until its rooms have loaded; walking towards it is
  * what starts loading them. World coordinates (the lobby's origin is the world origin).
@@ -44,6 +45,9 @@ const APPROACH = 6.5
 const OPEN_SECONDS = 1.1
 /** The front door, in the south wall, behind the visitor as they arrive. */
 const EXIT_X = -3
+/** Where the routes on the floor begin: just ahead of where the visitor arrives. */
+const ROUTE_Z = 33.6
+const ROUTE = basicMaterial('#57544e')
 
 const DOOR_OF: Partial<Record<ExhibitionDefinition['id'], keyof typeof DOORS>> = {
   permanent: 'lobbyPermanent',
@@ -135,7 +139,7 @@ const cardOf = (exhibition: ExhibitionDefinition) => ({
   description: exhibition.subtitle,
 })
 
-/** An exhibition's name beside its door: number, title, one line, and its state. */
+/** An exhibition's name beside its door, large enough to read from the front door: number, title, one line, and its state. */
 function Sign({ exhibition, x }: { exhibition: ExhibitionDefinition; x: number }) {
   const visited = useMuseumStore((state) => state.visited.includes(exhibition.id))
   const status = useExhibitionStatus(exhibition.id)
@@ -152,16 +156,16 @@ function Sign({ exhibition, x }: { exhibition: ExhibitionDefinition; x: number }
 
   return (
     <group position={[x, 0, NORTH]}>
-      <Text position={[0, 2.62, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
+      <Text position={[0, 2.98, 0]} fontSize={TYPE.kicker} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
         {`${exhibition.kind === 'temporary' ? 'TEMPORARY EXHIBITION' : 'EXHIBITION'} ${exhibition.number}  ↑`}
       </Text>
-      <Text face="display" position={[0, 2.44, 0]} fontSize={0.3} lineHeight={1} maxWidth={2.5} color={INK.text} anchorX="left" anchorY="top">
+      <Text face="display" position={[0, 2.8, 0]} fontSize={0.38} lineHeight={1} maxWidth={2.5} color={INK.text} anchorX="left" anchorY="top">
         {exhibition.title}
       </Text>
-      <Text position={[0, 1.86, 0]} fontSize={0.075} lineHeight={1.5} maxWidth={2.4} color={INK.body} anchorX="left" anchorY="top">
+      <Text position={[0, 1.94, 0]} fontSize={0.075} lineHeight={1.5} maxWidth={2.4} color={INK.body} anchorX="left" anchorY="top">
         {exhibition.subtitle}
       </Text>
-      <Text position={[0, 1.5, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.text} anchorX="left" anchorY="top">
+      <Text position={[0, 1.6, 0]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.text} anchorX="left" anchorY="top">
         {visited ? `${state}  ·  VISITED` : state}
       </Text>
     </group>
@@ -262,10 +266,20 @@ export function Lobby() {
           [28.6, 33.4].map((z) => <Luminaire key={`${x}:${z}`} position={[x + 1, LOBBY.height - 0.004, z]} size={[3.6, 2.8]} palette={palette} />),
         )}
 
-        {/* The recommended route, on the floor: from the front door to the permanent exhibition. */}
-        <mesh position={[0, 0.003, (LOBBY.minZ + 33.6) / 2]} rotation={[-Math.PI / 2, 0, 0]} material={basicMaterial('#57544e')}>
-          <planeGeometry args={[0.025, 33.6 - LOBBY.minZ]} />
+        {/* Routes on the floor, from where the visitor arrives to every entrance: straight on to the permanent exhibition, round to the others. */}
+        <mesh position={[0, 0.003, (LOBBY.minZ + ROUTE_Z) / 2]} rotation={[-Math.PI / 2, 0, 0]} material={ROUTE}>
+          <planeGeometry args={[0.025, ROUTE_Z - LOBBY.minZ]} />
         </mesh>
+        {[dark.x, archaeology.x].map((x) => (
+          <group key={x}>
+            <mesh position={[x / 2, 0.003, ROUTE_Z]} rotation={[-Math.PI / 2, 0, 0]} material={ROUTE}>
+              <planeGeometry args={[Math.abs(x) + 0.025, 0.025]} />
+            </mesh>
+            <mesh position={[x, 0.003, (LOBBY.minZ + ROUTE_Z) / 2]} rotation={[-Math.PI / 2, 0, 0]} material={ROUTE}>
+              <planeGeometry args={[0.025, ROUTE_Z - LOBBY.minZ]} />
+            </mesh>
+          </group>
+        ))}
       </StaticMerge>
 
       <RoomContents>
@@ -277,9 +291,14 @@ export function Lobby() {
         <Text position={[permanent.x, 3.72, NORTH]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="center" anchorY="middle">
           LOBBY
         </Text>
-        <Text position={[0.16, 0.006, 33.2]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.11} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="middle">
+        <Text position={[0.16, 0.006, ROUTE_Z - 0.4]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.11} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="middle">
           START HERE ↑
         </Text>
+        {EXHIBITIONS.filter((exhibition) => exhibition.door !== permanent.x).map((exhibition) => (
+          <Text key={exhibition.id} position={[exhibition.door + 0.16, 0.006, ROUTE_Z - 0.4]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.11} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="middle">
+            {`${exhibition.number} ↑`}
+          </Text>
+        ))}
 
         {EXHIBITIONS.map((exhibition) =>
           exhibition.status === 'open' ? <Entrance key={exhibition.id} exhibition={exhibition} /> : <ClosedEntrance key={exhibition.id} exhibition={exhibition} />,
@@ -295,8 +314,8 @@ export function Lobby() {
           body="A small museum about the controls, conventions and habits we use every day without noticing them. The permanent exhibition starts straight ahead; Interface Archaeology is on the right, and the temporary exhibition on the left. Each exhibition ends at a door back to this lobby."
         />
 
-        {/* The plan on the wall, beside how to visit. */}
-        <LobbyPlan position={[LOBBY.minX + 0.03, 1.75, 29.4]} />
+        {/* The plan, on the wall the visitor faces, between the permanent exhibition's sign and Interface Archaeology. */}
+        <LobbyPlan position={[5.6, 1.75, NORTH + 0.01]} facing="south" />
 
         {/* How to visit: a quiet gallery label, not a menu. */}
         <group position={[LOBBY.minX + 0.02, 0, 33.6]} rotation={[0, Math.PI / 2, 0]}>
