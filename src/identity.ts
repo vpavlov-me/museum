@@ -9,7 +9,10 @@ export const MUSEUM = {
   name: 'Interface Museum',
   premise: 'A small museum about the interfaces we use every day without noticing them.',
   /** The permanent exhibition's open rooms (#48). The museum's exhibitions are in museum/exhibitions.ts. */
-  rooms: [['01', 'The Button']] as const,
+  rooms: [
+    ['01', 'The Button'],
+    ['02', 'Things We Somehow Accepted'],
+  ] as const,
   author: 'Vladimir Pavlov',
   year: '2026',
   source: 'https://github.com/vpavlov-me/museum',

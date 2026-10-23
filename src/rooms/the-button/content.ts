@@ -1,3 +1,5 @@
+import type { EssayChapter } from '../../components/ChapterWall'
+import { FREE_WALL_FACE, type FreeWall } from '../../components/FreeWall'
 import type { Facing } from '../../components/WallText'
 import type { ExhibitCardData } from '../../museum/types'
 
@@ -37,17 +39,9 @@ export type ButtonExhibit = ExhibitCardData & {
  * A chapter of the essay. The wall carries its title, its first paragraph and its quote,
  * set large; the text version carries all of it.
  */
-export type Chapter = {
-  id: string
+export type Chapter = EssayChapter & {
   /** The zone it belongs to: P (prologue), the four bays, E (epilogue). */
   zone: 'P' | Bay | 'E'
-  kicker: string
-  title: string
-  paragraphs: string[]
-  quote: string
-  /** Where the block begins on its wall: [x, z], room-local; reading runs to the visitor's right. */
-  position: [number, number]
-  facing: Facing
 }
 
 /*
@@ -60,10 +54,6 @@ export type Chapter = {
  * (vitrines along the north wall); IV, the button dissolving (wide plinths).
  */
 
-/** A free-standing wall: along x at z = `at` (axis 'x'), or along z at x = `at` (axis 'z'). */
-export type FreeWall = { axis: 'x' | 'z'; at: number; from: number; to: number }
-
-export const FREE_WALL = { height: 4, thickness: 0.3 }
 
 export const FREE_WALLS: FreeWall[] = [
   { axis: 'x', at: 8, from: -12, to: -5 }, // prologue | I
@@ -74,7 +64,7 @@ export const FREE_WALLS: FreeWall[] = [
   { axis: 'x', at: 8, from: 5, to: 12 }, // IV | epilogue
 ]
 
-const FACE = FREE_WALL.thickness / 2 + 0.02
+const FACE = FREE_WALL_FACE
 
 /**
  * The key visual (#48): a kinetic installation hung over the centre of the hall, between

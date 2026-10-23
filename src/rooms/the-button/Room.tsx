@@ -3,7 +3,9 @@ import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useSound } from '../../audio/useSound'
 import { Clerestory, LeafSway } from '../../components/Clerestory'
+import { ChapterWall } from '../../components/ChapterWall'
 import { Cradle, CRADLE_SEAT } from '../../components/Cradle'
+import { FreeWallBodies, FreeWallObstacles } from '../../components/FreeWall'
 import { DoorLeaf } from '../../components/DoorLeaf'
 import { ExhibitLabel } from '../../components/ExhibitLabel'
 import { Plinth } from '../../components/Plinth'
@@ -22,7 +24,7 @@ import { StaticMerge } from '../../scene/StaticMerge'
 import { ARTIFACTS } from './artifacts'
 import { KeyVisual } from './KeyVisual'
 import { WALNUT } from './artifacts/shared'
-import { ESSAY, EXHIBITS, FREE_WALL, FREE_WALLS, type ButtonExhibit, type Chapter, type FreeWall } from './content'
+import { ESSAY, EXHIBITS, FREE_WALLS, type ButtonExhibit } from './content'
 
 const CRADLE = { height: 0.06 }
 const palette = PALETTES.hall
@@ -43,9 +45,6 @@ const FRAME = { width: 0.62, height: 0.8, depth: 0.05, border: 0.035, centre: 1.
 const GLASS = new THREE.MeshStandardMaterial({ color: '#ffffff', transparent: true, opacity: 0.1, roughness: 0.05, depthWrite: false })
 
 /** Texts on the free-standing walls: narrower than the default block, hung a little higher. */
-const CHAPTER_LAYOUT: WallTextLayout = { top: 2.55, titleWidth: 2, gap: 0.4, bodyWidth: 3.6, bodySize: 0.125 }
-/** Each chapter's quote, set large above it; the prologue's runs along the hall's west wall by the entrance. */
-const QUOTE = { top: 3.72, size: 0.28, width: 6 }
 const ENTRANCE_QUOTE = { at: [-12 + 0.01, 15.2] as [number, number], top: 3.1, size: 0.42, width: 5.6 }
 
 /** The clerestory: a band of frosted windows high round the hall, its only light (#48). */
@@ -164,62 +163,14 @@ function WallFrame() {
   )
 }
 
-/**
- * A free-standing wall: plaster, floating on a shadow gap like the hall's own walls, with
- * a clean top. It stands 4 m high in a 7 m hall, so the hall above it stays one space.
- */
-function FreeWallBody({ wall }: { wall: FreeWall }) {
-  const length = wall.to - wall.from
-  const mid = (wall.from + wall.to) / 2
-  const gap = 0.035
-  const [x, z] = wall.axis === 'x' ? [mid, wall.at] : [wall.at, mid]
-  const [sx, sz] = wall.axis === 'x' ? [length, FREE_WALL.thickness] : [FREE_WALL.thickness, length]
-  return (
-    <>
-      <mesh position={[x, gap + (FREE_WALL.height - gap) / 2, z]} material={palette.wall}>
-        <boxGeometry args={[sx, FREE_WALL.height - gap, sz]} />
-      </mesh>
-      <mesh position={[x, gap / 2, z]} material={palette.skirting}>
-        <boxGeometry args={[Math.max(0.01, sx - 0.024), gap, Math.max(0.01, sz - 0.024)]} />
-      </mesh>
-    </>
-  )
-}
-
-function FreeWallObstacle({ wall, index }: { wall: FreeWall; index: number }) {
-  const length = wall.to - wall.from
-  const mid = (wall.from + wall.to) / 2
-  useObstacle(`free-wall-${index}`, wall.axis === 'x' ? box(mid, wall.at, length, FREE_WALL.thickness) : box(wall.at, mid, FREE_WALL.thickness, length))
-  return null
-}
-
-/**
- * A chapter of the essay on its wall: the quote set large across the top, then the
- * chapter's title and its first paragraph at eye level. The rest is in the text version.
- */
-function ChapterWall({ chapter }: { chapter: Chapter }) {
-  return (
-    <>
-      {chapter.zone !== 'P' && (
-        <group position={[chapter.position[0], 0, chapter.position[1]]} rotation={facingRotation(chapter.facing)}>
-          <Text face="displayItalic" position={[0, QUOTE.top, 0]} fontSize={QUOTE.size} lineHeight={1.1} maxWidth={QUOTE.width} color={INK.text} anchorX="left" anchorY="top">
-            {`“${chapter.quote}”`}
-          </Text>
-        </group>
-      )}
-      <WallText position={chapter.position} facing={chapter.facing} layout={CHAPTER_LAYOUT} ink={INK} kicker={chapter.kicker} title={chapter.title} body={chapter.paragraphs[0]} />
-    </>
-  )
-}
-
-/** The end of the exhibition: a door back to the lobby, in the epilogue's corner of the hall's south wall. */
+/** A way back to the lobby for those who stop here, in the epilogue's corner; the exhibition goes on north, to Room 02. */
 const RETURN_X = 8.5
 const RETURN_CARD = {
   index: 'END',
   year: MUSEUM.year,
   category: 'PERMANENT EXHIBITION',
   title: 'Back to the lobby',
-  description: 'The end of the permanent exhibition, for now. The door leads back to the lobby.',
+  description: 'The exhibition goes on through the portal in the north wall, to Room 02. This door leads back to the lobby.',
 }
 
 /**
@@ -236,16 +187,12 @@ export function TheButtonRoom() {
   return (
     <>
       <StaticMerge>
-        {/* The lobby builds its half of the shared south wall; the hall, taller, builds its own half above and beside the portal. */}
-        <RoomShell minX={minX} maxX={maxX} minZ={minZ} maxZ={maxZ} height={height} palette={palette} north={{}} south={{ door: portal, split: true }} />
-        {FREE_WALLS.map((wall, i) => (
-          <FreeWallBody key={i} wall={wall} />
-        ))}
+        {/* The lobby builds its half of the shared south wall; the hall, taller, builds its own half above and beside the portal. The north wall, shared with Room 02's hall, is split the same way round the portal into it. */}
+        <RoomShell minX={minX} maxX={maxX} minZ={minZ} maxZ={maxZ} height={height} palette={palette} north={{ door: localDoor(DOORS.buttonAccepted, origin), split: true }} south={{ door: portal, split: true }} />
+        <FreeWallBodies walls={FREE_WALLS} palette={palette} />
         <Clerestory minX={minX} maxX={maxX} minZ={minZ} maxZ={maxZ} bottom={WINDOWS.bottom} top={WINDOWS.top} />
       </StaticMerge>
-      {FREE_WALLS.map((wall, i) => (
-        <FreeWallObstacle key={i} wall={wall} index={i} />
-      ))}
+      <FreeWallObstacles walls={FREE_WALLS} />
 
       <RoomContents>
         <LeafSway />
@@ -266,7 +213,7 @@ export function TheButtonRoom() {
         </group>
 
         {ESSAY.map((chapter) => (
-          <ChapterWall key={chapter.id} chapter={chapter} />
+          <ChapterWall key={chapter.id} chapter={chapter} quote={chapter.zone !== 'P'} />
         ))}
 
         <KeyVisual />

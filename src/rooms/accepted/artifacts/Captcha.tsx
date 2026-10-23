@@ -1,203 +1,175 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useThree } from '@react-three/fiber'
-import * as THREE from 'three'
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { useSound } from '../../../audio/useSound'
 import { ExhibitLabel } from '../../../components/ExhibitLabel'
 import { Text } from '../../../components/Text'
-import { Wall } from '../../../components/Wall'
-import { INK, TYPE } from '../../../identity'
+import { INK_ON_LIGHT } from '../../../identity'
 import { useRoomFrame } from '../../../museum/RoomContext'
-import { rect } from '../../../museum/types'
-import { useObstacle } from '../../../scene/Collision'
-import { CIRCLE } from '../../../scene/geometry'
+import { roundedRect } from '../../../scene/geometry'
 import { useFocusTarget } from '../../../scene/Interaction'
-import { PALETTES } from '../../../scene/materials'
-import { CAPTCHA_Z, CARDS, CELLS } from '../content'
-import { smoothstep, useVisitorAway } from '../shared'
+import { basicMaterial, FIXTURE_MATERIAL } from '../../../scene/materials'
+import { CARDS, LAYOUT } from '../content'
+import { SCREEN, since } from './shared'
 
-const WALL_DEPTH = 0.3
-const GATE = { width: 2.7, height: 2.95 }
-const TILE = { width: 0.86, height: 0.88, gap: 0.04 }
-const CHECK_MS = 1500
-const RISE = 3.4
+const PANEL = { width: 2.6, height: 3.6, centre: 2.15 }
+const TILE = 0.74
+const GAP = 0.04
+const CHECKING = 1.3
+/** The third attempt passes; the panel resets a while after. */
+const PASS_ON = 3
+const RESET_AFTER = 8
 
-type Stage = 'idle' | 'checking' | 'retry' | 'open'
-
+type Stage = 'idle' | 'checking' | 'retry' | 'pass'
 const HEADLINES: Record<Stage, string> = {
-  idle: 'Select all squares with crossings',
+  idle: 'crossings',
   checking: 'Verifying…',
   retry: 'Please try again.',
-  open: 'Verified. Thank you for your patience.',
+  pass: 'Verified. Thank you.',
 }
 
-const BACKGROUNDS = ['#5d5a52', '#4a4f53', '#6b6556', '#3f4441', '#575049', '#4d4a45']
-
-type Pattern = 'crossing' | 'disc' | 'blocks' | 'horizon'
-const PATTERNS: Pattern[] = ['crossing', 'disc', 'blocks', 'horizon']
-
-const PLANE = new THREE.PlaneGeometry(1, 1)
-const TILE_MATERIAL = new THREE.MeshBasicMaterial({ vertexColors: true })
-
-/** One coloured piece of a tile image: a unit shape, scaled, placed and painted with vertex colours. */
-function piece(shape: THREE.BufferGeometry, color: string, [x, y]: [number, number], [sx, sy]: [number, number], rotation = 0, layer = 0) {
-  const geometry = shape.clone().scale(sx, sy, 1).rotateZ(rotation).translate(x, y, layer * 0.002)
-  const c = new THREE.Color(color)
-  const colors = new Float32Array(geometry.attributes.position.count * 3)
-  for (let i = 0; i < colors.length; i += 3) colors.set([c.r, c.g, c.b], i)
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-  return geometry
-}
-
-const tileImages = new Map<string, THREE.BufferGeometry>()
-
-/** Abstract "photographs": enough to read as an image grid, with no recognisable source. One draw call each. */
-function tileImage(pattern: Pattern, color: string) {
-  const key = `${pattern}:${color}`
-  const cached = tileImages.get(key)
-  if (cached) return cached
-  const { width: w, height: h } = TILE
-  const parts = [piece(PLANE, color, [0, 0], [w, h])]
-  if (pattern === 'crossing') [-0.3, -0.15, 0, 0.15, 0.3].forEach((x) => parts.push(piece(PLANE, '#d9d6cc', [x, -0.12], [0.07, 0.5], 0.18, 1)))
-  if (pattern === 'disc') parts.push(piece(CIRCLE, '#c9b98f', [0.12, 0.14], [0.16, 0.16], 0, 1))
-  if (pattern === 'blocks') {
-    parts.push(piece(PLANE, '#2c2e2f', [-0.2, -0.12], [0.24, 0.62], 0, 1))
-    parts.push(piece(PLANE, '#363634', [0.14, -0.2], [0.3, 0.46], 0, 1))
-  }
-  if (pattern === 'horizon') parts.push(piece(PLANE, '#2f302d', [0, -0.22], [w, 0.42], 0, 1))
-  const geometry = mergeGeometries(parts, false)
-  parts.forEach((part) => part.dispose())
-  tileImages.set(key, geometry)
-  return geometry
-}
-
-const TILES = Array.from({ length: 9 }, (_, i) => {
-  const col = i % 3
-  const row = Math.floor(i / 3)
-  return {
-    x: (col - 1) * (TILE.width + TILE.gap),
-    y: 0.11 + TILE.height / 2 + row * (TILE.height + TILE.gap),
-    front: { pattern: PATTERNS[(i * 5 + 1) % 4], color: BACKGROUNDS[(i * 7) % 6] },
-    back: { pattern: PATTERNS[(i * 3 + 2) % 4], color: BACKGROUNDS[(i * 5 + 3) % 6] },
-  }
-})
+type Image = 'crossing' | 'car' | 'tree' | 'sky'
+const IMAGES: Image[] = ['crossing', 'car', 'tree', 'sky']
+const GROUNDS = ['#7d7a72', '#6a7076', '#8a8270', '#5f6763', '#7b7268', '#6e6a64'].map(basicMaterial)
+const WHITE = basicMaterial('#efeee9')
+const DARK = basicMaterial('#2c2b29')
+const GREEN = basicMaterial('#5c8a52')
+const SKY = basicMaterial('#a8b8c4')
+const CHECK = basicMaterial('#4bb06a')
 
 /**
- * Exhibit 04. A checkpoint in a partition wall. The gate is a grid of image tiles;
- * pressing E "verifies". The first attempt always asks you to try again. The second
- * lets you through. No bypass, no failure state, just the familiar small tax.
+ * Exhibit 04. A CAPTCHA, on the wall at full height, as the gate it used to be in Room 02
+ * but no longer in anybody's way. Verifying takes a moment and usually fails; the
+ * third try passes, with thanks.
  */
 export function Captcha() {
-  const away = useVisitorAway()
+  const [x, wall] = LAYOUT.captcha
+  const z = wall + 0.02
   const clock = useThree((state) => state.clock)
   const [stage, setStage] = useState<Stage>('idle')
-  const [passable, setPassable] = useState(false)
-  const attempts = useRef(0)
-  const flippedAt = useRef(-Infinity)
-  const openedAt = useRef(Infinity)
-  const timers = useRef<number[]>([])
-  const tiles = useRef<(THREE.Group | null)[]>([])
+  const [tries, setTries] = useState(0)
+  const at = useRef(-Infinity)
   const play = useSound()
 
-  const clearTimers = () => {
-    timers.current.forEach((timer) => window.clearTimeout(timer))
-    timers.current = []
-  }
-
-  useEffect(() => clearTimers, [])
-
-  useEffect(() => {
-    if (!away) return
-    clearTimers()
-    attempts.current = 0
-    flippedAt.current = -Infinity
-    openedAt.current = Infinity
-    setStage('idle')
-    setPassable(false)
-  }, [away])
-
   const verify = useCallback(() => {
-    attempts.current += 1
-    const passed = attempts.current >= 2
-    flippedAt.current = clock.elapsedTime
+    if (stage === 'checking' || stage === 'pass') return
+    at.current = clock.elapsedTime
     setStage('checking')
-    const at: [number, number, number] = [0, 2, CAPTCHA_Z]
-    play('captcha-check', at)
-    timers.current.push(
-      window.setTimeout(() => {
-        play(passed ? 'captcha-pass' : 'captcha-retry', at)
-        setStage(passed ? 'open' : 'retry')
-        if (passed) openedAt.current = clock.elapsedTime
-      }, CHECK_MS),
-    )
-    if (passed) timers.current.push(window.setTimeout(() => setPassable(true), CHECK_MS + 700))
-  }, [clock, play])
+    play('captcha-check', [x, 1.6, z])
+  }, [stage, clock, play, x, z])
+  useFocusTarget({ id: 'captcha', position: [x, 1.6, z], distance: 4.2, card: CARDS.captcha, labelled: true, prompt: stage === 'idle' || stage === 'retry' ? 'VERIFY' : null, onInteract: verify })
 
-  useRoomFrame(() => {
-    const now = clock.elapsedTime
-    const flips = attempts.current
-    tiles.current.forEach((tile, i) => {
-      if (!tile) return
-      // Tiles turn one after another while "verifying", revealing a new set of images.
-      const p = smoothstep(0, 0.35, now - flippedAt.current - i * 0.09)
-      const from = Math.max(0, flips - 1) * Math.PI
-      tile.rotation.y = flips === 0 ? 0 : from + Math.PI * p
-      // Once verified, the grid lifts into the lintel like a gate.
-      const row = Math.floor(i / 3)
-      tile.position.y = TILES[i].y + RISE * smoothstep(0, 0.9, now - openedAt.current - row * 0.12 - (i % 3) * 0.05)
-    })
+  useRoomFrame(({ clock }) => {
+    const t = since(at.current, clock.elapsedTime)
+    if (stage === 'checking' && t > CHECKING) {
+      const next = tries + 1
+      setTries(next)
+      at.current = clock.elapsedTime
+      if (next >= PASS_ON) {
+        setStage('pass')
+        play('captcha-pass', [x, 1.6, z])
+      } else {
+        setStage('retry')
+        play('captcha-retry', [x, 1.6, z])
+      }
+    } else if (stage === 'pass' && t > RESET_AFTER) {
+      setStage('idle')
+      setTries(0)
+    }
   })
 
-  const half = WALL_DEPTH / 2
-  useObstacle('captcha-gate', passable ? null : rect(-GATE.width / 2, GATE.width / 2, CAPTCHA_Z - half, CAPTCHA_Z + half))
-
-  const interactive = stage === 'idle' || stage === 'retry'
-  useFocusTarget({
-    id: 'captcha',
-    position: [0, 1.5, CAPTCHA_Z + half],
-    distance: 3.4,
-    card: stage === 'open' ? null : CARDS.captcha,
-    labelled: true,
-    prompt: interactive ? 'VERIFY' : null,
-    onInteract: verify,
-  })
-
-  const face = CAPTCHA_Z + half + 0.01
+  // Each attempt deals a new set of pictures.
+  const tiles = useMemo(() => Array.from({ length: 9 }, (_, i) => ({ image: IMAGES[(i * 3 + tries * 5 + (i % 2)) % IMAGES.length], ground: GROUNDS[(i + tries * 2) % GROUNDS.length] })), [tries])
+  const grid = TILE * 3 + GAP * 2
 
   return (
-    <>
-      {/* A partition across the room: the end of chapter II. */}
-      <Wall
-        axis="x"
-        at={CAPTCHA_Z}
-        from={CELLS.attend.minX}
-        to={CELLS.attend.maxX}
-        height={CELLS.attend.height}
-        thickness={WALL_DEPTH}
-        palette={PALETTES.accepted}
-        door={{ center: 0, width: GATE.width, height: GATE.height }}
-      />
-      <ExhibitLabel position={[CELLS.attend.minX + 0.2, 1.6, face]} exhibit={CARDS.captcha} width={1.15} />
-
-      <Text position={[0, 3.62, face]} fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="center" anchorY="middle">
-        VERIFY THAT YOU ARE HUMAN
-      </Text>
-      <Text position={[0, 3.32, face]} fontSize={0.17} color={stage === 'retry' ? '#e8a598' : '#efede6'} anchorX="center" anchorY="middle">
-        {HEADLINES[stage]}
-      </Text>
-
-      {TILES.map((tile, i) => (
-        <group
-          key={i}
-          ref={(node) => {
-            tiles.current[i] = node
-          }}
-          position={[tile.x, tile.y, CAPTCHA_Z]}
-        >
-          <mesh position={[0, 0, 0.012]} geometry={tileImage(tile.front.pattern, tile.front.color)} material={TILE_MATERIAL} />
-          <mesh position={[0, 0, -0.012]} rotation={[0, Math.PI, 0]} geometry={tileImage(tile.back.pattern, tile.back.color)} material={TILE_MATERIAL} />
-        </group>
-      ))}
-    </>
+    <group position={[x, PANEL.centre, z]}>
+      {/* A bronze frame, as for anything hung in the museum. */}
+      <mesh position={[0, 0, -0.012]} material={FIXTURE_MATERIAL}>
+        <boxGeometry args={[PANEL.width + 0.08, PANEL.height + 0.08, 0.02]} />
+      </mesh>
+      <mesh geometry={roundedRect(PANEL.width, PANEL.height, 0.02)} material={SCREEN.paper} />
+      <group position={[0, PANEL.height / 2 - 0.42, 0.002]}>
+        <mesh material={SCREEN.blueFill}>
+          <planeGeometry args={[grid, 0.62]} />
+        </mesh>
+        <Text position={[-grid / 2 + 0.12, 0.13, 0.002]} fontSize={0.075} color="#ffffff" anchorX="left" anchorY="middle">
+          {stage === 'idle' ? 'Select all squares with' : ' '}
+        </Text>
+        <Text position={[-grid / 2 + 0.12, -0.08, 0.002]} fontSize={0.15} color="#ffffff" anchorX="left" anchorY="middle">
+          {HEADLINES[stage]}
+        </Text>
+      </group>
+      <group position={[0, -0.18, 0.002]}>
+        {tiles.map((tile, i) => {
+          const cx = ((i % 3) - 1) * (TILE + GAP)
+          const cy = (1 - Math.floor(i / 3)) * (TILE + GAP)
+          return (
+            <group key={i} position={[cx, cy, 0]} visible={stage !== 'pass'}>
+              <mesh material={tile.ground}>
+                <planeGeometry args={[TILE, TILE]} />
+              </mesh>
+              <Picture image={tile.image} />
+            </group>
+          )
+        })}
+        {/* Passed: a check mark, drawn as two strokes. */}
+        {stage === 'pass' && (
+          <group position={[0, 0, 0.002]}>
+            <mesh position={[-0.16, -0.05, 0]} rotation={[0, 0, -Math.PI / 4]} material={CHECK}>
+              <planeGeometry args={[0.3, 0.08]} />
+            </mesh>
+            <mesh position={[0.1, 0.07, 0]} rotation={[0, 0, Math.PI / 4]} material={CHECK}>
+              <planeGeometry args={[0.6, 0.08]} />
+            </mesh>
+          </group>
+        )}
+      </group>
+      <group position={[grid / 2 - 0.36, -PANEL.height / 2 + 0.3, 0.002]}>
+        <mesh geometry={roundedRect(0.72, 0.22, 0.03)} material={SCREEN.blueFill} />
+        <Text position={[0, 0, 0.002]} fontSize={0.075} letterSpacing={0.08} color="#ffffff" anchorX="center" anchorY="middle">
+          VERIFY
+        </Text>
+      </group>
+      <ExhibitLabel position={[PANEL.width / 2 + 0.35, 0.3, -0.01]} exhibit={CARDS.captcha} width={1.1} ink={INK_ON_LIGHT} />
+    </group>
   )
+}
+
+/** A tile's picture, in a few flat shapes: a zebra crossing, a car, a tree, or only sky. */
+function Picture({ image }: { image: Image }) {
+  const z = 0.002
+  switch (image) {
+    case 'crossing':
+      return (
+        <>
+          {[-0.24, -0.08, 0.08, 0.24].map((dx) => (
+            <mesh key={dx} position={[dx, -0.12, z]} material={WHITE}>
+              <planeGeometry args={[0.09, 0.4]} />
+            </mesh>
+          ))}
+        </>
+      )
+    case 'car':
+      return (
+        <>
+          <mesh position={[0, -0.08, z]} geometry={roundedRect(0.5, 0.18, 0.05)} material={DARK} />
+          <mesh position={[0, 0.04, z]} geometry={roundedRect(0.3, 0.14, 0.05)} material={DARK} />
+        </>
+      )
+    case 'tree':
+      return (
+        <>
+          <mesh position={[0, -0.2, z]} material={DARK}>
+            <planeGeometry args={[0.06, 0.24]} />
+          </mesh>
+          <mesh position={[0, 0.06, z]} geometry={roundedRect(0.4, 0.4, 0.2)} material={GREEN} />
+        </>
+      )
+    default:
+      return (
+        <mesh position={[0, 0.18, z]} material={SKY}>
+          <planeGeometry args={[TILE, TILE * 0.4]} />
+        </mesh>
+      )
+  }
 }

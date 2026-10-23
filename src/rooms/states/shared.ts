@@ -2,7 +2,10 @@ import * as THREE from 'three'
 import { useRoom } from '../../museum/RoomContext'
 import { museumStore, useMuseumStore } from '../../museum/store'
 
-export { smoothstep } from '../accepted/shared'
+export const smoothstep = (edge0: number, edge1: number, x: number) => {
+  const t = THREE.MathUtils.clamp((x - edge0) / (edge1 - edge0), 0, 1)
+  return t * t * (3 - 2 * t)
+}
 
 /** The state (zone) of Room 03 the visitor is standing in, or null outside the room. */
 export function useStateZone() {

@@ -45,12 +45,12 @@ export const EXHIBITIONS: ExhibitionDefinition[] = [
     kind: 'permanent',
     number: '01',
     title: 'Permanent Exhibition',
-    subtitle: 'The Button: a small history of digital affordance.',
+    subtitle: 'The Button, and Things We Somehow Accepted: interfaces as objects.',
     status: 'open',
     slug: 'permanent',
     recommended: 1,
-    // For now one room, The Button (#48): an open hall straight off the lobby. Rooms 02 and 03 are closed.
-    spaces: ['the-button'],
+    // An enfilade of halls (#55): The Button straight off the lobby, then Room 02 to the north. Room 03 is closed.
+    spaces: ['the-button', 'accepted'],
     door: 0,
     start: { at: [0, 23.5], yaw: 0 },
     load: () => import('../rooms/permanent'),

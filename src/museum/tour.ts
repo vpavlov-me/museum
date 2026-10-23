@@ -72,9 +72,22 @@ const PERMANENT: TourStop[] = [
   { id: 'word', title: '2013, the button as a word', at: [6.6, 5.8], yaw: E, pitch: -0.1 },
   { id: 'material', title: '2014, the paper button', at: [6.6, 9.3], yaw: E, pitch: -0.1 },
   { id: 'quiet', title: 'Today, the quiet button', at: [6.6, 13], yaw: E, pitch: -0.1 },
-  // The epilogue, by the way out.
+  // The epilogue, by The Button's own door back to the lobby; the exhibition goes on north.
   { id: 'epilogue', title: 'What remains', at: [8.4, 21.5], yaw: N, via: [[6.8, 16.5], [4.2, 16.5], [4.2, 20.5]] },
-  { id: 'permanent-return', title: 'Back to the lobby', at: [8.5, 24.3], yaw: S },
+  // Room 02, Things We Somehow Accepted (#55), through the portal in The Button's north wall.
+  { id: 'accepted', title: 'Things We Somehow Accepted', at: [0, -9.5], yaw: N, via: [[4.2, 20.5], [4.2, 16.5], [2.2, 4.5], [0, 1.5], [0, -4.5]] },
+  { id: 'accepted-prologue', title: 'The way things are', at: [-8.6, -9.6], yaw: N },
+  { id: 'accepted-chapter-1', title: 'I. Interrupt', at: [-9.6, -19.4], yaw: E, via: [[-3.8, -11], [-3.8, -14.7], [-6.6, -14.7]] },
+  { id: 'banner', title: '2011, the cookie banner', at: [-8.5, -15.2], yaw: N, pitch: 0.3 },
+  { id: 'modals', title: '1984, the modal', at: [-6.6, -22.7], yaw: W, pitch: -0.1 },
+  { id: 'accepted-chapter-2', title: 'II. Prove, attend', at: [3.6, -29.6], yaw: S, via: [[-6.6, -25], [-9.6, -27.5]] },
+  { id: 'badge', title: '2007, the notification badge', at: [-6.5, -28.4], yaw: N, pitch: 0.05 },
+  { id: 'captcha', title: '2000, the CAPTCHA', at: [4.6, -30.2], yaw: N },
+  { id: 'accepted-chapter-3', title: 'III. Wait, continue', at: [8.6, -19.6], yaw: W, via: [[9.6, -27.5], [8.2, -24.8]] },
+  { id: 'skeleton', title: '2013, the skeleton screen', at: [5.9, -20.4], yaw: E },
+  { id: 'feed', title: '2006, infinite scroll', at: [0, -12.6], yaw: N, pitch: 0.2, via: [[6.6, -15.2], [2.5, -13.2]] },
+  { id: 'accepted-epilogue', title: 'Accepted, not chosen', at: [8.4, -9.8], yaw: N },
+  { id: 'permanent-return', title: 'Back to the lobby', at: [8.5, -8.4], yaw: S },
 ]
 
 const ARCHAEOLOGY: TourStop[] = [
