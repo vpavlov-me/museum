@@ -5,12 +5,12 @@ import type { ExhibitCardData } from '../../museum/types'
 /*
  * Interface Archaeology, the museum's second exhibition: one room in four cells,
  * room-local metres. It is entered from the passage off the lobby at z = -7.8 and
- * walked towards -z:
+ * walked towards -z; from the trench on, every door is on one axis, x = 10.5:
  *
  *   I   ACCESSION       z  -7.9 … -15    the archive's lobby: title, thesis, its own sign
- *   II  THE TRENCH      z -15.2 … -33    a hall around a stepped excavation; finds under soil
- *   III THE STORE       z -33.2 … -47    low shelving and three vitrines
- *   IV  RECONSTRUCTION  z -47.2 … -57    a dark room with the archive's diorama; a door back to the lobby
+ *   II  THE TRENCH      z -15.2 … -30    a hall around a stepped excavation; finds under soil
+ *   III THE STORE       z -30.4 … -42    low shelving and three vitrines
+ *   IV  RECONSTRUCTION  z -42.2 … -52    a dark room with the archive's diorama; a door back to the lobby
  *
  * Two voices. The museum speaks on the walls, in its own ink. The archive speaks on
  * its catalogue cards, dark on pale: confident, often wrong, not always.

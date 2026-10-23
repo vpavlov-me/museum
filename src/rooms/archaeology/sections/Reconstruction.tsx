@@ -25,15 +25,15 @@ const palette = PALETTES.diorama
  * from behind the seat, over its shoulder; nobody is in it. The only light in the
  * room is the rectangles' own. Then the museum's afterword, and the door back to the lobby.
  */
-const STAGE = rect(-1.6, 3.4, -54.6, -48.6)
+const STAGE = rect(cell.minX + 0.4, cell.minX + 5.4, cell.maxZ - 7.4, cell.maxZ - 1.4)
 const STAGE_HEIGHT = 0.22
 const BARRIER_X = STAGE.maxX + 0.25
-const SEAT = { x: 1.7, z: -51.6 }
+const SEAT = { x: cell.minX + 3.7, z: cell.maxZ - 4.4 }
 /** The cabinet the large rectangle stands on. */
 const CABINET_HEIGHT = 0.5
 const SCREEN_FRAME = 0.05
 /** The large rectangle, standing on the cabinet: `y` is its centre. */
-const SCREEN = { x: -1.15, z: -51.6, width: 1.3, height: 0.74, y: STAGE_HEIGHT + CABINET_HEIGHT + (0.74 + SCREEN_FRAME) / 2 }
+const SCREEN = { x: cell.minX + 0.85, z: SEAT.z, width: 1.3, height: 0.74, y: STAGE_HEIGHT + CABINET_HEIGHT + (0.74 + SCREEN_FRAME) / 2 }
 const LIGHT = '#c7d2dc'
 
 const FABRIC = new THREE.MeshStandardMaterial({ color: '#4a403a', roughness: 0.95 })
@@ -90,7 +90,7 @@ function Diorama() {
         <mesh position={[(STAGE.minX + STAGE.maxX) / 2, STAGE_HEIGHT / 2, (STAGE.minZ + STAGE.maxZ) / 2]} material={PLINTH_MATERIAL}>
           <boxGeometry args={[STAGE.maxX - STAGE.minX, STAGE_HEIGHT, STAGE.maxZ - STAGE.minZ]} />
         </mesh>
-        <mesh position={[0.4, STAGE_HEIGHT + 0.004, SEAT.z]} rotation={[-Math.PI / 2, 0, 0]} material={RUG}>
+        <mesh position={[cell.minX + 2.4, STAGE_HEIGHT + 0.004, SEAT.z]} rotation={[-Math.PI / 2, 0, 0]} material={RUG}>
           <planeGeometry args={[3.2, 2.2]} />
         </mesh>
         <Seat />
@@ -121,7 +121,7 @@ function Diorama() {
       </mesh>
 
       {/* Its light on the rug, the seat and the wall behind the cabinet. */}
-      <LightPool position={[0.2, STAGE_HEIGHT + 0.008, SEAT.z]} size={[3.6, 2.6]} material={glow} />
+      <LightPool position={[cell.minX + 2.2, STAGE_HEIGHT + 0.008, SEAT.z]} size={[3.6, 2.6]} material={glow} />
       <LightPool position={[STAGE.minX - 0.38, 1.3, SCREEN.z]} rotation={[0, Math.PI / 2, 0]} size={[3.2, 2.2]} material={glow} />
       <LightPool position={[SEAT.x - 0.38, STAGE_HEIGHT + 0.6, SEAT.z]} rotation={[0, -Math.PI / 2, 0]} size={[1.4, 1.3]} color={LIGHT} strength={0.05} />
     </>
@@ -129,7 +129,7 @@ function Diorama() {
 }
 
 /** The far door: back to the lobby. */
-const RETURN_X = 5.5
+const RETURN_X = cell.minX + 7.5
 
 export function Reconstruction() {
   const play = useSound()

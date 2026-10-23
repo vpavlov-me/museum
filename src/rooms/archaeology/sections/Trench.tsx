@@ -19,11 +19,12 @@ const cell = CELLS.trench
 const palette = PALETTES.archive
 
 /*
- * The excavation: a pit in the middle of the hall, cut down in three steps, one per
- * layer. Walking north along its east edge is walking back in time: each step stops
- * at the foot of an older layer. The visitor stays on the floor around it, behind a rail.
+ * The excavation: a pit in the hall, cut down in three steps, one per layer. Walking
+ * north along its east edge, the walkway and the room's axis, is walking back in time:
+ * each step stops at the foot of an older layer. The visitor stays on the walkway,
+ * behind a rail; the way on is straight ahead at its end.
  */
-const PIT = rect(2.5, 9.5, -29, -19.5)
+const PIT = rect(2.5, 8, -29, -19.5)
 const BAND = 0.6
 const STEPS = [
   { from: -19.5, to: -22.65 },
@@ -33,7 +34,7 @@ const STEPS = [
 const CURB = { width: 0.2, height: 0.1 }
 const RAIL = { height: 0.95, size: 0.04, post: 0.05 }
 /** Where the finds lie: near the east edge, close enough to read from the walkway. */
-const FIND_X = 7.5
+const FIND_X = PIT.maxX - 2
 /** The catalogue cards stand on the east rail, facing the walkway. */
 const CARD_X = PIT.maxX + CURB.width + 0.08
 
@@ -359,14 +360,13 @@ export function Trench() {
         <Excavation />
         <Edge />
         <Reliefs />
-        {/* Two long slots over the walkways: the hall's light, kept off the pit. */}
-        {[cell.minX + 1.6, cell.maxX - 1.6].map((x) => (
+        {/* A long slot over the walkway: the hall's light, kept off the pit. */}
+        {[cell.maxX - 1.6].map((x) => (
           <Luminaire key={x} position={[x, cell.height - 0.004, (cell.minZ + cell.maxZ) / 2]} size={[0.14, cell.maxZ - cell.minZ - 2.4]} palette={palette} />
         ))}
       </StaticMerge>
 
-      <LightPool position={[cell.maxX - 2.2, 0.004, (cell.minZ + cell.maxZ) / 2]} size={[4.5, 17]} color="#efe6d6" strength={0.05} />
-      <LightPool position={[cell.minX + 2.2, 0.004, (cell.minZ + cell.maxZ) / 2]} size={[4.5, 17]} color="#efe6d6" strength={0.05} />
+      <LightPool position={[cell.maxX - 2.2, 0.004, (cell.minZ + cell.maxZ) / 2]} size={[4.5, cell.maxZ - cell.minZ - 0.8]} color="#efe6d6" strength={0.05} />
 
       {/* Layer marks on the west face, in the excavators' chalk, each where its layer first shows. */}
       {LAYERS.map((layer, band) => (

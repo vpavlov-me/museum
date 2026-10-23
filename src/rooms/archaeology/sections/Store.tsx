@@ -23,15 +23,16 @@ const palette = PALETTES.archive
  * III — THE STORE. Low and close: shelving of numbered boxes down both long walls, and
  * three vitrines down the middle, each holding one find with its card on the plinth.
  */
-const CASE_X = 2.5
+/** The cases stand west of the aisle, which is the room's axis. */
+const CASE_X = cell.minX + 2
 const PLINTH = { width: 1.15, height: 0.92, depth: 0.82 }
 const GLASS = { width: 1.05, height: 0.56, depth: 0.72 }
-const VITRINES = { inscriptions: -37, hoard: -41, oath: -45 } as const
+const VITRINES = { inscriptions: cell.maxZ - 3.4, hoard: cell.maxZ - 6.9, oath: cell.maxZ - 10.4 } as const
 
 const SHELF = { depth: 0.5, levels: [0.12, 0.62, 1.12, 1.62, 2.12], height: 2.5 }
 const SHELVES = [
-  { x: cell.minX + SHELF.depth / 2, from: -34.6, to: -46.4 },
-  { x: cell.maxX - SHELF.depth / 2, from: -34.6, to: -45.2 },
+  { x: cell.minX + SHELF.depth / 2, from: cell.maxZ - 1.4, to: cell.minZ + 0.6 },
+  { x: cell.maxX - SHELF.depth / 2, from: cell.maxZ - 1.4, to: cell.minZ + 0.6 },
 ]
 const SHELF_MATERIAL = new THREE.MeshStandardMaterial({ color: '#34312d', roughness: 0.7 })
 const BOX_MATERIAL = new THREE.MeshStandardMaterial({ color: '#6a6257', roughness: 0.95 })
@@ -277,8 +278,8 @@ export function Store() {
     <>
       <StaticMerge>
         <Shelving />
-        {/* Two slots over the aisles either side of the cases. */}
-        {[0.3, 4.7].map((x) => (
+        {/* Two slots: over the cases, and over the aisle beside them. */}
+        {[CASE_X, CASE_X + 2.6].map((x) => (
           <Luminaire key={x} position={[x, cell.height - 0.004, (cell.minZ + cell.maxZ) / 2]} size={[0.12, cell.maxZ - cell.minZ - 3]} palette={palette} />
         ))}
       </StaticMerge>

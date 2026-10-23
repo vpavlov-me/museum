@@ -148,13 +148,15 @@ export const DARK_CELLS = {
 /**
  * Interface Archaeology as a sequence of cells, room-local: the lobby of a future
  * archive, a hall around an excavation, a low store, and a small dark room with a
- * reconstruction, whose far door leads back to the lobby.
+ * reconstruction, whose far door leads back to the lobby. From the hall on, an
+ * enfilade: every opening on one axis (ARCHAEOLOGY_AXIS), the walkway along the finds.
  */
+export const ARCHAEOLOGY_AXIS = 10.5
 export const ARCHAEOLOGY_CELLS = {
   accession: cell(2, 12, -15, -7.9, 4.2),
-  trench: cell(-2, 14, -33, -15.2, 5.2),
-  store: cell(-2, 7, -47, -33.2, 3.2),
-  reconstruction: cell(-2, 7, -57, -47.2, 3.4),
+  trench: cell(1, 14, -30.2, -15.2, 5.2),
+  store: cell(6, 14, -42, -30.4, 3.2),
+  reconstruction: cell(3.5, 12.5, -52, -42.2, 3.4),
 }
 
 /** After Room 03: a low, warm room that closes the permanent exhibition, with the way back to the lobby. Local to Room 03. */
@@ -203,9 +205,9 @@ export const DOORS = {
   /** From the lobby into the passage to Interface Archaeology. */
   lobbyArchaeology: { ...inArchaeology(0, 0), width: 1.8, height: 2.6 },
   archaeologyEntry: { ...inArchaeology(7, -7.8), width: 1.8, height: 2.4 },
-  trenchEntry: { ...inArchaeology(10.5, -15.1), width: 1.8, height: 2.6 },
-  storeEntry: { ...inArchaeology(0, -33.1), width: 1.8, height: 2.4 },
-  reconstructionEntry: { ...inArchaeology(5, -47.1), width: 1.6, height: 2.3 },
+  trenchEntry: { ...inArchaeology(ARCHAEOLOGY_AXIS, -15.1), width: 1.8, height: 2.6 },
+  storeEntry: { ...inArchaeology(ARCHAEOLOGY_AXIS, -30.3), width: 1.8, height: 2.4 },
+  reconstructionEntry: { ...inArchaeology(ARCHAEOLOGY_AXIS, -42.1), width: 1.6, height: 2.3 },
 } satisfies Record<string, DoorDefinition>
 
 export const SPACES: SpaceDefinition[] = [
