@@ -244,7 +244,8 @@ export function Lobby() {
   const archaeology = DOORS.lobbyArchaeology
   const west = (dark.x + permanent.x) / 2
   const east = (permanent.x + archaeology.x) / 2
-  const opening = (door: typeof dark) => ({ center: door.x, width: door.width, height: door.height })
+  // An entrance in preparation is walled up: its door is drawn on the wall, with no way through.
+  const opening = (door: typeof dark) => (EXHIBITIONS.some((exhibition) => exhibition.status === 'open' && exhibition.door === door.x) ? { center: door.x, width: door.width, height: door.height } : undefined)
 
   return (
     <>
@@ -292,7 +293,7 @@ export function Lobby() {
           ink={INK}
           kicker="INTERFACE MUSEUM"
           title="Interfaces, given physical form."
-          body="A small museum about the controls, conventions and habits we use every day without noticing them. The permanent exhibition starts straight ahead; Interface Archaeology is on the right, and the temporary exhibition on the left. Each exhibition ends at a door back to this lobby."
+          body="A small museum about the controls, conventions and habits we use every day without noticing them. The permanent exhibition starts straight ahead and ends at a door back to this lobby. The doors either side open later: Interface Archaeology on the right, the temporary exhibition on the left."
         />
 
         {/* The plan on the wall, beside how to visit. */}

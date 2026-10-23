@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { OPEN_EXHIBITIONS } from '../src/museum/exhibitions'
 import { TOURS } from '../src/museum/tour'
 import { enterWalking, look, open, press, settle, state, step, waitOpen, walkTo, watchConsole } from './museum'
 
@@ -39,7 +40,7 @@ async function reach(page: Page, x: number, z: number, label: string, previous?:
   throw new Error(`could not reach ${label} at [${x}, ${z}]: stopped at [${here.x.toFixed(2)}, ${here.z.toFixed(2)}] in ${here.space}`)
 }
 
-for (const id of ['permanent', 'archaeology', 'dark-patterns'] as const) {
+for (const { id } of OPEN_EXHIBITIONS) {
   test(`walks ${id} from the lobby and back`, async ({ page }) => {
     const errors = watchConsole(page)
     await open(page, '/')

@@ -3,13 +3,14 @@ import { useThree } from '@react-three/fiber'
 import type { SoundName } from '../../audio/sounds'
 import { useSound } from '../../audio/useSound'
 import { Cradle, CRADLE_SEAT } from '../../components/Cradle'
-import { DoorSign } from '../../components/DoorSign'
+import { DoorLeaf } from '../../components/DoorLeaf'
 import { ExhibitLabel } from '../../components/ExhibitLabel'
 import { Plinth } from '../../components/Plinth'
 import { RoomShell } from '../../components/RoomShell'
 import { Text } from '../../components/Text'
 import { WallText } from '../../components/WallText'
-import { INK } from '../../identity'
+import { INK, MUSEUM } from '../../identity'
+import { navigation } from '../../museum/navigation'
 import { DOORS, localDoor } from '../../museum/roomRegistry'
 import { RoomContents, useRoom } from '../../museum/RoomContext'
 import { box } from '../../museum/types'
@@ -89,10 +90,20 @@ function ExhibitStand({ exhibit }: { exhibit: ButtonExhibit }) {
   )
 }
 
+/** The end of the exhibition, for now (#48): a door back to the lobby where the way on to Room 02 was. */
+const RETURN_CARD = {
+  index: 'END',
+  year: MUSEUM.year,
+  category: 'PERMANENT EXHIBITION',
+  title: 'Back to the lobby',
+  description: 'The end of the permanent exhibition, for now. The door leads back to the lobby.',
+}
+
 export function TheButtonRoom() {
   const { origin } = useRoom()
   const exit = localDoor(DOORS.buttonExit, origin)
   const { halfWidth, halfLength, height } = ROOM
+  const play = useSound()
 
   return (
     <>
@@ -104,7 +115,7 @@ export function TheButtonRoom() {
           maxZ={halfLength}
           height={height}
           palette={palette}
-          north={{ door: exit }}
+          north={{}}
           south={{ door: localDoor(DOORS.entrance, origin) }}
         />
 
@@ -131,8 +142,20 @@ export function TheButtonRoom() {
           ROOM 01 / A SMALL HISTORY OF DIGITAL AFFORDANCE
         </Text>
 
-        {/* Where the exit leads, over it. */}
-        <DoorSign position={[exit.center, exit.height, -halfLength + 0.02]} facing="south" kicker="NEXT · ROOM 02" title="Things We Somehow Accepted" />
+        {/* The way out, back to the lobby. */}
+        <DoorLeaf
+          id="permanent-return"
+          x={exit.center}
+          wall={-halfLength + 0.02}
+          palette={palette}
+          sign="LOBBY"
+          prompt="RETURN TO THE LOBBY"
+          card={RETURN_CARD}
+          onUse={() => {
+            play('exit-door', [exit.center, 1.2, -halfLength])
+            navigation.returnToLobby('permanent')
+          }}
+        />
 
         {WALL_TEXTS.map((text) => (
           <WallText key={text.id} position={text.position} facing={text.facing} kicker={text.kicker} title={text.title} body={text.body} />

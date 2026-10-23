@@ -1,21 +1,15 @@
 import type { ExhibitionRooms } from '../museum/exhibitions'
-import { AcceptedRoom } from './accepted/Room'
-import { Colophon } from './colophon/Colophon'
 import { Entrance } from './entrance/Entrance'
-import { Passage } from './passage/Passage'
-import { StatesRoom } from './states/Room'
-import { StatesTransition } from './states/Transition'
 import { TheButtonRoom } from './the-button/Room'
 
-/** The permanent exhibition's rooms: one chunk, loaded when the visitor heads for it. */
+/**
+ * The permanent exhibition's rooms: one chunk, loaded when the visitor heads for it.
+ * For now the entrance and Room 01 (#48); Rooms 02 and 03, the passages and the
+ * colophon are closed, their code kept in rooms/ for when they open again.
+ */
 const rooms: ExhibitionRooms = {
   entrance: Entrance,
   'the-button': TheButtonRoom,
-  passage: Passage,
-  accepted: AcceptedRoom,
-  'transition-03': StatesTransition,
-  states: StatesRoom,
-  colophon: Colophon,
 }
 
 export default rooms

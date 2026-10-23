@@ -70,9 +70,9 @@ export function Entrance() {
           position={[HALL.minX + 0.02, 4.4]}
           facing="east"
           layout={STATEMENT_LAYOUT}
-          kicker="EXHIBITION 01 / THREE ROOMS"
-          title="Objects, conventions, states."
-          body="Three rooms about the interface as an object, as architecture, and as the state of the world. Each room holds one idea. Walk slowly and read the walls. Some objects respond when you approach them and press E."
+          kicker="EXHIBITION 01 / ONE ROOM"
+          title="The interface as an object."
+          body="For now, one room: the button, the oldest promise an interface makes. More rooms will follow. Walk slowly and read the walls; the buttons on their plinths can be pressed with E."
         />
 
       </RoomContents>

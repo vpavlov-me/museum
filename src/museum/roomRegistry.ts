@@ -208,7 +208,14 @@ export const DOORS = {
   reconstructionEntry: { ...inArchaeology(5, -47.1), width: 1.6, height: 2.3 },
 } satisfies Record<string, DoorDefinition>
 
-export const SPACES: SpaceDefinition[] = [
+/**
+ * Spaces closed for now (#48): the museum is the lobby and The Button while that room is
+ * rebuilt as an exhibition. Their definitions stay, so they can open again unchanged;
+ * closed, they have no floor, no doors and no place on the plans.
+ */
+const CLOSED = new Set(['passage', 'accepted', 'transition-03', 'states', 'colophon', 'dark-passage', 'dark-patterns', 'archaeology-passage', 'archaeology'])
+
+const ALL_SPACES: SpaceDefinition[] = [
   {
     id: 'lobby',
     number: null,
@@ -331,6 +338,8 @@ export const SPACES: SpaceDefinition[] = [
   },
 ]
 
+export const SPACES = ALL_SPACES.filter((space) => !CLOSED.has(space.id))
+
 /** Every visit starts in the lobby, by the front door, facing the three entrances. */
 export const SPAWN = {
   position: [1, EYE_HEIGHT, 34.4] as [number, number, number],
@@ -342,8 +351,11 @@ const doorRect = (door: DoorDefinition): Rect => {
   return rect(door.x - door.width / 2, door.x + door.width / 2, door.z - half, door.z + half)
 }
 
+/** The doors that join two open spaces: a door into a closed space is a wall. */
+const OPEN_DOORS = Object.values(DOORS).filter((door) => SPACES.filter((space) => space.bounds.some((bounds) => overlaps(bounds, doorRect(door)))).length >= 2)
+
 /** Every floor area the visitor may stand on: spaces plus the openings that join them. */
-export const WALKABLE: Rect[] = [...SPACES.flatMap((space) => space.bounds), ...Object.values(DOORS).map(doorRect)]
+export const WALKABLE: Rect[] = [...SPACES.flatMap((space) => space.bounds), ...OPEN_DOORS.map(doorRect)]
 
 export const getSpace = (id: string) => SPACES.find((space) => space.id === id) ?? null
 
@@ -371,7 +383,7 @@ export function zoneAt(space: SpaceDefinition, x: number, z: number) {
  */
 export const NEIGHBOURS: ReadonlyMap<string, ReadonlySet<string>> = (() => {
   const map = new Map(SPACES.map((space) => [space.id, new Set<string>()]))
-  for (const door of Object.values(DOORS)) {
+  for (const door of OPEN_DOORS) {
     const reach = doorRect(door)
     const joined = SPACES.filter((space) => space.bounds.some((bounds) => overlaps(bounds, reach)))
     for (const a of joined) for (const b of joined) if (a !== b) map.get(a.id)!.add(b.id)
@@ -415,7 +427,7 @@ const GRAPH: ReadonlyMap<string, ReadonlySet<string>> = (() => {
       })
     })
   }
-  for (const door of Object.values(DOORS)) {
+  for (const door of OPEN_DOORS) {
     const reach = doorRect(door)
     const joined = SPACES.flatMap((space) => space.bounds.flatMap((cell, i) => (overlaps(cell, reach) ? [nodeId(space.id, i)] : [])))
     for (const a of joined) for (const b of joined) link(a, b)

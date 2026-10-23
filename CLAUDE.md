@@ -61,16 +61,26 @@ Do not introduce this folder structure prematurely if a change is still small, b
 - Prefer proximity, gaze or clear interaction prompts.
 - Always preserve an obvious way to release pointer lock.
 
-## Current state: v2, a small museum
+## Current state: v3, one room done properly (#48)
 
-v1 shipped as one exhibition of three rooms (#12). v2 (#20, #21) makes it a small museum: a
-**lobby** where every visit starts and ends, the **Permanent Exhibition** (Rooms 01–03, unchanged),
-**Interface Archaeology** in its own wing (#22), and the temporary exhibition, **Dark Patterns** (#25).
+v1 shipped as one exhibition of three rooms (#12); v2 (#20, #21) made it a small museum with a
+lobby and three exhibitions. v3 narrows it on purpose: **the lobby and one room, The Button**, made
+as good as they can be before the museum grows again. Rooms 02–03, Interface Archaeology and Dark
+Patterns are **closed, not deleted**: `CLOSED` in `museum/roomRegistry.ts` and `in-preparation` in
+`museum/exhibitions.ts`; their code stays in `src/rooms/`.
 
-- The quality roadmap (#31) comes first: the museum standard (materials and light, display kit, wall
-  typography), then re-planning the exhibitions as clear enfilades.
+- Follow #48 step by step: concept (approved before code), modern architecture, exhibits, the essay
+  on the walls, the key visual, polish.
+- **An exhibition, not a route.** One open hall the visitor can see from its entrance and walk in any
+  order; free-standing walls divide it, nothing has to be passed through in sequence.
+- **Exhibits are objects** on plinths, in cases or on walls, each with a label (description and a
+  short introduction). The essay is set on the walls in fragments and complete in the text version.
+- **No interactive mechanics for now:** walking and looking only. Nothing blocks the way and nothing
+  has to be pressed to go on. Considered interactions come later, by design.
+- **Modern architecture,** neither classical nor futuristic (Chipperfield, Zumthor, SANAA, Beyeler):
+  calm concrete or plaster, terrazzo or polished concrete, a little oak, shadow gaps, top light.
 - Design for three to five exhibitions, not more. Do not start an exhibition, room or new exhibit
-  without an approved issue; ideas go into the v2 roadmap (#21) as backlog first.
+  without an approved issue; ideas go into the roadmap (#48) as backlog first.
 - Every merge to `main` deploys: each change must leave walking, the guided tour and the text
   version complete, with entry, colophon, metadata and the OG image matching the exhibitions.
 - Otherwise, only fix bugs, regressions, accessibility and performance problems, small copy errors
