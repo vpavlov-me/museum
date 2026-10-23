@@ -12,7 +12,7 @@ their code stays in `src/rooms/`, closed.
 
 ## The museum
 
-Every visit starts in the **lobby**, a light concrete-and-plaster hall. Its north wall holds the
+Every visit starts in the **lobby**, a hall of grey cast concrete on an oak floor. Its north wall holds the
 three entrances, each signed beside its door; a line on the floor leads to the one that is open,
 straight into The Button's hall. Every exhibition ends at a door back
 to the lobby, and the lobby's front door leaves the museum.

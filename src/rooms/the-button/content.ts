@@ -33,14 +33,21 @@ export type ButtonExhibit = ExhibitCardData & {
   artifact: { kind: ArtifactKind; label: string; prompt: string }
 }
 
-export type RoomWallText = {
+/**
+ * A chapter of the essay. The wall carries its title, its first paragraph and its quote,
+ * set large; the text version carries all of it.
+ */
+export type Chapter = {
   id: string
-  facing: Facing
-  /** [x, z] where the block begins. */
-  position: [number, number]
+  /** The zone it belongs to: P (prologue), the four bays, E (epilogue). */
+  zone: 'P' | Bay | 'E'
   kicker: string
   title: string
-  body: string
+  paragraphs: string[]
+  quote: string
+  /** Where the block begins on its wall: [x, z], room-local; reading runs to the visitor's right. */
+  position: [number, number]
+  facing: Facing
 }
 
 /*
@@ -261,33 +268,99 @@ export const EXHIBITS: ButtonExhibit[] = [
   },
 ]
 
-export const WALL_TEXTS: RoomWallText[] = [
+/*
+ * The essay, "A button is a promise", in six chapters, one for each zone of the hall.
+ * Each hangs on the wall that faces its bay's objects, so that the visitor turns from
+ * the things to the words about them.
+ */
+export const ESSAY: Chapter[] = [
   {
-    id: 'intro',
-    // The prologue: on the wall the visitor meets first, to the left of the entrance.
-    facing: 'south',
-    position: [-11.6, 8 + FACE],
-    kicker: 'INTRODUCTION / 01',
+    id: 'prologue',
+    zone: 'P',
+    kicker: 'PROLOGUE',
     title: 'A button is a promise.',
-    body: 'For decades, interface designers have been teaching people that a small surface on a screen can cause something to happen. Its appearance changed with every generation of software, but the contract remained surprisingly stable: this is a place where your intention becomes an action.',
-  },
-  {
-    id: 'observation',
-    // Bay IV: facing its buttons across the bay.
-    facing: 'east',
-    position: [5 + FACE, 4.6],
-    kicker: 'OBSERVATION / 02',
-    title: 'When the border disappeared.',
-    body: 'As people became fluent in digital interfaces, controls needed fewer physical metaphors. Shadows faded. Gradients flattened. Sometimes even the container vanished. Familiarity became part of the interface itself.',
-  },
-  {
-    id: 'question',
-    // The epilogue, by the way out.
+    paragraphs: [
+      'Every day you press a few hundred buttons and notice almost none of them. That is the point. A button is one of the few things in an interface that is not information: it is a place where a wish becomes an act. You want something to happen, you touch a small marked area, and it does.',
+      'Nothing about that is natural. A rectangle of light has no spring, no travel, no click. Everything we know about pressing it we learned from objects, then from pictures of objects, and at last from habit. This hall follows that education in four steps, from the brass and porcelain the idea came from to the buttons that have almost stopped looking like anything.',
+      'Read it as the history of a promise. The form of the button changed every decade; the promise did not. Here, it says, what you meant will be taken seriously.',
+      'Each bay holds the buttons of one age, and the wall facing them carries a chapter of this essay. The chapters run clockwise, but you may walk the hall in any order. A promise does not mind which way round you come to it.',
+    ],
+    quote: 'A button is the place where a wish becomes an act.',
+    position: [-11.6, 8 + FACE],
     facing: 'south',
+  },
+  {
+    id: 'chapter-1',
+    zone: 'I',
+    kicker: 'I / BEFORE THE SCREEN',
+    title: 'The hand learns first.',
+    paragraphs: [
+      'Before there were screens, a button was a mechanism you could feel. A typewriter key travelled a few millimetres and swung a typebar against the paper. A light switch resisted, then gave way with a snap. A bell push did nothing at your fingertip and everything in another room.',
+      'Out of these objects came the grammar that interfaces still speak. A control has a resting state and an active one. It answers at once, with a sound, a movement or a light. And it asks for very little: one finger, one motion, no explanation.',
+      'The elevator call button added something less mechanical. Pressing it a second time does nothing, and almost everyone does it. A button, it turned out, is also a way of being heard, and people like to be heard twice.',
+      'Each of these objects is honest about what it does. You can see the lever, the contact, the wire that runs to the bell. The control and the machine are the same thing, and learning one is learning the other. That honesty is what the screen would lose, and what designers would spend half a century trying to give back.',
+    ],
+    quote: 'A control has two positions and a sound between them.',
+    position: [-5 - FACE, -2.6],
+    facing: 'west',
+  },
+  {
+    id: 'chapter-2',
+    zone: 'II',
+    kicker: 'II / DRAWING A PRESS',
+    title: 'Light from the top left.',
+    paragraphs: [
+      'When the graphical interface arrived, the button lost its body. On the Xerox Star a command was a word in a thin rectangle, a frame that only said: point here. There was nothing to press, only something to select. Within fifteen years designers had drawn the body back, in pixels.',
+      'The Macintosh rounded the corners and ringed the expected answer with a heavier border. Windows 95 lit every button from the top left and shaded its bottom right, so that a grey rectangle seemed to stand off the screen and to sink when clicked.',
+      'These were not decorations. They were instructions written in light and shadow, the only words a flat screen had for saying that this, and not that, will move. A generation learned to read them so well that it stopped noticing it was reading.',
+      'Drawn buttons also made a new kind of decision possible. The default button is a suggestion built into a shape: the system expects one answer and makes it the easiest to give. A small rounded border began a long history of interfaces that lean, gently or not, towards what someone wants us to do.',
+    ],
+    quote: 'Light and shadow were the only words a flat screen had for: this one moves.',
+    position: [-3.4, -7 - FACE],
+    facing: 'north',
+  },
+  {
+    id: 'chapter-3',
+    zone: 'III',
+    kicker: 'III / THE MATERIAL AGE',
+    title: 'Something to touch.',
+    paragraphs: [
+      'In 2001 the button became a thing you might want to touch. Aqua made it out of blue gel, with a highlight like a drop of water, and let the default one breathe. Six years later the iPhone had no keys at all, and its lock screen explained the gesture with a drawn object: a knob in a groove, an arrow, a line of text.',
+      'Software went on to borrow whole materials: stitched leather, brushed aluminium, felt and paper. The aim was reassurance. A slab of glass that did things no object had ever done dressed itself in the textures of desks and diaries, so that nobody would feel lost.',
+      'Skeuomorphism is often remembered as kitsch. It was also a kindness. Millions of people who had never used a computer learned to use one in their pocket, and the leather told them what kind of place they were in.',
+      'It worked, and it could not last. Every new material was one more thing to draw and one more thing to read, and the people it was meant to reassure no longer needed reassuring.',
+    ],
+    quote: 'Glass dressed itself in leather so that nobody would feel lost.',
+    position: [9.6, -7 - FACE],
+    facing: 'north',
+  },
+  {
+    id: 'chapter-4',
+    zone: 'IV',
+    kicker: 'IV / DISSOLVING',
+    title: 'The form goes first.',
+    paragraphs: [
+      'In 2013 iOS 7 took the button apart. The outline went, then the gradient, then the shadow, and what remained was a word in the system colour. A year later Material Design brought depth back, but as behaviour rather than ornament: a sheet that rises when touched and answers with a ripple.',
+      'Since then the container has kept thinning. Many controls are now a word, an arrow or a line that moves. Their meaning comes from where they are, from what they did last time, and from the consistency of everything around them.',
+      'This is only possible because of everything in the bays behind you. The button can disappear because the habit of pressing is now stronger than any form it could take.',
+      'It is also a risk. Flatness asks people to trust what they have already learned, and for most people, most of the time, the trust is well placed. But what is invisible to those who know is invisible to those who do not know yet: to a newcomer, an older eye or a tired hand, a word in blue may be just a word in blue.',
+    ],
+    quote: 'The button can disappear because the habit is stronger than any form.',
+    position: [5 + FACE, 4.6],
+    facing: 'east',
+  },
+  {
+    id: 'epilogue',
+    zone: 'E',
+    kicker: 'EPILOGUE',
+    title: 'What remains.',
+    paragraphs: [
+      'Take away the spring, the bevel, the gel, the leather and the outline, and something is still there: a place on a surface, a word that names what will happen, an answer that comes at once. That is the promise this hall began with, and it has outlived every form that carried it.',
+      'Good buttons keep it plainly. They say what they will do, they do it, and they show that it is done. Bad ones break it, and no shape can make up for that.',
+      'The next button may have no surface at all: a gesture, a glance, a sentence spoken aloud. It will still be judged by the oldest question an interface has to answer. When you meant something, did it happen?',
+    ],
+    quote: 'When you meant something, did it happen?',
     position: [5.4, 8 + FACE],
-    kicker: 'QUESTION / 03',
-    title: 'How little can a button look like a button?',
-    body: 'The contemporary interface keeps testing the boundary between elegance and discoverability. Remove too much and the control becomes invisible. Add too much and it competes with the thing the user actually came to do.',
+    facing: 'south',
   },
 ]
-

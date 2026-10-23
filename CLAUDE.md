@@ -43,8 +43,11 @@ Do not introduce this folder structure prematurely if a change is still small, b
 
 ## Visual language
 
-- light, modern galleries (v3): polished concrete floors, warm plaster walls on a shadow gap, oak
-  plinths, laylights for even top light (`PALETTES.lobby` and `PALETTES.hall`); the closed rooms
+- light, modern galleries (v3): tall rooms (lobby 9 m, hall 12 m) of seamless grey cast concrete on
+  a shadow gap, wide oak boards, plinths in the floor's oak, and daylight only: a band of frosted
+  windows under the ceiling with palm shadows swaying on the glass (`components/Clerestory`, drawn
+  in code), no lamps or spots (`PALETTES.lobby` and
+  `PALETTES.hall`, `wallKind: 'concrete'`, `floorKind: 'oak'`); the closed rooms
   keep their dark stone and plaster until they are rebuilt;
 - warm off-white typography;
 - sparse accent colors reserved for exhibits;
@@ -79,7 +82,7 @@ Patterns are **closed, not deleted**: `CLOSED` in `museum/roomRegistry.ts` and `
 - **No interactive mechanics for now:** walking and looking only. Nothing blocks the way and nothing
   has to be pressed to go on. Considered interactions come later, by design.
 - **Modern architecture,** neither classical nor futuristic (Chipperfield, Zumthor, SANAA, Beyeler):
-  calm concrete or plaster, terrazzo or polished concrete, a little oak, shadow gaps, top light.
+  cast concrete, oak boards, shadow gaps, daylight from high windows.
 - Design for three to five exhibitions, not more. Do not start an exhibition, room or new exhibit
   without an approved issue; ideas go into the roadmap (#48) as backlog first.
 - Every merge to `main` deploys: each change must leave walking, the guided tour and the text
@@ -101,8 +104,9 @@ Patterns are **closed, not deleted**: `CLOSED` in `museum/roomRegistry.ts` and `
   it); the address bar follows the exhibition the visitor is in. `P` opens the plan (`ui/Plan`).
   `museum/events.ts` is the analytics surface: add an event there, never instrument per frame.
 - **Visibility and activation:** put everything except merged architecture in
-  `<RoomContents cells={[…]}>`. Animate with `useRoomFrame`. Light exhibits with `Downlight`
-  fixtures; the shared `LightRig` has a budget of 6 spotlights. Contents more than two doors away
+  `<RoomContents cells={[…]}>`. Animate with `useRoomFrame`. The v3 galleries are lit by daylight
+  alone; the closed rooms light exhibits with `Downlight` fixtures (the shared `LightRig` has a
+  budget of 6 spotlights). Contents more than two doors away
   are neither drawn, animated nor lit.
 - **Interaction:** `useObstacle` blocks the way, and `useFocusTarget` makes things focusable and
   usable with `E`; the guided tour's action button does the same. Things that block the way must
