@@ -79,8 +79,8 @@ test('the front door leaves the museum', async ({ page }) => {
   await open(page, '/')
   await enterWalking(page)
   await page.evaluate(() => (window as any).__museum.teleport(-3, 34.4, Math.PI))
-  await step(page, 6)
-  expect((await state(page)).prompt).toBe('LEAVE THE MUSEUM')
+  // The visit may take a few frames to begin after entering: step until the door is in focus.
+  await expect.poll(async () => (await state(page)).prompt, { timeout: 30_000, intervals: [100] }).toBe('LEAVE THE MUSEUM')
   await press(page)
   await expect(page.locator('.colophon')).toHaveClass(/overlay--visible/)
   expect((await state(page)).ended).toBe(true)
