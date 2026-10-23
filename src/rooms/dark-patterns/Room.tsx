@@ -88,7 +88,8 @@ function Welcome() {
 
 /* II — CHECKOUT. A long counter; the receipt along the far wall fills in as the visitor walks. */
 
-const LINE_X = [-7.1, -9.0, -10.9, -12.8, -14.7, -16.6]
+/** The receipt's mounts, 1.8 m apart, between the big door and the small one. */
+const LINE_X = [-6.3, -8.1, -9.9, -11.7, -13.5, -15.3]
 const BOX = { x: -11, z: -16.6 }
 
 function ReceiptLine({ index }: { index: number }) {
@@ -199,7 +200,7 @@ function Checkout() {
   return (
     <>
       <StaticMerge>
-        {[checkout.minX + 3, checkout.minX + 9, checkout.minX + 15].map((x) => (
+        {[checkout.minX + 2.6, checkout.minX + 8, checkout.minX + 13.4].map((x) => (
           <Luminaire key={x} position={[x, checkout.height - 0.004, (checkout.minZ + checkout.maxZ) / 2]} size={[4.2, 0.14]} palette={sales} />
         ))}
         {/* The big door is framed in light. */}
@@ -230,7 +231,7 @@ function Checkout() {
       {RECEIPT.map((_, i) => (
         <ReceiptLine key={i} index={i} />
       ))}
-      <group position={[-17.6, 2.05, checkout.maxZ - 0.03]} rotation={[0, Math.PI, 0]}>
+      <group position={[checkout.minX + 2.4, 2.05, checkout.maxZ - 0.03]} rotation={[0, Math.PI, 0]}>
         <Text fontSize={TYPE.sign} letterSpacing={TYPE.tracking} color={INK.muted} anchorX="left" anchorY="top">
           TOTAL
         </Text>
@@ -297,13 +298,13 @@ function Leaving() {
 function Cancelled() {
   const play = useSound()
   const wall = cancelled.minZ + 0.02
-  const door = -9.6
+  const door = cancelled.maxX - 1.6
   return (
     <>
       <StaticMerge>
         <Luminaire position={[(cancelled.minX + cancelled.maxX) / 2, cancelled.height - 0.004, cancelled.minZ + 1.6]} size={[6.4, 0.12]} palette={sales} />
       </StaticMerge>
-      <LightPool position={[-15.6, 2, wall - 0.008]} rotation={[0, 0, 0]} size={[6.4, 3]} color="#eef2f5" strength={0.06} />
+      <LightPool position={[cancelled.minX + 4.4, 2, wall - 0.008]} rotation={[0, 0, 0]} size={[6.4, 3]} color="#eef2f5" strength={0.06} />
       <Text position={[cancelled.minX + 0.4, 3.0, wall]} fontSize={0.075} letterSpacing={0.14} color={INK.muted} anchorX="left" anchorY="top">
         YOUR SUBSCRIPTION HAS BEEN CANCELLED.
       </Text>

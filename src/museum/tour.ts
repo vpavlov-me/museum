@@ -99,20 +99,20 @@ const ARCHAEOLOGY: TourStop[] = [
 ]
 
 const DARK_PATTERNS: TourStop[] = [
-  { id: 'dark-patterns', title: 'Dark Patterns', at: dk(-7, -10), yaw: N, via: [dk(0, 1.3), dk(0, -2), dk(0, -6.6), dk(-7, -6.6), dk(-7, -8.6)] },
+  { id: 'dark-patterns', title: 'Dark Patterns', at: dk(-7, -10), yaw: N, via: [dk(0, 1.3), dk(0, -2), dk(0, -6.6), dk(-4, -6.6), dk(-4, -8.6)] },
   { id: 'countdown', title: 'This exhibition closes in…', at: dk(-4.4, -12.2), yaw: E },
   { id: 'checkout', title: 'II. Checkout', at: dk(-4, -17.4), yaw: N, via: [dk(-4, -14.2), dk(-4, -16)] },
-  { id: 'stay', title: 'Thank you for staying', at: dk(-4.6, -22.6), yaw: N, via: [dk(-4.6, -19.8)] },
-  { id: 'preselected', title: 'Booking protection', at: dk(-11, -18.2), yaw: S, via: [dk(-4.6, -19.8), dk(-10, -19.8)] },
-  { id: 'receipt', title: 'The receipt', at: dk(-13.4, -19), yaw: N },
-  { id: 'total', title: 'The total', at: dk(-16.4, -17.4), yaw: S },
-  { id: 'leave-door', title: 'No thanks', at: dk(-18.6, -19.6), yaw: N + 0.5 },
-  { id: 'flow-1', title: 'Are you sure?', at: dk(-10.2, -22.3), yaw: E, via: [dk(-18.9, -20.4), dk(-18.9, -22.3)] },
-  { id: 'flow-2', title: 'Before you go', at: dk(-17.8, -24.7), yaw: W, via: [dk(-9, -22.3), dk(-9, -24.7)] },
-  { id: 'flow-3', title: 'Tell us why', at: dk(-10.2, -27.1), yaw: E, via: [dk(-19, -24.7), dk(-19, -27.1)] },
-  { id: 'flow-4', title: 'Please hold', at: dk(-17.8, -29.5), yaw: W, via: [dk(-9, -27.1), dk(-9, -29.5)] },
-  { id: 'cancelled', title: 'IV. Cancelled', at: dk(-16.4, -33.6), yaw: N, via: [dk(-18.9, -29.5), dk(-18.9, -31.6)] },
-  { id: 'dark-return', title: 'Back to the lobby', at: dk(-9.8, -34.4), yaw: N },
+  { id: 'stay', title: 'Thank you for staying', at: dk(-3.8, -21.6), yaw: N, via: [dk(-3.8, -19.2)] },
+  { id: 'preselected', title: 'Booking protection', at: dk(-11, -18.2), yaw: S, via: [dk(-3.8, -19.2), dk(-10, -19.2)] },
+  { id: 'receipt', title: 'The receipt', at: dk(-13.4, -18.6), yaw: N },
+  { id: 'total', title: 'The total', at: dk(-15.6, -17.4), yaw: S },
+  { id: 'leave-door', title: 'No thanks', at: dk(-16.6, -18.8), yaw: N + 0.5 },
+  { id: 'flow-1', title: 'Are you sure?', at: dk(-8.2, -21.3), yaw: E, via: [dk(-16.9, -19.4), dk(-16.9, -21.3)] },
+  { id: 'flow-2', title: 'Before you go', at: dk(-15.8, -23.7), yaw: W, via: [dk(-7, -21.3), dk(-7, -23.7)] },
+  { id: 'flow-3', title: 'Tell us why', at: dk(-8.2, -26.1), yaw: E, via: [dk(-17, -23.7), dk(-17, -26.1)] },
+  { id: 'flow-4', title: 'Please hold', at: dk(-15.8, -28.5), yaw: W, via: [dk(-7, -26.1), dk(-7, -28.5)] },
+  { id: 'cancelled', title: 'IV. Cancelled', at: dk(-14.4, -32.6), yaw: N, via: [dk(-16.9, -28.5), dk(-16.9, -30.6)] },
+  { id: 'dark-return', title: 'Back to the lobby', at: dk(-7.8, -33.4), yaw: N },
 ]
 
 export const TOURS: Record<Route, TourStop[]> = { lobby: LOBBY, permanent: PERMANENT, archaeology: ARCHAEOLOGY, 'dark-patterns': DARK_PATTERNS }

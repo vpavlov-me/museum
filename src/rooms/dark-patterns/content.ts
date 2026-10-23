@@ -6,9 +6,11 @@ import type { ExhibitCardData } from '../../museum/types'
  * Dark Patterns, the temporary exhibition: one room walked as a purchase and a
  * cancellation, room-local metres. Entered from the passage off the lobby at z = -7.8:
  *
- *   I   WELCOME     the title, a countdown that never ends, a crowd that is not there
+ *   I   WELCOME     the title, a countdown that never ends, a crowd that is not there;
+ *                   entered and left on one axis
  *   II  CHECKOUT    a free ticket that collects fees as you walk; a box ticked for you
- *   III LEAVING     a big door to stay, a small one to leave, and the cancellation flow
+ *   III LEAVING     a big door to stay straight ahead, a small one to leave at the far
+ *                   end, and the cancellation flow
  *                   folded into four corridors, each turn with one more screen
  *   IV  CANCELLED   the afterword, and the door back to the lobby
  *

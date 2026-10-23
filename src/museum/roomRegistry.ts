@@ -122,27 +122,28 @@ export const STATES_CELLS = {
 /** The passage from the lobby into Interface Archaeology, local to it: the same low turn as before Room 03. */
 export const ARCHAEOLOGY_PASSAGE = TRANSITION_03
 
-/** The passage from the lobby into Dark Patterns: the same low turn, mirrored, turning west. */
+/** The passage from the lobby into Dark Patterns: the same low turn, mirrored and shorter, turning west onto the welcome's axis. */
 export const DARK_PASSAGE = {
   height: 2.4,
   a: rect(-0.8, 0.8, -5.5, -0.1),
-  b: rect(-8.2, 0.8, -7.7, -5.5),
+  b: rect(-5.2, 0.8, -7.7, -5.5),
 }
 
 /**
- * Dark Patterns as a sequence of cells, room-local: a welcome, a long checkout, two
- * doors (a big one into a small thank-you room, a small one into the cancellation flow),
- * the flow itself folded into four corridors, and a last room with the way back.
+ * Dark Patterns as a sequence of cells, room-local: a welcome entered and left on one
+ * axis (x = -4), a long checkout with two doors (a big one straight ahead into a small
+ * thank-you room, a small one at the far end into the cancellation flow), the flow
+ * itself folded into four corridors, and a last room with the way back.
  */
 export const DARK_CELLS = {
   welcome: cell(-12, -2, -15, -7.9, 4.2),
-  checkout: cell(-20, -2, -21, -15.2, 3.4),
-  stay: cell(-7.6, -2, -24, -21.2, 3.4),
-  flow1: cell(-20, -8, -23.4, -21.2, 2.8),
-  flow2: cell(-20, -8, -25.8, -23.6, 2.8),
-  flow3: cell(-20, -8, -28.2, -26, 2.8),
-  flow4: cell(-20, -8, -30.6, -28.4, 2.8),
-  cancelled: cell(-20, -8, -36, -30.8, 3.2),
+  checkout: cell(-18, -2, -20, -15.2, 3.4),
+  stay: cell(-5.6, -2, -23, -20.2, 3.4),
+  flow1: cell(-18, -6, -22.4, -20.2, 2.8),
+  flow2: cell(-18, -6, -24.8, -22.6, 2.8),
+  flow3: cell(-18, -6, -27.2, -25, 2.8),
+  flow4: cell(-18, -6, -29.6, -27.4, 2.8),
+  cancelled: cell(-18, -6, -35, -29.8, 3.2),
 }
 
 /**
@@ -190,16 +191,16 @@ export const DOORS = {
   successExit: { ...inStates(-2.5, -93.1), width: 1.6, height: 2.5 },
   /** From the lobby into the passage to Dark Patterns. */
   lobbyDark: { ...inDark(0, 0), width: 1.8, height: 2.6 },
-  darkEntry: { ...inDark(-7, -7.8), width: 1.8, height: 2.4 },
+  darkEntry: { ...inDark(-4, -7.8), width: 1.8, height: 2.4 },
   checkoutEntry: { ...inDark(-4, -15.1), width: 1.8, height: 2.6 },
-  /** Confirmshaming: the big, lit door stays… */
-  stayDoor: { ...inDark(-4.6, -21.1), width: 2.4, height: 3 },
+  /** Confirmshaming: the big, lit door stays, straight ahead… */
+  stayDoor: { ...inDark(-3.8, -20.1), width: 2.4, height: 3 },
   /** …and the small one, at the far end, leaves. */
-  leaveDoor: { ...inDark(-18.9, -21.1), width: 1.1, height: 2.1 },
-  flow12: { ...inDark(-9, -23.5), width: 1.3, height: 2.2 },
-  flow23: { ...inDark(-19, -25.9), width: 1.3, height: 2.2 },
-  flow34: { ...inDark(-9, -28.3), width: 1.3, height: 2.2 },
-  cancelDoor: { ...inDark(-18.9, -30.7), width: 1.1, height: 2.1 },
+  leaveDoor: { ...inDark(-16.9, -20.1), width: 1.1, height: 2.1 },
+  flow12: { ...inDark(-7, -22.5), width: 1.3, height: 2.2 },
+  flow23: { ...inDark(-17, -24.9), width: 1.3, height: 2.2 },
+  flow34: { ...inDark(-7, -27.3), width: 1.3, height: 2.2 },
+  cancelDoor: { ...inDark(-16.9, -29.7), width: 1.1, height: 2.1 },
   /** From the lobby into the passage to Interface Archaeology. */
   lobbyArchaeology: { ...inArchaeology(0, 0), width: 1.8, height: 2.6 },
   archaeologyEntry: { ...inArchaeology(7, -7.8), width: 1.8, height: 2.4 },
