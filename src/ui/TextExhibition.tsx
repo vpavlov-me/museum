@@ -127,7 +127,7 @@ export function TextExhibition({ visible, canVisit, onVisit }: { visible: boolea
     <article className="text-exhibition" aria-labelledby="text-title">
       <header className="text-exhibition__head">
         <div className="meta">
-          {COUNT} exhibitions · {MUSEUM.year}
+          {COUNT} {OPEN_EXHIBITIONS.length === 1 ? 'exhibition' : 'exhibitions'} · {MUSEUM.year}
         </div>
         <h1 id="text-title" ref={heading} tabIndex={-1}>
           {MUSEUM.name}

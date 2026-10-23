@@ -357,8 +357,16 @@ const doorRect = (door: DoorDefinition): Rect => {
   return rect(door.x - door.width / 2, door.x + door.width / 2, door.z - half, door.z + half)
 }
 
+/**
+ * The lobby's doors to the exhibitions in preparation: walled up, though The Button's hall
+ * now runs behind them, so they would otherwise join the lobby to the hall.
+ */
+const WALLED: readonly DoorDefinition[] = [DOORS.lobbyDark, DOORS.lobbyArchaeology]
+
 /** The doors that join two open spaces: a door into a closed space is a wall. */
-const OPEN_DOORS = Object.values(DOORS).filter((door) => SPACES.filter((space) => space.bounds.some((bounds) => overlaps(bounds, doorRect(door)))).length >= 2)
+const OPEN_DOORS = Object.values(DOORS).filter(
+  (door) => !WALLED.includes(door) && SPACES.filter((space) => space.bounds.some((bounds) => overlaps(bounds, doorRect(door)))).length >= 2,
+)
 
 /** Every floor area the visitor may stand on: spaces plus the openings that join them. */
 export const WALKABLE: Rect[] = [...SPACES.flatMap((space) => space.bounds), ...OPEN_DOORS.map(doorRect)]
