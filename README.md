@@ -1,24 +1,26 @@
 # Interface Museum
 
 A small museum about the interfaces we use every day without noticing them, given physical form.
-You walk through it in a browser: from a lobby into three exhibitions, and back.
+You walk through it in a browser: from a lobby into an exhibition, and back.
 
 **Visit:** https://museum-dquality.vercel.app ·
-[permanent exhibition](https://museum-dquality.vercel.app/exhibitions/permanent) ·
-[Interface Archaeology](https://museum-dquality.vercel.app/exhibitions/archaeology) ·
-[Dark Patterns](https://museum-dquality.vercel.app/exhibitions/dark-patterns)
+[permanent exhibition](https://museum-dquality.vercel.app/exhibitions/permanent)
+
+For now the museum is the lobby and one room, **The Button**, while that room is rebuilt as an
+exhibition of objects in a modern hall (#48). The other rooms and exhibitions are in preparation:
+their code stays in `src/rooms/`, closed.
 
 ## The museum
 
 Every visit starts in the **lobby**. Its north wall holds the three entrances, each signed beside
-its door; a line on the floor leads to the recommended start. Every exhibition ends at a door back
+its door; a line on the floor leads to the one that is open. Every exhibition ends at a door back
 to the lobby, and the lobby's front door leaves the museum.
 
-| | Exhibition | Idea |
-|---|---|---|
-| **01** | **Permanent Exhibition** | Three rooms: **The Button** (interface as an object), **Things We Somehow Accepted** (interface behavior as architecture) and **Interface States** (interface state as the state of the world). |
-| **02** | **Interface Archaeology** | The interface outside its own time: our interfaces as a future archive digs them up and catalogues them, often wrongly. |
-| **03** | **Dark Patterns** (temporary) | Interfaces designed against the people using them, walked as a purchase and a cancellation: the signs use the patterns, small labels name them. |
+| | Exhibition | Idea | |
+|---|---|---|---|
+| **01** | **Permanent Exhibition** | **The Button** (interface as an object). Later also **Things We Somehow Accepted** (interface behavior as architecture) and **Interface States** (interface state as the state of the world). | open: Room 01 |
+| **02** | **Interface Archaeology** | The interface outside its own time: our interfaces as a future archive digs them up and catalogues them, often wrongly. | in preparation |
+| **03** | **Dark Patterns** (temporary) | Interfaces designed against the people using them, walked as a purchase and a cancellation: the signs use the patterns, small labels name them. | in preparation |
 
 Each room holds one idea, told through space first and short wall texts second.
 
@@ -48,8 +50,9 @@ npm run test:ci         # build:profile, then the tests
 ```
 
 The tests (`e2e/`, Playwright, Chromium with software WebGL) drive the museum through the
-debug bridge: they open every exhibition from its door and from a direct link, walk every guided
-tour stop on foot, take all three guided routes on a phone, and check the text version. GitHub
+debug bridge: they open every open exhibition from its door and from a direct link, check that the
+ones in preparation stay shut, walk every guided tour stop on foot, take every guided route on a
+phone, and check the text version. GitHub
 Actions runs them, with both builds, on every pull request and every push to `main`.
 
 The project deploys as a static site (Vercel); no server is involved. `vercel.json` rewrites

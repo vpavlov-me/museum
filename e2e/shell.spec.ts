@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
-import { DOORS } from '../src/museum/roomRegistry'
+import { EXHIBITIONS, OPEN_EXHIBITIONS } from '../src/museum/exhibitions'
+import { DOORS, spaceAt } from '../src/museum/roomRegistry'
 import { enterWalking, exhibitionStatus, open, settle, state, step, strayVisibility, waitOpen, walkTo, watchChunks, watchConsole } from './museum'
 
 const EXHIBITION_CHUNKS = ['permanent', 'archaeology', 'dark-patterns']
@@ -17,11 +18,10 @@ test('opens into the lobby, with only the lobby loaded', async ({ page }) => {
   errors.expectClean()
 })
 
-for (const [id, door] of [
-  ['permanent', DOORS.lobbyPermanent],
-  ['archaeology', DOORS.lobbyArchaeology],
-  ['dark-patterns', DOORS.lobbyDark],
-] as const) {
+const LOBBY_DOOR = { permanent: DOORS.lobbyPermanent, archaeology: DOORS.lobbyArchaeology, 'dark-patterns': DOORS.lobbyDark }
+
+for (const { id } of OPEN_EXHIBITIONS) {
+  const door = LOBBY_DOOR[id]
   test(`walking up to its door loads ${id}, and the door opens`, async ({ page }) => {
     const errors = watchConsole(page)
     const chunks = watchChunks(page)
@@ -41,11 +41,9 @@ for (const [id, door] of [
   })
 }
 
-for (const [path, id, title, space] of [
-  ['/exhibitions/permanent', 'permanent', 'Permanent Exhibition', 'entrance'],
-  ['/exhibitions/archaeology', 'archaeology', 'Interface Archaeology', 'archaeology'],
-  ['/exhibitions/dark-patterns', 'dark-patterns', 'Dark Patterns', 'dark-patterns'],
-] as const) {
+for (const { id, slug, title, start } of OPEN_EXHIBITIONS) {
+  const path = `/exhibitions/${slug}`
+  const space = spaceAt(...start.at)?.id
   test(`a direct link starts in ${id}`, async ({ page }) => {
     const errors = watchConsole(page)
     const chunks = watchChunks(page)
@@ -64,17 +62,35 @@ for (const [path, id, title, space] of [
   })
 }
 
+// Exhibitions in preparation (#48): their doors are walled up, and a link to one starts in the lobby.
+for (const { id, slug } of EXHIBITIONS.filter((exhibition) => exhibition.status !== 'open')) {
+  test(`${id} is in preparation: its door is shut and its link starts in the lobby`, async ({ page }) => {
+    const errors = watchConsole(page)
+    const chunks = watchChunks(page)
+    await open(page, `/exhibitions/${slug}`)
+    await expect(page.locator('#enter-museum')).toHaveText('Enter the museum')
+    await enterWalking(page)
+    const door = LOBBY_DOOR[id]
+    await walkTo(page, door.x, door.z + 3)
+    const at = await walkTo(page, door.x, door.z - 1.5)
+    expect(at.space).toBe('lobby')
+    await settle(page, 1000)
+    expect(chunks).not.toContain(id)
+    errors.expectClean()
+  })
+}
+
 test('an unknown path starts in the lobby', async ({ page }) => {
   await open(page, '/exhibitions/nowhere')
   await expect(page.locator('#enter-museum')).toHaveText('Enter the museum')
 })
 
-test('the text version has every exhibition', async ({ page }) => {
+test('the text version has every open exhibition', async ({ page }) => {
   const errors = watchConsole(page)
   await open(page, '/')
   await page.getByRole('button', { name: 'Read the museum as text' }).click()
   const exhibitions = page.locator('.text-exhibition h2')
-  await expect(exhibitions).toHaveText(['Permanent Exhibition', 'Interface Archaeology', 'Dark Patterns'])
-  await expect(page.locator('.text-exhibition h3')).toContainText(['The Button', 'Things We Somehow Accepted', 'Interface States'])
+  await expect(exhibitions).toHaveText(OPEN_EXHIBITIONS.map((exhibition) => exhibition.title))
+  await expect(page.locator('.text-exhibition h3')).toContainText(['The Button'])
   errors.expectClean()
 })

@@ -111,7 +111,7 @@ export function Plan({ visible, onClose }: { visible: boolean; onClose: () => vo
             ))}
           </ol>
           <p className="plan__note">
-            Every exhibition starts from the lobby and ends at a door back to it. The permanent exhibition (01) is three rooms: 01 The Button, 02 Things We Somehow Accepted, 03 Interface States. Dark Patterns (03) is temporary.
+            Every exhibition starts from the lobby and ends at a door back to it. For now the permanent exhibition (01) is one room, The Button; Interface Archaeology (02) and Dark Patterns (03) are in preparation.
           </p>
           <button id="plan-back" ref={back} className="museum-button" type="button" onClick={onClose}>
             Back to the visit

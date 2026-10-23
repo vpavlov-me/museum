@@ -94,10 +94,10 @@ export function LobbyPlan({ position }: { position: [number, number, number] }) 
           ))}
         </StaticMerge>
         <Text position={[0.1, -0.16, 0]} fontSize={0.06} lineHeight={3.33} color={INK.text} anchorX="left" anchorY="top">
-          {[...EXHIBITIONS.map((e) => `${e.number}  ${e.title}${e.kind === 'temporary' ? ' (temporary)' : ''}`), 'Lobby'].join('\n')}
+          {[...EXHIBITIONS.map((e) => `${e.number}  ${e.title}${e.status !== 'open' ? ' (in preparation)' : e.kind === 'temporary' ? ' (temporary)' : ''}`), 'Lobby'].join('\n')}
         </Text>
         <Text position={[0, -0.36 - (EXHIBITIONS.length + 1) * 0.2, 0]} fontSize={0.045} lineHeight={1.5} maxWidth={1.3} color={INK.body} anchorX="left" anchorY="top">
-          The permanent exhibition is three rooms, one after another. Each exhibition ends at a door back to this lobby. Press P for this plan at any time.
+          For now the permanent exhibition is one room, The Button; the others are in preparation. Each exhibition ends at a door back to this lobby. Press P for this plan at any time.
         </Text>
       </group>
     </group>

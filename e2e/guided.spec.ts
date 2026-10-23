@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { OPEN_EXHIBITIONS } from '../src/museum/exhibitions'
 import { open, step, watchConsole } from './museum'
 
 /*
@@ -72,9 +73,9 @@ test('every guided route, from the lobby and back', async ({ page }) => {
   const errors = watchConsole(page)
   await open(page, '/')
   await page.click('#enter-guided')
-  await expect(page.locator('.guided__choices .museum-button')).toHaveCount(3)
+  await expect(page.locator('.guided__choices .museum-button')).toHaveCount(OPEN_EXHIBITIONS.length)
 
-  for (const title of ['Permanent Exhibition', 'Interface Archaeology', 'Dark Patterns']) {
+  for (const { title } of OPEN_EXHIBITIONS) {
     await runRoute(page, title)
     expect((await ui(page)).space).toBe('lobby')
     await expect(page.locator('.guided__choices .museum-button', { hasText: title })).toContainText('visited')

@@ -90,6 +90,9 @@ const DARK_PATTERNS = {
 }
 
 const COUNT = ['One', 'Two', 'Three', 'Four', 'Five'][OPEN_EXHIBITIONS.length - 1]
+const isOpen = (id: string) => OPEN_EXHIBITIONS.some((exhibition) => exhibition.id === id)
+/** The permanent exhibition's open rooms (#48): the others keep their texts here for when they open again. */
+const OPEN_ROOMS = ROOMS.filter((room) => MUSEUM.rooms.some(([number]) => number === room.number))
 
 function Entries({ entries, level }: { entries: Entry[]; level: 3 | 4 }) {
   const Heading = level === 3 ? 'h3' : 'h4'
@@ -156,8 +159,8 @@ export function TextExhibition({ visible, canVisit, onVisit }: { visible: boolea
       <section id="exhibition-permanent" className="text-exhibition__room" aria-labelledby="exhibition-permanent-title">
         <div className="meta">Exhibition 01</div>
         <h2 id="exhibition-permanent-title">Permanent Exhibition</h2>
-        <p className="text-exhibition__idea">{EXHIBITIONS[0].subtitle} The interface as an object, as architecture, and as the state of the world.</p>
-        {ROOMS.map((room) => (
+        <p className="text-exhibition__idea">{EXHIBITIONS[0].subtitle} For now, one room; more will follow.</p>
+        {OPEN_ROOMS.map((room) => (
           <section key={room.number} className="text-exhibition__subroom" aria-labelledby={`room-${room.number}`}>
             <div className="meta">Room {room.number}</div>
             <h3 id={`room-${room.number}`}>{room.title}</h3>
@@ -167,19 +170,23 @@ export function TextExhibition({ visible, canVisit, onVisit }: { visible: boolea
         ))}
       </section>
 
-      <section id="exhibition-archaeology" className="text-exhibition__room" aria-labelledby="exhibition-archaeology-title">
-        <div className="meta">Exhibition 02</div>
-        <h2 id="exhibition-archaeology-title">Interface Archaeology</h2>
-        <p className="text-exhibition__idea">{ARCHAEOLOGY.idea}</p>
-        <Entries entries={ARCHAEOLOGY.entries} level={3} />
-      </section>
+      {isOpen('archaeology') && (
+        <section id="exhibition-archaeology" className="text-exhibition__room" aria-labelledby="exhibition-archaeology-title">
+          <div className="meta">Exhibition 02</div>
+          <h2 id="exhibition-archaeology-title">Interface Archaeology</h2>
+          <p className="text-exhibition__idea">{ARCHAEOLOGY.idea}</p>
+          <Entries entries={ARCHAEOLOGY.entries} level={3} />
+        </section>
+      )}
 
-      <section id="exhibition-dark-patterns" className="text-exhibition__room" aria-labelledby="exhibition-dark-patterns-title">
-        <div className="meta">Temporary exhibition 03</div>
-        <h2 id="exhibition-dark-patterns-title">Dark Patterns</h2>
-        <p className="text-exhibition__idea">{DARK_PATTERNS.idea}</p>
-        <Entries entries={DARK_PATTERNS.entries} level={3} />
-      </section>
+      {isOpen('dark-patterns') && (
+        <section id="exhibition-dark-patterns" className="text-exhibition__room" aria-labelledby="exhibition-dark-patterns-title">
+          <div className="meta">Temporary exhibition 03</div>
+          <h2 id="exhibition-dark-patterns-title">Dark Patterns</h2>
+          <p className="text-exhibition__idea">{DARK_PATTERNS.idea}</p>
+          <Entries entries={DARK_PATTERNS.entries} level={3} />
+        </section>
+      )}
 
       <footer className="text-exhibition__foot">
         <p>
